@@ -33,7 +33,7 @@ std::vector<PermissionLifetimeOption> CreatePermissionLifetimeOptions() {
   // TODO(https://github.com/brave/brave-browser/issues/14126): Actualize
   // values.
   constexpr base::TimeDelta kLifetimes[] = {
-      base::TimeDelta::FromSeconds(60), base::TimeDelta::FromHours(1),
+      base::TimeDelta::FromSeconds(10), base::TimeDelta::FromHours(1),
       base::TimeDelta::FromHours(3),    base::TimeDelta::FromDays(1),
       base::TimeDelta::FromDays(30),
   };
