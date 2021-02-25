@@ -44,28 +44,59 @@ EXCLUDES = [
 ]
 
 
-def do_check_defines(override_file, orig_file):
-    # TODO
+def do_check_includes(override_filename):
+    """
+    Checks if |override_filename| uses the correct number of ".." in the
+    include statement for the original file.
+    """
     pass
 
 
-def do_check_includes(override_file):
-    # TODO
-    pass
+def do_check_defines(override_filename, original_filename):
+    """
+    Finds `#define TARGET REPLACEMENT` statements in |override_filename| and
+    attempts to find the <TARGET> in the |original_filename|.
+    """
+    with open(override_filename, 'r') as override_file:
+        for line in override_file:
+            line_match = re.search(r'^#define\s*(\S*)\s*(\S*)', line)
+            if not line_match:
+                continue
+            target = line_match.group(1)
+            replacement = line_match.group(2)
+            if not replacement:
+                continue
+
+            # Adjust target name for BUILDFLAG_INTERNAL_*() cases.
+            if target.startswith('BUILDFLAG_INTERNAL_'):
+                buildflag_match = re.search(r'BUILDFLAG_INTERNAL_(\S*)\(\)',
+                                            target)
+                target = buildflag_match.group(1)
+
+            # Report ERROR if target can't be found in the original file.
+            with open(original_filename, 'r') as original_file:
+                if not target in original_file.read():
+                    print("ERROR: Unable to find symbol {} in {}"
+                              .format(target, original_filename))
+                    print("-------------------------")
 
 
 def do_check_overrides(overrides_list, search_dir, check_includes=False):
+    """
+    Checks that each path in the passed in list |overrides_list| exists in
+    the passed in directory (|search_dir|), optionally checking includes too.
+    """
     print("--------------------------------------------------")
     print("Checking overrides in {} ...".format(search_dir))
     print("--------------------------------------------------")
     for file in overrides_list:
-        orig_file = os.path.join(search_dir, file)
-        if not os.path.isfile(orig_file):
+        original_file = os.path.join(search_dir, file)
+        if not os.path.isfile(original_file):
             print("WARNING: No source for override {}".format(file))
             print("-------------------------")
             continue
 
-        do_check_defines(file, orig_file)
+        do_check_defines(file, original_file)
         if check_includes:
             do_check_includes(file)
 
