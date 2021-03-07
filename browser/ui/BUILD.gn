@@ -3,6 +3,7 @@ import("//brave/build/config.gni")
 import("//brave/components/brave_rewards/browser/buildflags/buildflags.gni")
 import("//brave/components/brave_wallet/buildflags/buildflags.gni")
 import("//brave/components/brave_wayback_machine/buildflags/buildflags.gni")
+import("//brave/components/decentralized_dns/buildflags/buildflags.gni")
 import("//brave/components/ipfs/buildflags/buildflags.gni")
 import("//brave/components/sidebar/buildflags/buildflags.gni")
 import("//brave/components/speedreader/buildflags.gni")
@@ -91,6 +92,8 @@ source_set("ui") {
       "webui/new_tab_page/brave_new_tab_message_handler.h",
       "webui/new_tab_page/brave_new_tab_ui.cc",
       "webui/new_tab_page/brave_new_tab_ui.h",
+      "webui/new_tab_page/brave_new_tab_ui_utils.cc",
+      "webui/new_tab_page/brave_new_tab_ui_utils.h",
       "webui/new_tab_page/instant_service_message_handler.cc",
       "webui/new_tab_page/instant_service_message_handler.h",
       "webui/settings/brave_appearance_handler.cc",
@@ -229,6 +232,7 @@ source_set("ui") {
     "//brave/components/brave_wayback_machine:buildflags",
     "//brave/components/cosmetic_filters/resources/data:generated_resources",
     "//brave/components/crypto_dot_com/browser/buildflags:buildflags",
+    "//brave/components/decentralized_dns/buildflags",
     "//brave/components/l10n/browser",
     "//brave/components/l10n/common",
     "//brave/components/ntp_background_images/browser",
@@ -370,6 +374,10 @@ source_set("ui") {
       if (enable_widevine) {
         deps += [ "//brave/browser/widevine" ]
       }
+    }
+
+    if (decentralized_dns_enabled) {
+      deps += [ "//brave/components/decentralized_dns" ]
     }
 
     if (brave_rewards_enabled) {

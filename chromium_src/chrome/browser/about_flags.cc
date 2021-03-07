@@ -12,16 +12,20 @@
 #include "brave/components/brave_shields/common/features.h"
 #include "brave/components/brave_sync/buildflags/buildflags.h"
 #include "brave/components/brave_wallet/buildflags/buildflags.h"
+#include "brave/components/decentralized_dns/buildflags/buildflags.h"
 #include "brave/components/ipfs/buildflags/buildflags.h"
 #include "brave/components/ntp_background_images/browser/features.h"
 #include "brave/components/sidebar/buildflags/buildflags.h"
 #include "brave/components/speedreader/buildflags.h"
 #include "chrome/browser/profiles/profile.h"
 #include "chrome/browser/profiles/profile_manager.h"
+#include "components/permissions/features.h"
 #include "components/prefs/pref_service.h"
 #include "net/base/features.h"
 
 using brave_shields::features::kBraveAdblockCosmeticFiltering;
+using brave_shields::features::kBraveAdblockCosmeticFilteringNative;
+using brave_shields::features::kBraveDomainBlock;
 using ntp_background_images::features::kBraveNTPBrandedWallpaper;
 using ntp_background_images::features::kBraveNTPBrandedWallpaperDemo;
 using ntp_background_images::features::kBraveNTPSuperReferralWallpaper;
@@ -92,6 +96,18 @@ using ntp_background_images::features::kBraveNTPSuperReferralWallpaper;
 #define BRAVE_NATIVE_WALLET_FEATURE_ENTRIES
 #endif
 
+#if BUILDFLAG(DECENTRALIZED_DNS_ENABLED)
+#include "brave/components/decentralized_dns/features.h"
+
+#define BRAVE_DECENTRALIZED_DNS_FEATURE_ENTRIES                             \
+    {"brave-decentralized-dns",                                             \
+     flag_descriptions::kBraveDecentralizedDnsName,                         \
+     flag_descriptions::kBraveDecentralizedDnsDescription, kOsDesktop,      \
+     FEATURE_VALUE_TYPE(decentralized_dns::features::kDecentralizedDns)},
+#else
+#define BRAVE_DECENTRALIZED_DNS_FEATURE_ENTRIES
+#endif
+
 #define BRAVE_FEATURE_ENTRIES \
     {"use-dev-updater-url",                                                \
      flag_descriptions::kUseDevUpdaterUrlName,                             \
@@ -109,11 +125,21 @@ using ntp_background_images::features::kBraveNTPSuperReferralWallpaper;
      flag_descriptions::kBraveAdblockCosmeticFilteringName,                \
      flag_descriptions::kBraveAdblockCosmeticFilteringDescription, kOsAll, \
      FEATURE_VALUE_TYPE(kBraveAdblockCosmeticFiltering)},                  \
+    {"brave-adblock-cosmetic-filtering-native",                            \
+     flag_descriptions::kBraveAdblockCosmeticFilteringNativeName,          \
+     flag_descriptions::kBraveAdblockCosmeticFilteringNativeDescription,   \
+     kOsMac | kOsWin | kOsLinux,                                           \
+     FEATURE_VALUE_TYPE(kBraveAdblockCosmeticFilteringNative)},            \
+    {"brave-domain-block",                                                 \
+     flag_descriptions::kBraveDomainBlockName,                             \
+     flag_descriptions::kBraveDomainBlockDescription, kOsAll,              \
+     FEATURE_VALUE_TYPE(kBraveDomainBlock)},                               \
     SPEEDREADER_FEATURE_ENTRIES                                            \
     BRAVE_SYNC_FEATURE_ENTRIES                                             \
     BRAVE_IPFS_FEATURE_ENTRIES                                             \
     BRAVE_NATIVE_WALLET_FEATURE_ENTRIES                                    \
     SIDEBAR_FEATURE_ENTRIES                                                \
+    BRAVE_DECENTRALIZED_DNS_FEATURE_ENTRIES                              \
     {"brave-super-referral",                                               \
      flag_descriptions::kBraveSuperReferralName,                           \
      flag_descriptions::kBraveSuperReferralDescription,                    \
@@ -122,7 +148,12 @@ using ntp_background_images::features::kBraveNTPSuperReferralWallpaper;
     {"brave-ephemeral-storage",                                            \
      flag_descriptions::kBraveEphemeralStorageName,                        \
      flag_descriptions::kBraveEphemeralStorageDescription, kOsAll,         \
-     FEATURE_VALUE_TYPE(net::features::kBraveEphemeralStorage)},
+     FEATURE_VALUE_TYPE(net::features::kBraveEphemeralStorage)},           \
+    {"brave-permission-lifetime",                                          \
+     flag_descriptions::kBravePermissionLifetimeName,                      \
+     flag_descriptions::kBravePermissionLifetimeDescription, kOsAll,       \
+     FEATURE_VALUE_TYPE(permissions::features::kPermissionLifetime)},
+
 
 #define SetFeatureEntryEnabled SetFeatureEntryEnabled_ChromiumImpl
 #include "../../../../chrome/browser/about_flags.cc"  // NOLINT

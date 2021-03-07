@@ -16,7 +16,11 @@ extern const char kBraveNTPBrandedWallpaperDescription[];
 extern const char kBraveNTPBrandedWallpaperDemoName[];
 extern const char kBraveNTPBrandedWallpaperDemoDescription[];
 extern const char kBraveAdblockCosmeticFilteringName[];
+extern const char kBraveAdblockCosmeticFilteringNativeName[];
 extern const char kBraveAdblockCosmeticFilteringDescription[];
+extern const char kBraveAdblockCosmeticFilteringNativeDescription[];
+extern const char kBraveDomainBlockName[];
+extern const char kBraveDomainBlockDescription[];
 extern const char kBraveSidebarName[];
 extern const char kBraveSidebarDescription[];
 extern const char kBraveSpeedreaderName[];
@@ -27,10 +31,14 @@ extern const char kBraveIpfsName[];
 extern const char kBraveIpfsDescription[];
 extern const char kNativeBraveWalletName[];
 extern const char kNativeBraveWalletDescription[];
+extern const char kBraveDecentralizedDnsName[];
+extern const char kBraveDecentralizedDnsDescription[];
 extern const char kBraveSuperReferralName[];
 extern const char kBraveSuperReferralDescription[];
 extern const char kBraveEphemeralStorageName[];
 extern const char kBraveEphemeralStorageDescription[];
+extern const char kBravePermissionLifetimeName[];
+extern const char kBravePermissionLifetimeDescription[];
 }  // namespace flag_descriptions
 
 #endif  // BRAVE_CHROMIUM_SRC_CHROME_BROWSER_FLAG_DESCRIPTIONS_H_

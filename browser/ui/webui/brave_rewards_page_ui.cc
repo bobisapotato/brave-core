@@ -145,10 +145,10 @@ class RewardsDOMHandler : public WebUIMessageHandler,
     const ledger::type::Result result,
     ledger::type::BalancePtr balance);
 
-  void GetUpholdWallet(const base::ListValue* args);
-  void OnGetUpholdWallet(
-      const ledger::type::Result result,
-      ledger::type::UpholdWalletPtr wallet);
+  void GetExternalWallet(const base::ListValue* args);
+  void OnGetExternalWallet(const ledger::type::Result result,
+                           ledger::type::ExternalWalletPtr wallet);
+
   void ProcessRewardsPageUrl(const base::ListValue* args);
 
   void OnProcessRewardsPageUrl(
@@ -199,6 +199,8 @@ class RewardsDOMHandler : public WebUIMessageHandler,
   void SaveOnboardingResult(const base::ListValue* args);
 
   // RewardsServiceObserver implementation
+  void OnRewardsInitialized(
+      brave_rewards::RewardsService* rewards_service) override;
   void OnFetchPromotions(
       brave_rewards::RewardsService* rewards_service,
       const ledger::type::Result result,
@@ -445,9 +447,10 @@ void RewardsDOMHandler::RegisterMessages() {
   web_ui()->RegisterMessageCallback("brave_rewards.fetchBalance",
       base::BindRepeating(&RewardsDOMHandler::FetchBalance,
       base::Unretained(this)));
-  web_ui()->RegisterMessageCallback("brave_rewards.getExternalWallet",
-      base::BindRepeating(&RewardsDOMHandler::GetUpholdWallet,
-      base::Unretained(this)));
+  web_ui()->RegisterMessageCallback(
+      "brave_rewards.getExternalWallet",
+      base::BindRepeating(&RewardsDOMHandler::GetExternalWallet,
+                          base::Unretained(this)));
   web_ui()->RegisterMessageCallback("brave_rewards.processRewardsPageUrl",
       base::BindRepeating(&RewardsDOMHandler::ProcessRewardsPageUrl,
       base::Unretained(this)));
@@ -543,6 +546,16 @@ void RewardsDOMHandler::OnGetRewardsParameters(
   }
   web_ui()->CallJavascriptFunctionUnsafe(
         "brave_rewards.rewardsParameters", data);
+}
+
+void RewardsDOMHandler::OnRewardsInitialized(
+    brave_rewards::RewardsService* rewards_service) {
+  if (!web_ui()->CanCallJavascript())
+    return;
+
+  web_ui()->CallJavascriptFunctionUnsafe(
+      "brave_rewards.initialized",
+      base::Value(0));
 }
 
 void RewardsDOMHandler::GetAutoContributeProperties(
@@ -1556,19 +1569,18 @@ void RewardsDOMHandler::FetchBalance(const base::ListValue* args) {
   }
 }
 
-void RewardsDOMHandler::GetUpholdWallet(const base::ListValue* args) {
+void RewardsDOMHandler::GetExternalWallet(const base::ListValue* args) {
   if (!rewards_service_) {
     return;
   }
 
-  rewards_service_->GetUpholdWallet(
-      base::BindOnce(&RewardsDOMHandler::OnGetUpholdWallet,
-                     weak_factory_.GetWeakPtr()));
+  rewards_service_->GetExternalWallet(base::BindOnce(
+      &RewardsDOMHandler::OnGetExternalWallet, weak_factory_.GetWeakPtr()));
 }
 
-void RewardsDOMHandler::OnGetUpholdWallet(
+void RewardsDOMHandler::OnGetExternalWallet(
     const ledger::type::Result result,
-    ledger::type::UpholdWalletPtr wallet) {
+    ledger::type::ExternalWalletPtr wallet) {
   if (web_ui()->CanCallJavascript()) {
     base::Value data(base::Value::Type::DICTIONARY);
 
@@ -1576,6 +1588,7 @@ void RewardsDOMHandler::OnGetUpholdWallet(
     base::Value wallet_dict(base::Value::Type::DICTIONARY);
 
     if (wallet) {
+      wallet_dict.SetStringKey("type", wallet->type);
       wallet_dict.SetStringKey("token", wallet->token);
       wallet_dict.SetStringKey("address", wallet->address);
       wallet_dict.SetIntKey("status", static_cast<int>(wallet->status));
@@ -1634,13 +1647,10 @@ void RewardsDOMHandler::ProcessRewardsPageUrl(const base::ListValue* args) {
 }
 
 void RewardsDOMHandler::DisconnectWallet(const base::ListValue* args) {
-  CHECK_EQ(1U, args->GetSize());
   if (!rewards_service_) {
     return;
   }
-
-  const std::string wallet_type = args->GetList()[0].GetString();
-  rewards_service_->DisconnectWallet(wallet_type);
+  rewards_service_->DisconnectWallet();
 }
 
 void RewardsDOMHandler::OnDisconnectWallet(

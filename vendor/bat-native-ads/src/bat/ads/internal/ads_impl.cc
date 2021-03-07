@@ -41,6 +41,7 @@
 #include "bat/ads/internal/conversions/conversions.h"
 #include "bat/ads/internal/database/database_initialize.h"
 #include "bat/ads/internal/features/features.h"
+#include "bat/ads/internal/idle_time.h"
 #include "bat/ads/internal/legacy_migration/legacy_conversion_migration.h"
 #include "bat/ads/internal/logging.h"
 #include "bat/ads/internal/platform/platform_helper.h"
@@ -52,15 +53,12 @@
 #include "bat/ads/internal/url_util.h"
 #include "bat/ads/internal/user_activity/user_activity.h"
 #include "bat/ads/new_tab_page_ad_info.h"
+#include "bat/ads/page_transition_types.h"
 #include "bat/ads/pref_names.h"
 #include "bat/ads/promoted_content_ad_info.h"
 #include "bat/ads/statement_info.h"
 
 namespace ads {
-
-namespace {
-const int kIdleThresholdInSeconds = 15;
-}  // namespace
 
 AdsImpl::AdsImpl(AdsClient* ads_client)
     : ads_client_helper_(std::make_unique<AdsClientHelper>(ads_client)),
@@ -130,16 +128,15 @@ void AdsImpl::OnAdsSubdivisionTargetingCodeHasChanged() {
   subdivision_targeting_->MaybeFetchForCurrentLocale();
 }
 
-void AdsImpl::OnPageLoaded(const int32_t tab_id,
+void AdsImpl::OnHtmlLoaded(const int32_t tab_id,
                            const std::vector<std::string>& redirect_chain,
-                           const std::string& content) {
+                           const std::string& html) {
   DCHECK(!redirect_chain.empty());
 
   if (!IsInitialized()) {
     return;
   }
 
-  const std::string original_url = redirect_chain.front();
   const std::string url = redirect_chain.back();
 
   if (!DoesUrlHaveSchemeHTTPOrHTTPS(url)) {
@@ -147,26 +144,45 @@ void AdsImpl::OnPageLoaded(const int32_t tab_id,
     return;
   }
 
+  const std::string original_url = redirect_chain.front();
   ad_transfer_->MaybeTransferAd(tab_id, original_url);
+  conversions_->MaybeConvert(redirect_chain, html);
+}
 
-  conversions_->MaybeConvert(redirect_chain);
+void AdsImpl::OnTextLoaded(const int32_t tab_id,
+                           const int32_t page_transition_type,
+                           const bool has_user_gesture,
+                           const std::vector<std::string>& redirect_chain,
+                           const std::string& text) {
+  DCHECK(!redirect_chain.empty());
+
+  if (!IsInitialized()) {
+    return;
+  }
+
+  if (has_user_gesture) {
+    const PageTransitionType cast_page_transition_type =
+        static_cast<PageTransitionType>(page_transition_type);
+    user_activity_->RecordEventForPageTransition(cast_page_transition_type);
+  }
+
+  const std::string url = redirect_chain.back();
+
+  if (!DoesUrlHaveSchemeHTTPOrHTTPS(url)) {
+    BLOG(1, "Visited URL is not supported");
+    return;
+  }
 
   const base::Optional<TabInfo> last_visible_tab =
       TabManager::Get()->GetLastVisible();
-
-  std::string last_visible_tab_url;
-  if (last_visible_tab) {
-    last_visible_tab_url = last_visible_tab->url;
-  }
-
-  if (!SameDomainOrHost(url, last_visible_tab_url)) {
+  if (!SameDomainOrHost(url, last_visible_tab ? last_visible_tab->url : "")) {
     purchase_intent_processor_->Process(GURL(url));
   }
 
   if (SearchProviders::IsSearchEngine(url)) {
     BLOG(1, "Search engine pages are not supported for text classification");
   } else {
-    const std::string stripped_text = StripNonAlphaCharacters(content);
+    const std::string stripped_text = StripNonAlphaCharacters(text);
     text_classification_processor_->Process(stripped_text);
   }
 }
@@ -175,14 +191,27 @@ void AdsImpl::OnIdle() {
   BLOG(1, "Browser state changed to idle");
 }
 
-void AdsImpl::OnUnIdle() {
+void AdsImpl::OnUnIdle(const int idle_time, const bool was_locked) {
   if (!IsInitialized()) {
     return;
   }
 
-  BLOG(1, "Browser state changed to unidle");
+  MaybeUpdateIdleTimeThreshold();
+
+  BLOG(1, "Browser state changed to unidle after "
+              << base::TimeDelta::FromSeconds(idle_time));
 
   MaybeUpdateCatalog();
+
+  if (WasLocked(was_locked)) {
+    BLOG(1, "Ad notification not served: Screen was locked");
+    return;
+  }
+
+  if (HasExceededMaximumIdleTime(idle_time)) {
+    BLOG(1, "Ad notification not served: Exceeded maximum idle time");
+    return;
+  }
 
   MaybeServeAdNotification();
 }
@@ -482,10 +511,11 @@ void AdsImpl::LoadAdNotificationsState(InitializeCallback callback) {
 void AdsImpl::Initialized(InitializeCallback callback) {
   BLOG(1, "Successfully initialized ads");
 
+  user_activity_->RecordEvent(UserActivityEventType::kInitializedAds);
+
   is_initialized_ = true;
 
-  AdsClientHelper::Get()->SetIntegerPref(prefs::kIdleThreshold,
-                                         kIdleThresholdInSeconds);
+  MaybeUpdateIdleTimeThreshold();
 
   callback(SUCCESS);
 

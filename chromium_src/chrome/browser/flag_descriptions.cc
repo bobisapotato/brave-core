@@ -24,6 +24,13 @@ const char kBraveNTPBrandedWallpaperDemoDescription[] =
 const char kBraveAdblockCosmeticFilteringName[] = "Enable cosmetic filtering";
 const char kBraveAdblockCosmeticFilteringDescription[] =
     "Enable support for cosmetic filtering";
+const char kBraveAdblockCosmeticFilteringNativeName[] =
+    "Use native implementation for cosmetic filtering";
+const char kBraveAdblockCosmeticFilteringNativeDescription[] =
+    "Uses native implementation for cosmetic filtering instead of extension";
+const char kBraveDomainBlockName[] = "Enable domain blocking";
+const char kBraveDomainBlockDescription[] =
+    "Enable support for blocking domains with an interstitial page";
 const char kBraveSidebarName[] = "Enable Sidebar";
 // TODO(simon): Use more better description.
 const char kBraveSidebarDescription[] = "Enable Sidebar";
@@ -41,10 +48,18 @@ const char kNativeBraveWalletName[] = "Enable experimental Brave native wallet";
 const char kNativeBraveWalletDescription[] =
     "Experimental native cryptocurrency wallet support without the use of "
     "extensions";
+const char kBraveDecentralizedDnsName[] = "Enable decentralized DNS";
+const char kBraveDecentralizedDnsDescription[] =
+    "Enable decentralized DNS support, such as Unstoppable Domains and "
+    "Ethereum Name Service (ENS).";
 const char kBraveSuperReferralName[] = "Enable Brave Super Referral";
 const char kBraveSuperReferralDescription[] =
     "Use custom theme for Brave Super Referral";
 const char kBraveEphemeralStorageName[] = "Enable Ephemeral Storage";
 const char kBraveEphemeralStorageDescription[] =
     "Use ephemeral storage for third-party frames";
+const char kBravePermissionLifetimeName[] = "Permission Lifetime";
+const char kBravePermissionLifetimeDescription[] =
+    "Enables the option to choose a time period after which a permission will "
+    "be automatically revoked";
 }  // namespace flag_descriptions
