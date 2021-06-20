@@ -29,7 +29,7 @@ struct ResourceRequest;
 
 namespace brave {
 struct BraveRequestInfo;
-using ResponseCallback = base::Callback<void()>;
+using ResponseCallback = base::RepeatingCallback<void()>;
 }  // namespace brave
 
 namespace brave_rewards {
@@ -78,8 +78,6 @@ struct BraveRequestInfo {
   bool allow_http_upgradable_resource = false;
   bool allow_referrers = false;
   bool is_webtorrent_disabled = false;
-  int render_process_id = 0;
-  int render_frame_id = 0;
   int frame_tree_node_id = 0;
   uint64_t request_identifier = 0;
   size_t next_url_request_index = 0;
@@ -135,13 +133,13 @@ struct BraveRequestInfo {
 
 // ResponseListener
 using OnBeforeURLRequestCallback =
-    base::Callback<int(const ResponseCallback& next_callback,
-                       std::shared_ptr<BraveRequestInfo> ctx)>;
+    base::RepeatingCallback<int(const ResponseCallback& next_callback,
+                                std::shared_ptr<BraveRequestInfo> ctx)>;
 using OnBeforeStartTransactionCallback =
-    base::Callback<int(net::HttpRequestHeaders* headers,
-                       const ResponseCallback& next_callback,
-                       std::shared_ptr<BraveRequestInfo> ctx)>;
-using OnHeadersReceivedCallback = base::Callback<int(
+    base::RepeatingCallback<int(net::HttpRequestHeaders* headers,
+                                const ResponseCallback& next_callback,
+                                std::shared_ptr<BraveRequestInfo> ctx)>;
+using OnHeadersReceivedCallback = base::RepeatingCallback<int(
     const net::HttpResponseHeaders* original_response_headers,
     scoped_refptr<net::HttpResponseHeaders>* override_response_headers,
     GURL* allowed_unsafe_redirect_url,

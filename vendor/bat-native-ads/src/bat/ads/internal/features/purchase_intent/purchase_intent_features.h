@@ -6,7 +6,7 @@
 #ifndef BRAVE_VENDOR_BAT_NATIVE_ADS_SRC_BAT_ADS_INTERNAL_FEATURES_PURCHASE_INTENT_PURCHASE_INTENT_FEATURES_H_
 #define BRAVE_VENDOR_BAT_NATIVE_ADS_SRC_BAT_ADS_INTERNAL_FEATURES_PURCHASE_INTENT_PURCHASE_INTENT_FEATURES_H_
 
-#include <stdint.h>
+#include <cstdint>
 
 #include "base/feature_list.h"
 
@@ -20,6 +20,8 @@ bool IsPurchaseIntentEnabled();
 uint16_t GetPurchaseIntentThreshold();
 
 int64_t GetPurchaseIntentTimeWindowInSeconds();
+
+int GetPurchaseIntentResourceVersion();
 
 }  // namespace features
 }  // namespace ads

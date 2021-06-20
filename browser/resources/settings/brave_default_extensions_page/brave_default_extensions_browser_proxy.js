@@ -21,6 +21,8 @@ cr.define('settings', function () {
     isWidevineEnabled() {}
     getRestartNeeded () {}
     wasSignInEnabledAtStartup () {}
+    isDecentralizedDnsEnabled() {}
+    getDecentralizedDnsResolveMethodList(provider) {}
   }
 
   /**
@@ -70,6 +72,10 @@ cr.define('settings', function () {
 
     isDecentralizedDnsEnabled () {
       return cr.sendWithPromise('isDecentralizedDnsEnabled')
+    }
+
+    getDecentralizedDnsResolveMethodList (provider) {
+      return cr.sendWithPromise('getDecentralizedDnsResolveMethodList', provider)
     }
   }
 

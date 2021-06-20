@@ -14,6 +14,7 @@
 #include "bat/ledger/internal/ledger_impl.h"
 #include "bat/ledger/internal/publisher/protos/channel_response.pb.h"
 #include "brave/components/brave_private_cdn/private_cdn_helper.h"
+#include "net/base/load_flags.h"
 #include "net/http/http_status_code.h"
 
 using std::placeholders::_1;
@@ -72,7 +73,18 @@ void GetPublisherStatusFromMessage(
           info->status = ledger::type::PublisherStatus::UPHOLD_VERIFIED;
           info->address = wallet.uphold_wallet().address();
           return;
-        default: {}
+        default:
+          break;
+      }
+    }
+    if (wallet.has_bitflyer_wallet()) {
+      switch (wallet.bitflyer_wallet().wallet_state()) {
+        case publishers_pb::BITFLYER_ACCOUNT_KYC:
+          info->status = ledger::type::PublisherStatus::BITFLYER_VERIFIED;
+          info->address = wallet.bitflyer_wallet().address();
+          return;
+        default:
+          break;
       }
     }
   }
@@ -151,6 +163,7 @@ type::Result GetPublisher::CheckStatusCode(const int status_code) {
   }
 
   if (status_code != net::HTTP_OK) {
+    BLOG(0, "Unexpected HTTP status: " << status_code);
     return type::Result::LEDGER_ERROR;
   }
 
@@ -208,6 +221,7 @@ void GetPublisher::Request(
 
   auto request = type::UrlRequest::New();
   request->url = GetUrl(hash_prefix);
+  request->load_flags = net::LOAD_BYPASS_CACHE | net::LOAD_DISABLE_CACHE;
   ledger_->LoadURL(std::move(request), url_callback);
 }
 

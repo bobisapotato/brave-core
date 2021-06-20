@@ -6,8 +6,7 @@
 #ifndef BRAVE_VENDOR_BAT_NATIVE_ADS_SRC_BAT_ADS_INTERNAL_AD_TRANSFER_AD_TRANSFER_H_
 #define BRAVE_VENDOR_BAT_NATIVE_ADS_SRC_BAT_ADS_INTERNAL_AD_TRANSFER_AD_TRANSFER_H_
 
-#include <stdint.h>
-
+#include <cstdint>
 #include <string>
 
 #include "bat/ads/ad_info.h"
@@ -29,7 +28,7 @@ class AdTransfer {
 
   void Cancel(const int32_t tab_id);
 
-  void set_last_clicked_ad(const AdInfo& ad);
+  void SetLastClickedAd(const AdInfo& ad);
 
  private:
   base::ObserverList<AdTransferObserver> observers_;
@@ -46,9 +45,9 @@ class AdTransfer {
 
   void OnTransferAd(const int32_t tab_id, const std::string& url);
 
-  void NotifyAdTransfer(const AdInfo& ad);
+  void NotifyAdTransfer(const AdInfo& ad) const;
 
-  void NotifyAdTransferFailed(const AdInfo& ad);
+  void NotifyAdTransferFailed(const AdInfo& ad) const;
 };
 
 }  // namespace ads

@@ -19,6 +19,7 @@ import org.chromium.chrome.R;
 import org.chromium.chrome.browser.ActivityTabProvider;
 import org.chromium.chrome.browser.bookmarks.BookmarkBridge;
 import org.chromium.chrome.browser.compositor.layouts.OverviewModeBehavior;
+import org.chromium.chrome.browser.feed.webfeed.WebFeedBridge;
 import org.chromium.chrome.browser.multiwindow.MultiWindowModeStateDispatcher;
 import org.chromium.chrome.browser.tabmodel.TabModelSelector;
 import org.chromium.chrome.browser.toolbar.ToolbarManager;
@@ -31,11 +32,9 @@ public class BraveAppMenuPropertiesDelegateImpl extends AppMenuPropertiesDelegat
             MultiWindowModeStateDispatcher multiWindowModeStateDispatcher,
             TabModelSelector tabModelSelector, ToolbarManager toolbarManager, View decorView,
             @Nullable OneshotSupplier<OverviewModeBehavior> overviewModeBehaviorSupplier,
-            ObservableSupplier<BookmarkBridge> bookmarkBridgeSupplier,
-            ModalDialogManager modalDialogManager) {
+            ObservableSupplier<BookmarkBridge> bookmarkBridgeSupplier) {
         super(context, activityTabProvider, multiWindowModeStateDispatcher, tabModelSelector,
-                toolbarManager, decorView, overviewModeBehaviorSupplier, bookmarkBridgeSupplier,
-                modalDialogManager);
+                toolbarManager, decorView, overviewModeBehaviorSupplier, bookmarkBridgeSupplier);
     }
 
     @Override
@@ -51,6 +50,9 @@ public class BraveAppMenuPropertiesDelegateImpl extends AppMenuPropertiesDelegat
                 MenuItem item = menu.getItem(i);
                 if (item.hasSubMenu()) {
                     maybeReplaceIcons(item.getSubMenu());
+                } else if (item.getItemId() == R.id.new_tab_menu_id) {
+                    item.setIcon(
+                            AppCompatResources.getDrawable(mContext, R.drawable.ic_new_tab_page));
                 } else if (item.getItemId() == R.id.new_incognito_tab_menu_id) {
                     item.setIcon(AppCompatResources.getDrawable(
                             mContext, R.drawable.brave_menu_new_private_tab));

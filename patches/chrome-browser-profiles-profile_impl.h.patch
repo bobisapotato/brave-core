@@ -1,12 +1,12 @@
 diff --git a/chrome/browser/profiles/profile_impl.h b/chrome/browser/profiles/profile_impl.h
-index 0697c9525f9e149945b8cf699c71912eeceb5b48..456fccbff40d8741ed8130a2f3409bd5e61c0968 100644
+index e72b6b67b1ab02dec9d79973dc5ec472af0bdbde..1912ae8ba6550f3df057712c94893a447475320a 100644
 --- a/chrome/browser/profiles/profile_impl.h
 +++ b/chrome/browser/profiles/profile_impl.h
-@@ -172,6 +172,7 @@ class ProfileImpl : public Profile {
+@@ -164,6 +164,7 @@ class ProfileImpl : public Profile {
    void OnLogin() override;
    void InitChromeOSPreferences() override;
  #endif  // BUILDFLAG(IS_CHROMEOS_ASH)
 +  BRAVE_PROFILE_IMPL_H_
  
-   void SetCreationTimeForTesting(base::Time creation_time) override;
-   void RecordMainFrameNavigation() override {}
+   bool IsNewProfile() const override;
+ 

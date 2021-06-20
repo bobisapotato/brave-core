@@ -23,7 +23,6 @@
 #include "base/time/time.h"
 #include "brave/browser/net/resource_context_data.h"
 #include "brave/browser/net/url_context.h"
-#include "mojo/public/cpp/bindings/binding.h"
 #include "mojo/public/cpp/bindings/pending_receiver.h"
 #include "mojo/public/cpp/bindings/pending_remote.h"
 #include "mojo/public/cpp/bindings/receiver_set.h"
@@ -57,7 +56,6 @@ class BraveProxyingURLLoaderFactory
         int32_t network_service_request_id,
         int render_process_id,
         int frame_tree_node_id,
-        int32_t routing_id,
         uint32_t options,
         const network::ResourceRequest& request,
         content::BrowserContext* browser_context,
@@ -80,6 +78,8 @@ class BraveProxyingURLLoaderFactory
     void ResumeReadingBodyFromNet() override;
 
     // network::mojom::URLLoaderClient:
+    void OnReceiveEarlyHints(
+        network::mojom::EarlyHintsPtr early_hints) override;
     void OnReceiveResponse(
         network::mojom::URLResponseHeadPtr response_head) override;
     void OnReceiveRedirect(
@@ -121,7 +121,6 @@ class BraveProxyingURLLoaderFactory
 
     const int render_process_id_;
     const int frame_tree_node_id_;
-    const int32_t routing_id_;
     const uint32_t options_;
 
     content::BrowserContext* browser_context_;
@@ -195,7 +194,6 @@ class BraveProxyingURLLoaderFactory
   // network::mojom::URLLoaderFactory:
   void CreateLoaderAndStart(
       mojo::PendingReceiver<network::mojom::URLLoader> loader_receiver,
-      int32_t routing_id,
       int32_t request_id,
       uint32_t options,
       const network::ResourceRequest& request,

@@ -13,12 +13,14 @@
 #include "base/macros.h"
 #include "base/memory/scoped_refptr.h"
 #include "brave/components/brave_stats/browser/brave_stats_updater_util.h"
+#include "chrome/browser/profiles/profile_manager_observer.h"
 #include "url/gurl.h"
 
 class BraveStatsUpdaterBrowserTest;
 class PrefChangeRegistrar;
 class PrefRegistrySimple;
 class PrefService;
+class Profile;
 
 namespace base {
 class OneShotTimer;
@@ -37,10 +39,10 @@ namespace brave_stats {
 
 class BraveStatsUpdaterParams;
 
-class BraveStatsUpdater {
+class BraveStatsUpdater : public ProfileManagerObserver {
  public:
   explicit BraveStatsUpdater(PrefService* pref_service);
-  ~BraveStatsUpdater();
+  ~BraveStatsUpdater() override;
 
   void Start();
   void Stop();
@@ -48,10 +50,15 @@ class BraveStatsUpdater {
 
   using StatsUpdatedCallback = base::RepeatingCallback<void(const GURL& url)>;
 
-  void SetStatsUpdatedCallback(StatsUpdatedCallback stats_updated_callback);
-  void SetStatsThresholdCallback(StatsUpdatedCallback stats_threshold_callback);
+  static void SetStatsUpdatedCallbackForTesting(
+      StatsUpdatedCallback* stats_updated_callback);
+  static void SetStatsThresholdCallbackForTesting(
+      StatsUpdatedCallback* stats_threshold_callback);
 
  private:
+  // ProfileManagerObserver
+  void OnProfileAdded(Profile* profile) override;
+
   GURL BuildStatsEndpoint(const std::string& path);
   void OnThresholdLoaderComplete(scoped_refptr<net::HttpResponseHeaders>);
   // Invoked from SimpleURLLoader after download is complete.
@@ -87,8 +94,6 @@ class BraveStatsUpdater {
   bool stats_startup_complete_ = false;
   PrefService* pref_service_;
   std::string usage_server_;
-  StatsUpdatedCallback stats_updated_callback_;
-  StatsUpdatedCallback stats_threshold_callback_;
   std::unique_ptr<network::SimpleURLLoader> simple_url_loader_;
   std::unique_ptr<base::OneShotTimer> server_ping_startup_timer_;
   std::unique_ptr<base::RepeatingTimer> server_ping_periodic_timer_;
@@ -97,10 +102,6 @@ class BraveStatsUpdater {
 
   DISALLOW_COPY_AND_ASSIGN(BraveStatsUpdater);
 };
-
-// Creates the BraveStatsUpdater
-std::unique_ptr<BraveStatsUpdater> BraveStatsUpdaterFactory(
-    PrefService* pref_service);
 
 // Registers the preferences used by BraveStatsUpdater
 void RegisterLocalStatePrefs(PrefRegistrySimple* registry);

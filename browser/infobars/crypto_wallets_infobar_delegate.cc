@@ -8,17 +8,17 @@
 #include <memory>
 #include <utility>
 
-#include "brave/browser/brave_wallet/brave_wallet_service_factory.h"
+#include "brave/browser/ethereum_remote_client/ethereum_remote_client_constants.h"
+#include "brave/browser/ethereum_remote_client/ethereum_remote_client_service.h"
+#include "brave/browser/ethereum_remote_client/ethereum_remote_client_service_factory.h"
 #include "brave/browser/ui/brave_pages.h"
 #include "brave/common/url_constants.h"
-#include "brave/components/brave_wallet/brave_wallet_constants.h"
-#include "brave/components/brave_wallet/brave_wallet_service.h"
-#include "brave/components/brave_wallet/pref_names.h"
+#include "brave/components/brave_wallet/browser/brave_wallet_constants.h"
+#include "brave/components/brave_wallet/browser/pref_names.h"
 #include "brave/grit/brave_generated_resources.h"
 #include "chrome/browser/infobars/infobar_service.h"
 #include "chrome/browser/ui/browser_finder.h"
 #include "chrome/grit/chromium_strings.h"
-#include "chrome/browser/profiles/profile.h"
 #include "components/infobars/core/infobar.h"
 #include "components/prefs/pref_service.h"
 #include "components/strings/grit/components_strings.h"
@@ -55,7 +55,7 @@ const gfx::VectorIcon& CryptoWalletsInfoBarDelegate::GetVectorIcon() const {
 void CryptoWalletsInfoBarDelegate::InfoBarDismissed() {
 }
 
-base::string16 CryptoWalletsInfoBarDelegate::GetMessageText() const {
+std::u16string CryptoWalletsInfoBarDelegate::GetMessageText() const {
   if (subtype_ == InfobarSubType::LOAD_CRYPTO_WALLETS) {
     return l10n_util::GetStringUTF16(IDS_BRAVE_CRYPTO_WALLETS_LAZY_LOAD_TEXT);
   }
@@ -66,7 +66,7 @@ int CryptoWalletsInfoBarDelegate::GetButtons() const {
   return BUTTON_OK | BUTTON_CANCEL;
 }
 
-base::string16 CryptoWalletsInfoBarDelegate::GetButtonLabel(
+std::u16string CryptoWalletsInfoBarDelegate::GetButtonLabel(
     InfoBarButton button) const {
   if (subtype_ == InfobarSubType::LOAD_CRYPTO_WALLETS) {
     if (button == BUTTON_CANCEL) {
@@ -84,7 +84,7 @@ base::string16 CryptoWalletsInfoBarDelegate::GetButtonLabel(
       IDS_BRAVE_CRYPTO_WALLETS_SETUP_CRYPTO_WALLETS);
 }
 
-base::string16 CryptoWalletsInfoBarDelegate::GetLinkText() const {
+std::u16string CryptoWalletsInfoBarDelegate::GetLinkText() const {
   return l10n_util::GetStringUTF16(IDS_LEARN_MORE);
 }
 
@@ -98,11 +98,11 @@ bool CryptoWalletsInfoBarDelegate::Accept() {
       InfoBarService::WebContentsFromInfoBar(infobar());
     if (web_contents) {
       auto* browser_context = web_contents->GetBrowserContext();
-      Profile* profile = Profile::FromBrowserContext(browser_context);
-      auto* service = BraveWalletServiceFactory::GetForProfile(profile);
-      service->LoadCryptoWalletsExtension(base::BindOnce(
-          &CryptoWalletsInfoBarDelegate::OnCryptoWalletsLoaded,
-          base::Unretained(this), web_contents));
+      auto* service =
+          EthereumRemoteClientServiceFactory::GetForContext(browser_context);
+      service->MaybeLoadCryptoWalletsExtension(
+          base::BindOnce(&CryptoWalletsInfoBarDelegate::OnCryptoWalletsLoaded,
+                         weak_ptr_factory_.GetWeakPtr(), web_contents));
     }
     return true;
   }
@@ -111,9 +111,10 @@ bool CryptoWalletsInfoBarDelegate::Accept() {
       InfoBarService::WebContentsFromInfoBar(infobar());
     if (web_contents) {
       auto* browser_context = web_contents->GetBrowserContext();
-      user_prefs::UserPrefs::Get(browser_context)->
-          SetInteger(kBraveWalletWeb3Provider,
-              static_cast<int>(BraveWalletWeb3ProviderTypes::CRYPTO_WALLETS));
+      user_prefs::UserPrefs::Get(browser_context)
+          ->SetInteger(kBraveWalletWeb3Provider,
+                       static_cast<int>(
+                           brave_wallet::Web3ProviderTypes::CRYPTO_WALLETS));
       Browser* browser = chrome::FindBrowserWithWebContents(web_contents);
       brave::ShowBraveWallet(browser);
     }
@@ -127,13 +128,13 @@ bool CryptoWalletsInfoBarDelegate::Cancel() {
   if (web_contents) {
     if (subtype_ == InfobarSubType::GENERIC_SETUP) {
       auto* browser_context = web_contents->GetBrowserContext();
-      user_prefs::UserPrefs::Get(browser_context)->
-          SetInteger(kBraveWalletWeb3Provider,
-              static_cast<int>(BraveWalletWeb3ProviderTypes::NONE));
+      user_prefs::UserPrefs::Get(browser_context)
+          ->SetInteger(kBraveWalletWeb3Provider,
+                       static_cast<int>(brave_wallet::Web3ProviderTypes::NONE));
       return true;
     }
     Browser* browser = chrome::FindBrowserWithWebContents(web_contents);
-    brave::ShowExtensionSettings(browser);
+    brave::ShowWalletSettings(browser);
   }
   return true;
 }

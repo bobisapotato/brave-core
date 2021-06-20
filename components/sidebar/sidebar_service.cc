@@ -34,7 +34,7 @@ std::vector<SidebarItem> GetDefaultSidebarItems() {
   std::vector<SidebarItem> items;
   items.push_back(SidebarItem::Create(
       GURL("https://together.brave.com/"),
-      l10n_util::GetStringUTF16(IDS_SIDEBAR_BRAVE_TOGETHER_ITEM_TITLE),
+      l10n_util::GetStringUTF16(IDS_SIDEBAR_BRAVE_TALK_ITEM_TITLE),
       SidebarItem::Type::kTypeBuiltIn, true));
   items.push_back(SidebarItem::Create(
       GURL("chrome://wallet/"),
@@ -54,12 +54,14 @@ std::vector<SidebarItem> GetDefaultSidebarItems() {
 }  // namespace
 
 // static
-void SidebarService::RegisterPrefs(PrefRegistrySimple* registry) {
+void SidebarService::RegisterProfilePrefs(PrefRegistrySimple* registry) {
   if (!base::FeatureList::IsEnabled(kSidebarFeature))
     return;
 
   registry->RegisterListPref(kSidebarItems);
-  registry->RegisterIntegerPref(kSidebarShowOption, kShowAlways);
+  registry->RegisterIntegerPref(
+      kSidebarShowOption, static_cast<int>(ShowSidebarOption::kShowAlways));
+  registry->RegisterIntegerPref(kSidebarItemAddedFeedbackBubbleShowCount, 0);
 }
 
 SidebarService::SidebarService(PrefService* prefs) : prefs_(prefs) {
@@ -95,6 +97,23 @@ void SidebarService::RemoveItemAt(int index) {
   items_.erase(items_.begin() + index);
   for (Observer& obs : observers_)
     obs.OnItemRemoved(removed_item, index);
+
+  UpdateSidebarItemsToPrefStore();
+}
+
+void SidebarService::MoveItem(int from, int to) {
+  DCHECK(items_.size() > static_cast<size_t>(from) &&
+         items_.size() > static_cast<size_t>(to) && from >= 0 && to >= 0);
+
+  if (from == to)
+    return;
+
+  const SidebarItem item = items_[from];
+  items_.erase(items_.begin() + from);
+  items_.insert(items_.begin() + to, item);
+
+  for (Observer& obs : observers_)
+    obs.OnItemMoved(item, from, to);
 
   UpdateSidebarItemsToPrefStore();
 }
@@ -143,12 +162,12 @@ SidebarService::GetDefaultSidebarItemsFromCurrentItems() const {
   return items;
 }
 
-int SidebarService::GetSidebarShowOption() const {
-  return prefs_->GetInteger(kSidebarShowOption);
+SidebarService::ShowSidebarOption SidebarService::GetSidebarShowOption() const {
+  return static_cast<ShowSidebarOption>(prefs_->GetInteger(kSidebarShowOption));
 }
 
-void SidebarService::SetSidebarShowOption(int show_options) {
-  prefs_->SetInteger(kSidebarShowOption, show_options);
+void SidebarService::SetSidebarShowOption(ShowSidebarOption show_options) {
+  prefs_->SetInteger(kSidebarShowOption, static_cast<int>(show_options));
 }
 
 void SidebarService::LoadSidebarItems() {

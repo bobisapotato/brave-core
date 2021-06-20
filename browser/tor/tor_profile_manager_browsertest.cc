@@ -5,12 +5,11 @@
 
 #include "base/path_service.h"
 #include "base/strings/utf_string_conversions.h"
-#include "brave/browser/brave_browser_process_impl.h"
+#include "brave/browser/brave_ads/ads_service_factory.h"
 #include "brave/browser/brave_rewards/rewards_service_factory.h"
 #include "brave/browser/tor/tor_profile_manager.h"
 #include "brave/browser/tor/tor_profile_service_factory.h"
 #include "brave/common/brave_paths.h"
-#include "brave/components/brave_ads/browser/ads_service_factory.h"
 #include "brave/components/ipfs/buildflags/buildflags.h"
 #include "brave/components/tor/mock_tor_launcher_factory.h"
 #include "brave/components/tor/tor_constants.h"
@@ -28,6 +27,7 @@
 #include "components/content_settings/core/common/content_settings.h"
 #include "components/content_settings/core/common/content_settings_types.h"
 #include "content/public/test/browser_test.h"
+#include "extensions/buildflags/buildflags.h"
 
 #if BUILDFLAG(ENABLE_EXTENSIONS)
 #include "chrome/browser/extensions/extension_browsertest.h"
@@ -63,7 +63,7 @@ Profile* SwitchToTorProfile(Profile* parent_profile,
   base::RunLoop run_loop;
   TorProfileManager::SwitchToTorProfile(
       parent_profile,
-      base::Bind(&OnUnblockOnProfileCreation, &run_loop, factory));
+      base::BindRepeating(&OnUnblockOnProfileCreation, &run_loop, factory));
   run_loop.Run();
 
   BrowserList* browser_list = BrowserList::GetInstance();
@@ -103,7 +103,7 @@ IN_PROC_BROWSER_TEST_F(TorProfileManagerTest,
   Profile* parent_profile = ProfileManager::GetActiveUserProfile();
 
   // Add a bookmark in parent profile.
-  const base::string16 title(base::ASCIIToUTF16("Test"));
+  const std::u16string title(u"Test");
   const GURL url1("https://www.test1.com");
   bookmarks::BookmarkModel* parent_bookmark_model =
       BookmarkModelFactory::GetForBrowserContext(parent_profile);
@@ -321,16 +321,5 @@ IN_PROC_BROWSER_TEST_F(TorProfileManagerExtensionTest,
                                                 false);
   EXPECT_TRUE(extensions::util::IsIncognitoEnabled(component_extension->id(),
                                                    tor_profile));
-
-  // "not_allowed" mode will also disable extension in Tor
-  const extensions::Extension* incognito_not_allowed_ext =
-      InstallExtension(incognito_not_allowed_ext_path(), 1);
-  const std::string incognito_not_allowed_id = incognito_not_allowed_ext->id();
-  parent_extension_prefs->SetIsIncognitoEnabled(incognito_not_allowed_id, true);
-  Profile* primary_otr_profile = parent_profile->GetPrimaryOTRProfile();
-  EXPECT_FALSE(extensions::util::IsIncognitoEnabled(incognito_not_allowed_id,
-                                                    primary_otr_profile));
-  EXPECT_FALSE(extensions::util::IsIncognitoEnabled(incognito_not_allowed_id,
-                                                    tor_profile));
 }
 #endif

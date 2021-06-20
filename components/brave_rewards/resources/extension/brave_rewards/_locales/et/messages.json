@@ -235,6 +235,18 @@
     "message": "Varundage oma Brave'i rahakotti",
     "description": "Description for backup wallet notification"
   },
+  "deviceLimitReachedLearnMore": {
+    "message": "Rohkem teavet",
+    "description": "Notification button text to learn more about device limit"
+  },
+  "deviceLimitReachedTitle": {
+    "message": "Jõuti seadmete ülemmäärani",
+    "description": "Title for device limit reached notification"
+  },
+  "deviceLimitReachedNotification": {
+    "message": "Rahakotti ei saa kinnitada, sest olete jõudnud kinnitatud seadmete ülemmäärani.",
+    "description": "Description for device limit reached notification"
+  },
   "insufficientFundsNotification": {
     "message": "Teie Brave Rewardsi konto ootab sissemakset.",
     "description": "Description for new insufficient funds notification"
@@ -515,9 +527,15 @@
     "message": "Rahakott on kinnitatud",
     "description": "Displayed in wallet that tells users that he is verified"
   },
-  "walletGoToUphold":  {
-    "message": "Ava minu Upholdi konto",
-    "description": "CTA to open uphold account"
+  "walletGoToProvider":  {
+    "message": "Ava minu konto: $provider$",
+    "description": "CTA to open an external wallet account",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Uphold"
+      }
+    }
   },
   "walletDisconnect":  {
     "message": "Katkesta Brave Rewardsi ühendus",
@@ -612,8 +630,14 @@
     "description": "Text for login button"
   },
   "loginMessageText":  {
-    "message": "Upholdi konto loomiseks peab teil olema vähemalt 25 BATi. Proovige hiljem uuesti. \n Kui teil on juba kinnitatud Upholdi konto, jätkake sisselogimisega.",
-    "description": "Text for login button"
+    "message": "Upholdi konto loomiseks on vaja vähemalt $amount$ BAT-i. Kui teil on juba kinnitatud Upholdi konto, siis jätkake sisselogimist.",
+    "description": "Text for login button",
+    "placeholders": {
+      "amount": {
+        "content": "$1",
+        "example": "15"
+      }
+    }
   },
   "walletConnected":  {
     "message": "Ühendatud",
@@ -624,8 +648,14 @@
     "description": "Status button that tells user that he is currently pending"
   },
   "walletVerificationNote3":  {
-    "message": "Märkus. Kui annate volituse, näeb Uphold teie tehinguid. Näiteks näeb ta saajat ja preemiate summat.",
-    "description": "Displayed in login modal for uphold"
+    "message": "Märkus. Kui annate volituse, näeb $provider$ teie tehinguid. Näiteks näeb ta saajat ja preemiate summat.",
+    "description": "Displayed in login modal for external wallet providers",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Uphold"
+      }
+    }
   },
   "onboardingEarnHeader": {
     "message": "Teenige ja andke tokeneid",
@@ -718,7 +748,7 @@
     "description": ""
   },
   "onboardingPanelScheduleHeader": {
-    "message": "Millal preemiaid saab?",
+    "message": "Millal saate preemiaid?",
     "description": ""
   },
   "onboardingPanelScheduleText": {
@@ -764,6 +794,42 @@
   "onboardingPanelCompleteText": {
     "message": "Brave Rewardsi kasutamisega aitate veebi kõigi jaoks paremaks muuta. Ja see on vinge!",
     "description": ""
+  },
+  "onboardingPanelVerifyHeader": {
+    "message": "Kinnitage oma rahakott",
+    "description": ""
+  },
+  "onboardingPanelVerifySubtext": {
+    "message": "Et võtta välja reklaamide vaatamise eest teenitud tokeneid, peate kinnitama oma rahakoti.",
+    "description": ""
+  },
+  "onboardingPanelVerifyLater": {
+    "message": "Tee seda hiljem",
+    "description": ""
+  },
+  "onboardingPanelVerifyNow": {
+    "message": "Kinnita minu rahakott",
+    "description": ""
+  },
+  "onboardingPanelBitflyerNote": {
+    "message": "bitFlyeri rahakott on teenus, mida haldab bitFlyer, Inc.",
+    "description": ""
+  },
+  "onboardingPanelBitflyerText": {
+    "message": "Kui kinnitate oma rahakoti ja seote selle bitFlyeri kontoga, saate Brave Rewardsi kaudu teenitud tokeneid lihtsamalt säilitada ja hallata.",
+    "description": ""
+  },
+  "onboardingPanelBitflyerLearnMore": {
+    "message": "$link_begin$Vaata lisateavet$link_end$ selle kohta, kuidas oma Brave’i brauser bitFlyeri kontoga linkida.",
+    "description": "",
+    "placeholders": {
+      "link_begin": {
+        "content": "$1"
+      },
+      "link_end": {
+        "content": "$2"
+      }
+    }
   },
   "bapDeprecationHeader": {
     "message": "Brave Rewards läheb Jaapanis üle uuele süsteemile.",

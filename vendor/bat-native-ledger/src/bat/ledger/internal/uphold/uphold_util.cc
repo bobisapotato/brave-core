@@ -21,8 +21,14 @@ namespace uphold {
 
 std::string GetClientId() {
   return ledger::_environment == type::Environment::PRODUCTION
-      ? kClientIdProduction
-      : kClientIdStaging;
+             ? UPHOLD_CLIENT_ID
+             : UPHOLD_STAGING_CLIENT_ID;
+}
+
+std::string GetClientSecret() {
+  return ledger::_environment == type::Environment::PRODUCTION
+             ? UPHOLD_CLIENT_SECRET
+             : UPHOLD_STAGING_CLIENT_SECRET;
 }
 
 std::string GetUrl() {
@@ -231,17 +237,6 @@ bool SetWallet(LedgerImpl* ledger, type::ExternalWalletPtr wallet) {
   BLOG_IF(0, !success, "Can't encrypt uphold wallet");
 
   return success;
-}
-
-std::string GenerateRandomString(bool testing) {
-  if (testing) {
-    return "123456789";
-  }
-
-  const size_t kLength = 32;
-  uint8_t bytes[kLength];
-  crypto::RandBytes(bytes, sizeof(bytes));
-  return base::HexEncode(bytes, sizeof(bytes));
 }
 
 std::string GetAccountUrl() {

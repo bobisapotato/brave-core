@@ -43,17 +43,15 @@ export const handleContributionAmount = (amount: string) => {
   return result
 }
 
-export const getPromotion = (promotion: RewardsExtension.Promotion, onlyAnonWallet: boolean) => {
+export const getPromotion = (promotion: RewardsExtension.Promotion) => {
   if (!promotion) {
     return promotion
   }
 
-  const tokenString = onlyAnonWallet ? getMessage('point') : getMessage('token')
+  const tokenString = getMessage('token')
   promotion.finishTitle = getMessage('grantFinishTitleUGP')
   promotion.finishText = getMessage('grantFinishTextUGP', [tokenString])
-  promotion.finishTokenTitle = onlyAnonWallet
-    ? getMessage('grantFinishPointTitleUGP')
-    : getMessage('grantFinishTokenTitleUGP')
+  promotion.finishTokenTitle = getMessage('grantFinishTokenTitleUGP')
 
   if (promotion.type === 1) { // Rewards.PromotionTypes.ADS
     promotion.expiresAt = 0
@@ -140,10 +138,6 @@ export const handleExternalWalletLink = (balance: RewardsExtension.Balance, exte
     link = 'brave://rewards/#verify'
   }
 
-  if (balance.total < 25 && externalWallet && externalWallet.type === 'uphold') {
-    link = externalWallet.loginUrl
-  }
-
   chrome.tabs.create({
     url: link
   })
@@ -164,6 +158,7 @@ export const getExternalWallet = (actions: any, externalWallet?: RewardsExtensio
 export const getWalletProviderName = (wallet?: RewardsExtension.ExternalWallet) => {
   switch (wallet ? wallet.type : '') {
     case 'uphold' : return 'Uphold'
+    case 'bitflyer': return 'bitFlyer'
     default: return ''
   }
 }

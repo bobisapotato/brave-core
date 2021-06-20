@@ -6,22 +6,38 @@
 #include "brave/browser/ui/views/location_bar/brave_location_bar_view.h"
 
 #include <memory>
+#include <utility>
 
+#include "brave/app/vector_icons/vector_icons.h"
 #include "brave/browser/profiles/profile_util.h"
 #include "brave/browser/themes/brave_theme_service.h"
 #include "brave/browser/ui/views/brave_actions/brave_actions_container.h"
 #include "brave/browser/ui/views/toolbar/brave_toolbar_view.h"
+#include "brave/grit/brave_theme_resources.h"
 #include "chrome/browser/profiles/profile.h"
 #include "chrome/browser/themes/theme_service_factory.h"
 #include "chrome/browser/ui/layout_constants.h"
 #include "chrome/browser/ui/omnibox/omnibox_theme.h"
 #include "chrome/browser/ui/views/chrome_layout_provider.h"
 #include "chrome/browser/ui/views/location_bar/location_bar_view.h"
+#include "chrome/grit/chromium_strings.h"
+#include "components/grit/brave_components_strings.h"
+#include "components/omnibox/browser/omnibox_edit_model.h"
 #include "components/version_info/channel.h"
+#include "content/public/browser/navigation_entry.h"
+#include "ui/base/resource/resource_bundle.h"
+#include "ui/gfx/image/image_skia.h"
+#include "ui/gfx/paint_vector_icon.h"
 #include "ui/views/controls/highlight_path_generator.h"
 
 #if BUILDFLAG(ENABLE_TOR)
 #include "brave/browser/ui/views/location_bar/onion_location_view.h"
+#endif
+#if BUILDFLAG(IPFS_ENABLED)
+#include "brave/browser/ipfs/ipfs_service_factory.h"
+#include "brave/browser/ui/views/location_bar/ipfs_location_view.h"
+#include "brave/components/ipfs/ipfs_constants.h"
+#include "brave/components/ipfs/ipfs_utils.h"
 #endif
 
 namespace {
@@ -72,6 +88,11 @@ void BraveLocationBarView::Init() {
   onion_location_view_ = new OnionLocationView(browser_->profile());
   AddChildView(onion_location_view_);
 #endif
+#if BUILDFLAG(IPFS_ENABLED)
+  ipfs_location_view_ = new IPFSLocationView(browser_->profile());
+  AddChildView(ipfs_location_view_);
+#endif
+
   // brave action buttons
   brave_actions_ = new BraveActionsContainer(browser_, profile());
   brave_actions_->Init();
@@ -84,6 +105,20 @@ void BraveLocationBarView::Init() {
     content_setting_view->disable_animation();
 }
 
+bool BraveLocationBarView::ShouldShowIPFSLocationView() const {
+#if BUILDFLAG(IPFS_ENABLED)
+  const GURL& url = GetLocationBarModel()->GetURL();
+  if (!ipfs::IpfsServiceFactory::IsIpfsEnabled(profile_) ||
+      !ipfs::IsIPFSScheme(url) ||
+      !ipfs::IsLocalGatewayConfigured(profile_->GetPrefs()))
+    return false;
+
+  return true;
+#else
+  return false;
+#endif
+}
+
 void BraveLocationBarView::Update(content::WebContents* contents) {
   // base Init calls update before our Init is run, so our children
   // may not be initialized yet
@@ -94,7 +129,32 @@ void BraveLocationBarView::Update(content::WebContents* contents) {
   if (onion_location_view_)
     onion_location_view_->Update(contents);
 #endif
+#if BUILDFLAG(IPFS_ENABLED)
+  if (ipfs_location_view_)
+    ipfs_location_view_->Update(contents);
+#endif
+
   LocationBarView::Update(contents);
+
+  if (!ShouldShowIPFSLocationView())
+    return;
+  // Secure display text for a page was set by chromium.
+  // We do not want to override this.
+  if (!GetLocationBarModel()->GetSecureDisplayText().empty())
+    return;
+  auto badge_text = l10n_util::GetStringUTF16(IDS_IPFS_BADGE_TITLE);
+  location_icon_view()->SetLabel(badge_text);
+}
+
+ui::ImageModel BraveLocationBarView::GetLocationIcon(
+    LocationIconView::Delegate::IconFetchedCallback on_icon_fetched) const {
+  if (!ShouldShowIPFSLocationView() ||
+      !omnibox_view_->model()->ShouldShowCurrentPageIcon())
+    return LocationBarView::GetLocationIcon(std::move(on_icon_fetched));
+
+  auto& bundle = ui::ResourceBundle::GetSharedInstance();
+  const auto& ipfs_logo = *bundle.GetImageSkiaNamed(IDR_BRAVE_IPFS_LOGO);
+  return ui::ImageModel::FromImageSkia(ipfs_logo);
 }
 
 void BraveLocationBarView::OnChanged() {
@@ -109,6 +169,11 @@ void BraveLocationBarView::OnChanged() {
     onion_location_view_->Update(
         browser_->tab_strip_model()->GetActiveWebContents());
 #endif
+#if BUILDFLAG(IPFS_ENABLED)
+  if (ipfs_location_view_)
+    ipfs_location_view_->Update(
+        browser_->tab_strip_model()->GetActiveWebContents());
+#endif
 
   // OnChanged calls Layout
   LocationBarView::OnChanged();
@@ -120,6 +185,11 @@ std::vector<views::View*> BraveLocationBarView::GetTrailingViews() {
   if (onion_location_view_)
     views.push_back(onion_location_view_);
 #endif
+#if BUILDFLAG(IPFS_ENABLED)
+  if (ipfs_location_view_)
+    views.push_back(ipfs_location_view_);
+#endif
+
   if (brave_actions_)
     views.push_back(brave_actions_);
 
@@ -141,6 +211,14 @@ gfx::Size BraveLocationBarView::CalculatePreferredSize() const {
     min_size.Enlarge(extra_width, 0);
   }
 #endif
+#if BUILDFLAG(IPFS_ENABLED)
+  if (ipfs_location_view_ && ipfs_location_view_->GetVisible()) {
+    const int extra_width = GetLayoutConstant(LOCATION_BAR_ELEMENT_PADDING) +
+                            ipfs_location_view_->GetMinimumSize().width();
+    min_size.Enlarge(extra_width, 0);
+  }
+#endif
+
   return min_size;
 }
 
@@ -165,7 +243,7 @@ void BraveLocationBarView::ChildPreferredSizeChanged(views::View* child) {
 
 int BraveLocationBarView::GetBorderRadius() const {
   return ChromeLayoutProvider::Get()->GetCornerRadiusMetric(
-      views::EMPHASIS_HIGH, size());
+      views::Emphasis::kHigh, size());
 }
 
 SkPath BraveLocationBarView::GetFocusRingHighlightPath() const {

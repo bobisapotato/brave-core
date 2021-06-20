@@ -5,7 +5,7 @@
 <translation id="7942180974165298215">Chặn Quảng cáo Brave</translation>
 <translation id="4615489450165434530">Báo cáo trang web bị hỏng</translation>
 <translation id="6406506848690869874">Đồng bộ</translation>
-<translation id="5655621391922317800">Ví Điện tử</translation>
+<translation id="1544192797660353713">Ví</translation>
 <translation id="2445484935443597917">Tạo hồ sơ mới</translation>
 <translation id="2666990579225592931">Mở cửa sổ khách</translation>
 <translation id="8275068909952022340">Nhiều hơn...</translation>
@@ -59,13 +59,29 @@ Bằng cách cài đặt tiện ích mở rộng này, bạn đồng ý với c�
 <translation id="1970435562892104727">Đây là một cửa sổ riêng tư với Tor</translation>
 <translation id="1037341607922068025">Mở Cửa sổ Riêng tư với Tor</translation>
 <translation id="1725356094208762656">Mở trong Tor</translation>
+<translation id="7643538479215207633">Mở bằng IPFS</translation>
+<translation id="3094628781200061820">Phát hành và truy xuất tệp từ IPFS</translation>
 <translation id="1672270084584211506">Onion Khả dụng</translation>
+<translation id="4901618511712685702">Nhập vào IPFS</translation>
+<translation id="6794469945030154569">Trang này</translation>
+<translation id="5037852323412456577">Ảnh đã chọn</translation>
+<translation id="2715839724138372481">Video đã chọn</translation>
+<translation id="4227945450504703638">Âm thanh đã chọn</translation>
+<translation id="7895302206188277628">Nội dung liên kết</translation>
+<translation id="4322612543319315652">Nhập văn bản đã chọn vào IPFS</translation>
+<translation id="8883166554766780543">Nhập và sao chép liên kết tới ảnh chụp nhanh IPFS</translation>
+<translation id="3654831858282189202">Xuất bản bằng khóa IPNS</translation>
+<translation id="7691598647605453992">IPFS</translation>
 <translation id="1434416574322382019">Cửa sổ Riêng tư với Tor Mới</translation>
 <translation id="4703780849509456860">Mở Liên kết trong Cửa sổ Riêng tư với Tor</translation>
 <translation id="3488584642074079080">Mở Liên kết trong Cửa sổ Riêng tư với Tor của Brave</translation>
+<translation id="7475547933708221517">Chia sẻ tệp cục bộ sử dụng IPFS</translation>
+<translation id="2286177249736199435">Chia sẻ thư mục cục bộ bằng IPFS</translation>
+<translation id="784573715436258741">Chia sẻ tệp cục bộ sử dụng IPFS</translation>
 <translation id="6313675821927505581">Mở cửa sổ cá nhân mới với công nghệ Tor</translation>
 <translation id="2638041073279639246">Mở liên kết trong cửa sổ cá nhân mới với công nghệ Tor</translation>
 <translation id="3425600262621021599">Mở liên kết trong cửa sổ cá nhân Brave với công nghệ Tor</translation>
+<translation id="575838692088926391">Chia sẻ thư mục cục bộ bằng IPFS</translation>
 <translation id="5410152065859052603">Tor</translation>
 <translation id="2515126961943087659">Dịch vụ Bat Ads</translation>
 <translation id="7924918279836988121">Dịch vụ Sổ cái Bat</translation>
@@ -145,7 +161,7 @@ Bằng cách cài đặt tiện ích mở rộng này, bạn đồng ý với c�
 <translation id="4112587618563511470">Mã đồng bộ hóa không hợp lệ, xin vui lòng kiểm tra và thử lại.</translation>
 <translation id="2339730291919608488">Rời chuỗi đồng bộ</translation>
 <translation id="115699408012835975">Nếu bạn đặt lại Đồng bộ hóa, bạn sẽ phải nhập lại mã đồng bộ hóa từ một thiết bị khác để đồng bộ hóa với thiết bị đó. Bạn có chắc muốn tiếp tục không?</translation>
-<translation id="339086854515247923">Bạn có chắc chắn muốn xóa thiết bị đã chọn khỏi chuỗi đồng bộ hóa không?</translation>
+<translation id="6092564993102418148">Bạn có chắc chắn muốn gỡ thiết bị đã chọn khỏi chuỗi đồng bộ hóa không?</translation>
 <translation id="3396347744975515056">Brave Sync đã được nâng cấp và cần phải thiết lập</translation>
 <translation id="7473245612074035141">Bắt đầu Thiết lập</translation>
 <translation id="3411013544209536575">Lời khuyên trợ giúp</translation>
@@ -156,24 +172,49 @@ Bằng cách cài đặt tiện ích mở rộng này, bạn đồng ý với c�
 <translation id="1336940801687497203">Giống như Windows</translation>
 <translation id="8721331068159819483">Giống như macOS</translation>
 <translation id="2896916411183256228">Sử dụng WebTorrent để hiển thị torrent trực tiếp trong trình duyệt. Hỗ trợ các tập tin torrent và liên kết nam châm (magnet).</translation>
+<translation id="8488282162676695335">Ví Brave</translation>
 <translation id="2356070529366658676">Yêu cầu</translation>
 <translation id="7701040980221191251">Không</translation>
+<translation id="5655621391922317800">Ví Điện tử</translation>
+<translation id="1696548911367097044">Phần mở rộng Không dùng đến của Ví tiền Crypto</translation>
 <translation id="1085027414516521238">MetaMask</translation>
 <translation id="7090046810227878892">Nhà cung cấp Ethereum để sử dụng Dapps</translation>
 <translation id="5913089932885076110">Tải Ví Tiền điện tử lúc khởi động</translation>
+<translation id="757886143331967039">Tải phần mở rộng không dùng đến của Ví tiền Crypto khi khởi động</translation>
+<translation id="1834467296210148203">Hiển thị biểu tượng Ví Brave trên thanh công cụ</translation>
 <translation id="6864914031231797928">Cho phép đăng nhập bằng Google cho các tiện ích mở rộng</translation>
+<translation id="5927916530277631319">Phương thức phân giải tên miền Unstoppable Domains</translation>
+<translation id="8412057160793088103"><ph name="BEGIN_LINK"/>Tìm hiểu thêm<ph name="END_LINK"/> về DNS trên HTTPS và các cân nhắc quyền riêng tư của Ethereum.</translation>
+<translation id="5248318250177143470">Phương thức phân giải tên miền ENS (Dịch vụ Cung cấp Tên miền Ethereum)</translation>
+<translation id="7024553202001112871">Thiết lập khóa IPNS của bạn</translation>
+<translation id="951216659045543447">Ký nội dung bằng khóa riêng tư tương ứng và xuất bản lên IPNS</translation>
+<translation id="7611728475758612204">Các khóa có sẵn để xuất bản</translation>
+<translation id="911363100236037920">Nhập tên cho khóa mới</translation>
+<translation id="6358469157239228181">Tên này không thể sử dụng</translation>
+<translation id="8996633027318264334">Bạn có thực sự muốn xóa <ph name="KEY_NAME"/>?</translation>
+<translation id="910215077892371264">Nút không được khởi chạy</translation>
+<translation id="616058968889448209">Lỗi khởi chạy dịch vụ IPFS, thông tin thêm có sẵn trên <ph name="BEGIN_LINK"/>trang chẩn đoán<ph name="END_LINK"/></translation>
+<translation id="6912148685459054619"><ph name="KEY_NAME"/> nhập khóa không thành công</translation>
+<translation id="8275038454117074363">Nhập</translation>
+<translation id="3654980960391973513">Nhập khóa</translation>
+<translation id="5531501313997312487">Nút Bắt đầu</translation>
 <translation id="9170907049676078643">Phương thức giải quyết tài nguyên IPFS</translation>
 <translation id="1327977588028644528">Cổng vào</translation>
 <translation id="80225669816651290">Nút cục bộ</translation>
 <translation id="4927734062756955434">Địa chỉ cổng mạng IPFS công khai</translation>
+<translation id="3399481770463167943"><ph name="BEGIN_LINK_MPL"/>Tìm hiểu thêm<ph name="END_LINK_MPL"/> về nút cục bộ IPFS và các cân nhắc quyền riêng tư của cổng.</translation>
 <translation id="8425213833346101688">Thay đổi</translation>
 <translation id="557281710253742286">Đặt cổng mạng IPFS</translation>
 <translation id="8571837315037233299">Địa chỉ cổng mạng</translation>
+<translation id="1251574393468476924">Kích thước bộ nhớ đệm tối đa của IPFS (GB)</translation>
+<translation id="2503497578400410320">Giới hạn mềm cận trên về kích thước kho dữ liệu của kho lưu trữ IPFS.</translation>
 <translation id="7703184801853248830">Địa chỉ cổng mạng không hợp lệ</translation>
 <translation id="585868419599255817">Dự phòng cổng công khai IPFS</translation>
 <translation id="207763736230883589">Tự động quay trở lại cổng mạng IPFS công khai nếu không thể truy cập vào nút cục bộ của bạn.</translation>
 <translation id="4107552920076294723">Chuyển hướng tài nguyên IPFS đến cổng IPFS đã cấu hình</translation>
 <translation id="6494857428933042381">Tự động sử dụng cổng mạng đã được cấu hình đối với các giải pháp IPFS khi gặp tài nguyên cổng mạng IPFS.</translation>
+<translation id="8655170717758778983">Tự động chuyển hướng đến các trang IPFS thông qua DNSLink khi có thể</translation>
+<translation id="2233724520223030977">Tự động dùng DNSLink để điều hướng đến phiên bản IPFS của một website khi có thể</translation>
 <translation id="6554397389149987360">Sử dụng thành phần của Hangouts để cho phép chia sẻ màn hình và các tính năng khác trong trình duyệt.</translation>
 <translation id="1765684547504191670">Sử dụng cấu phần Bộ định tuyến Phương tiện để bật Chromecast trong trình duyệt.</translation>
 <translation id="9156965752763025780">Các thay đổi của bạn sẽ có hiệu lực vào lần tới khi bạn chạy lại Brave.</translation>
@@ -233,12 +274,13 @@ Bằng cách cài đặt tiện ích mở rộng này, bạn đồng ý với c�
 <translation id="1959966725083452288">Ảnh đại diện Bonbon Royal</translation>
 <translation id="2039034364578911089">Ảnh đại diện Bonbon Ninja</translation>
 <translation id="239760341987199724">Đặt Brave là trình duyệt mặc định của bạn</translation>
-<translation id="9185422039067880535">Trình duyệt Brave hiện không được đặt làm trình duyệt mặc định của bạn.
-Hãy đặt Brave làm trình duyệt mặc định của bạn để tiếp tục duyệt web nhanh hơn -
-nhanh hơn tới 6 lần trên các website tin tức lớn.</translation>
+<translation id="1391855377994926460">Hãy tiếp tục duyệt web nhanh hơn - nhanh hơn đến 6 lần trên những trang tin tức lớn.</translation>
 <translation id="9218430445555521422">Đặt làm mặc định</translation>
 <translation id="3479552764303398839">Không phải bây giờ</translation>
+<translation id="6040143037577758943">Đóng</translation>
+<translation id="5600566490506283344">Thông báo quảng cáo Brave</translation>
 <translation id="4877147287319222750">Thêm vào Thanh bên</translation>
+<translation id="4233010476457917696">Hiển thị thanh bên</translation>
 <translation id="5404213409401164238">Hiển thị Thanh bên</translation>
 <translation id="7561196759112975576">Luôn luôn</translation>
 <translation id="7060352228894039151">Khi di chuột qua</translation>
@@ -254,11 +296,9 @@ nhanh hơn tới 6 lần trên các website tin tức lớn.</translation>
 <translation id="7090566321964540749">Thông tin ẩn danh này chỉ cho phép Brave ước tính mức độ sử dụng tổng thể của một số tính năng nhất định.</translation>
 <translation id="1947672064022327074">Bạn có muốn bắt đầu Ví tiền Điện tử để được hỗ trợ Ethereum không?</translation>
 <translation id="7583735190612229830">Thiết lập Crypto Wallets để tương tác với ứng dụng này và các ứng dụng khác giống như vậy.</translation>
-<translation id="4823406846571523661">Thiết lập Ví Tiền điện tử</translation>
+<translation id="8731422418734770661">Thiết lập Ví tiền Crypto</translation>
 <translation id="8199661191594897555">Bắt đầu Ví Tiền điện tử và tải lại</translation>
 <translation id="8428213095426709021">Cài đặt</translation>
-<translation id="1664718502100303670">Cài đặt Ví</translation>
-<translation id="965566669123544695">Cài đặt IPFS</translation>
 <translation id="72868071984333667">Tìm hiểu thêm về IPFS và quyền riêng tư</translation>
 <translation id="4552520379838695057">Rất tiếc, không tìm thấy trang này.</translation>
 <translation id="2609895996619941644">Bạn có muốn kiểm tra xem phiên bản đã lưu đã có trên Wayback Machine chưa không?</translation>

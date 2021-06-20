@@ -235,6 +235,18 @@
     "message": "Sikkerhetskopier Brave-lommeboken din.",
     "description": "Description for backup wallet notification"
   },
+  "deviceLimitReachedLearnMore": {
+    "message": "Les mer",
+    "description": "Notification button text to learn more about device limit"
+  },
+  "deviceLimitReachedTitle": {
+    "message": "Enhetsgrensen er nådd",
+    "description": "Title for device limit reached notification"
+  },
+  "deviceLimitReachedNotification": {
+    "message": "Lommeboken kan ikke verifiseres, ettersom du har nådd den øvre enhetsgrensen for verifisering.",
+    "description": "Description for device limit reached notification"
+  },
   "insufficientFundsNotification": {
     "message": "Brave Rewards-kontoen din venter på et innskudd.",
     "description": "Description for new insufficient funds notification"
@@ -515,9 +527,15 @@
     "message": "Lommeboken er verifisert",
     "description": "Displayed in wallet that tells users that he is verified"
   },
-  "walletGoToUphold":  {
-    "message": "Gå til Uphold-kontoen min",
-    "description": "CTA to open uphold account"
+  "walletGoToProvider":  {
+    "message": "Gå til $provider$-kontoen min",
+    "description": "CTA to open an external wallet account",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Uphold"
+      }
+    }
   },
   "walletDisconnect":  {
     "message": "Koble fra Brave Rewards",
@@ -612,8 +630,14 @@
     "description": "Text for login button"
   },
   "loginMessageText":  {
-    "message": "Du må ha minst 25 BAT for å opprette en Uphold-konto. Prøv på nytt senere.\nHvis du allerede har bekreftet Uphold-kontoen din, kan du logge på.",
-    "description": "Text for login button"
+    "message": "Du må ha minst $amount$ BAT for å opprette en Uphold-konto. Om du allerede har en verifisert Uphold-konto, kan du fortsette med innloggingen.",
+    "description": "Text for login button",
+    "placeholders": {
+      "amount": {
+        "content": "$1",
+        "example": "15"
+      }
+    }
   },
   "walletConnected":  {
     "message": "Tilkoblet",
@@ -624,8 +648,14 @@
     "description": "Status button that tells user that he is currently pending"
   },
   "walletVerificationNote3":  {
-    "message": "Merk: Transaksjonene dine er synlige for Uphold så snart du autoriserer. De kan for eksempel se kvitteringen og tipsbeløpet ditt.",
-    "description": "Displayed in login modal for uphold"
+    "message": "Merk: Transaksjonene dine kommer til å være synlige for $provider$ når du autoriserer dem. De kan for eksempel se mottakeren og beløpet du tipser.",
+    "description": "Displayed in login modal for external wallet providers",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Uphold"
+      }
+    }
   },
   "onboardingEarnHeader": {
     "message": "Tjen tokener og gi tilbake",
@@ -718,7 +748,7 @@
     "description": ""
   },
   "onboardingPanelScheduleHeader": {
-    "message": "Når mottar du belønninger",
+    "message": "Når mottar du belønninger?",
     "description": ""
   },
   "onboardingPanelScheduleText": {
@@ -764,6 +794,42 @@
   "onboardingPanelCompleteText": {
     "message": "Når du bruker Brave Rewards bidrar du til å gjøre nettet til et bedre sted for alle. Og det er kjempebra!",
     "description": ""
+  },
+  "onboardingPanelVerifyHeader": {
+    "message": "Bekreft lommeboken din",
+    "description": ""
+  },
+  "onboardingPanelVerifySubtext": {
+    "message": "For å gjøre uttak av tokenene du tjener på å se annonser, må du bekrefte lommeboken din.",
+    "description": ""
+  },
+  "onboardingPanelVerifyLater": {
+    "message": "Gjør det senere",
+    "description": ""
+  },
+  "onboardingPanelVerifyNow": {
+    "message": "Bekreft lommeboken min",
+    "description": ""
+  },
+  "onboardingPanelBitflyerNote": {
+    "message": "BitFlyer-lommeboken er en tjeneste som administreres av bitFlyer, Inc.",
+    "description": ""
+  },
+  "onboardingPanelBitflyerText": {
+    "message": "Ved å bekrefte lommeboken din og knytte den til en bitFlyer-konto, vil du lettere kunne lagre og administrere tokener du har tjent gjennom Brave Rewards.",
+    "description": ""
+  },
+  "onboardingPanelBitflyerLearnMore": {
+    "message": "$link_begin$Finn ut mer$link_end$ om hvordan du knytter Brave-nettleseren din til bitFlyer-kontoen din.",
+    "description": "",
+    "placeholders": {
+      "link_begin": {
+        "content": "$1"
+      },
+      "link_end": {
+        "content": "$2"
+      }
+    }
   },
   "bapDeprecationHeader": {
     "message": "Brave Rewards i Japan bytter nå til et nytt system!",

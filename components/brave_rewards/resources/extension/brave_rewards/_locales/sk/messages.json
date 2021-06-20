@@ -235,6 +235,18 @@
     "message": "Prosím, zálohujte svoju peňaženku Brave.",
     "description": "Description for backup wallet notification"
   },
+  "deviceLimitReachedLearnMore": {
+    "message": "Ďalšie informácie",
+    "description": "Notification button text to learn more about device limit"
+  },
+  "deviceLimitReachedTitle": {
+    "message": "Dosiahnutý počet zariadení",
+    "description": "Title for device limit reached notification"
+  },
+  "deviceLimitReachedNotification": {
+    "message": "Peňaženku nie je možné overiť, pretože ste dosiahli maximálny počet overených zariadení.",
+    "description": "Description for device limit reached notification"
+  },
   "insufficientFundsNotification": {
     "message": "Na vašom účte Brave odmeny sa očakáva vklad.",
     "description": "Description for new insufficient funds notification"
@@ -515,9 +527,15 @@
     "message": "Peňaženka verifikovaná",
     "description": "Displayed in wallet that tells users that he is verified"
   },
-  "walletGoToUphold":  {
-    "message": "Prejsť na účet Uphold",
-    "description": "CTA to open uphold account"
+  "walletGoToProvider":  {
+    "message": "Prejsť na môj účet $provider$",
+    "description": "CTA to open an external wallet account",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Uphold"
+      }
+    }
   },
   "walletDisconnect":  {
     "message": "Odpojiť sa od Brave Rewards",
@@ -612,8 +630,14 @@
     "description": "Text for login button"
   },
   "loginMessageText":  {
-    "message": "Potrebujete minimálne 25 BAT na vytvorenie účtu Uphold. Prosím, skúste to znova neskôr. Ak už máte overený účet Uphold, pokračujte prihlásením.",
-    "description": "Text for login button"
+    "message": "Na vytvorenie účtu Uphold potrebujete minimálne $amount$ BAT. Ak už máte overený účet Uphold, pokračujte prihlásením.",
+    "description": "Text for login button",
+    "placeholders": {
+      "amount": {
+        "content": "$1",
+        "example": "15"
+      }
+    }
   },
   "walletConnected":  {
     "message": "Pripojené",
@@ -624,8 +648,14 @@
     "description": "Status button that tells user that he is currently pending"
   },
   "walletVerificationNote3":  {
-    "message": "Poznámka: Po povolení budú vaše transakcie  viditeľné pre Uphold. Uvidia napríklad príjemcu a množstvo vašich príspevkov.",
-    "description": "Displayed in login modal for uphold"
+    "message": "Poznámka: Vaše transakcie budú viditeľné pre $provider$ po autorizácii. Uvidí napríklad príjemcu a množstvo vašich tipov.",
+    "description": "Displayed in login modal for external wallet providers",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Uphold"
+      }
+    }
   },
   "onboardingEarnHeader": {
     "message": "Zarábajte žetóny a dávajte späť",
@@ -718,7 +748,7 @@
     "description": ""
   },
   "onboardingPanelScheduleHeader": {
-    "message": "Kedy dostávate odmeny",
+    "message": "Kedy dostávate odmeny?",
     "description": ""
   },
   "onboardingPanelScheduleText": {
@@ -764,6 +794,42 @@
   "onboardingPanelCompleteText": {
     "message": "Používaním služby Odmeny Brave pomáhate robiť z webu lepšie miesto pre všetkých. A to je úžasné!",
     "description": ""
+  },
+  "onboardingPanelVerifyHeader": {
+    "message": "Overte si peňaženku",
+    "description": ""
+  },
+  "onboardingPanelVerifySubtext": {
+    "message": "Ak chcete stiahnuť tokeny, ktoré ste získali pozeraním reklám, musíte overiť svoju peňaženku.",
+    "description": ""
+  },
+  "onboardingPanelVerifyLater": {
+    "message": "Urobiť to neskôr",
+    "description": ""
+  },
+  "onboardingPanelVerifyNow": {
+    "message": "Overiť peňaženku",
+    "description": ""
+  },
+  "onboardingPanelBitflyerNote": {
+    "message": "Peňaženka bitFlyer je služba spravovaná spoločnosťou bitFlyer, Inc.",
+    "description": ""
+  },
+  "onboardingPanelBitflyerText": {
+    "message": "Keď svoju peňaženku overíte a prepojíte s účtom bitFlyer, budete môcť jednoduchšie ukladať a spravovať tokeny, ktoré ste získali cez odmeny Brave",
+    "description": ""
+  },
+  "onboardingPanelBitflyerLearnMore": {
+    "message": "$link_begin$Získajte viac informácií$link_end$ o tom, ako prepojiť prehliadač Brave s vašim účtom bitFlyer.",
+    "description": "",
+    "placeholders": {
+      "link_begin": {
+        "content": "$1"
+      },
+      "link_end": {
+        "content": "$2"
+      }
+    }
   },
   "bapDeprecationHeader": {
     "message": "Brave odmeny prechádzajú v Japonsku na nový systém!",

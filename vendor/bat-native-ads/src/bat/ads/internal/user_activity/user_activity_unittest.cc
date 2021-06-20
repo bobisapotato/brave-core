@@ -31,7 +31,6 @@ TEST_F(BatAdsUserActivityTest, HasInstance) {
 
 TEST_F(BatAdsUserActivityTest, RecordLaunchedBrowserEvent) {
   // Arrange
-
   const UserActivityEventType event_type =
       UserActivityEventType::kInitializedAds;
 
@@ -52,11 +51,10 @@ TEST_F(BatAdsUserActivityTest, RecordLaunchedBrowserEvent) {
   EXPECT_EQ(expected_events, events);
 }
 
-TEST_F(BatAdsUserActivityTest, RecordBrowserWindowDidBecomeActiveEvent) {
+TEST_F(BatAdsUserActivityTest, RecordBrowserDidBecomeActiveEvent) {
   // Arrange
-
   const UserActivityEventType event_type =
-      UserActivityEventType::kBrowserWindowDidBecomeActive;
+      UserActivityEventType::kBrowserDidBecomeActive;
 
   // Act
   UserActivity::Get()->RecordEvent(event_type);
@@ -75,11 +73,10 @@ TEST_F(BatAdsUserActivityTest, RecordBrowserWindowDidBecomeActiveEvent) {
   EXPECT_EQ(expected_events, events);
 }
 
-TEST_F(BatAdsUserActivityTest, RecordBrowserWindowDidEnterBackgroundEvent) {
+TEST_F(BatAdsUserActivityTest, RecordBrowserDidEnterBackgroundEvent) {
   // Arrange
-
   const UserActivityEventType event_type =
-      UserActivityEventType::kBrowserWindowDidEnterBackground;
+      UserActivityEventType::kBrowserDidEnterBackground;
 
   // Act
   UserActivity::Get()->RecordEvent(event_type);
@@ -101,7 +98,6 @@ TEST_F(BatAdsUserActivityTest, RecordBrowserWindowDidEnterBackgroundEvent) {
 TEST_F(BatAdsUserActivityTest,
        RecordClickedBackOrForwardNavigationButtonsEvent) {
   // Arrange
-
   const UserActivityEventType event_type =
       UserActivityEventType::kClickedBackOrForwardNavigationButtons;
 
@@ -124,7 +120,6 @@ TEST_F(BatAdsUserActivityTest,
 
 TEST_F(BatAdsUserActivityTest, RecordClickedBookmarkEvent) {
   // Arrange
-
   const UserActivityEventType event_type =
       UserActivityEventType::kClickedBookmark;
 
@@ -147,7 +142,6 @@ TEST_F(BatAdsUserActivityTest, RecordClickedBookmarkEvent) {
 
 TEST_F(BatAdsUserActivityTest, RecordClickedHomePageButtonEvent) {
   // Arrange
-
   const UserActivityEventType event_type =
       UserActivityEventType::kClickedHomePageButton;
 
@@ -170,7 +164,6 @@ TEST_F(BatAdsUserActivityTest, RecordClickedHomePageButtonEvent) {
 
 TEST_F(BatAdsUserActivityTest, RecordClickedLinkEvent) {
   // Arrange
-
   const UserActivityEventType event_type = UserActivityEventType::kClickedLink;
 
   // Act
@@ -192,7 +185,6 @@ TEST_F(BatAdsUserActivityTest, RecordClickedLinkEvent) {
 
 TEST_F(BatAdsUserActivityTest, RecordClickedReloadButtonEvent) {
   // Arrange
-
   const UserActivityEventType event_type =
       UserActivityEventType::kClickedReloadButton;
 
@@ -215,7 +207,6 @@ TEST_F(BatAdsUserActivityTest, RecordClickedReloadButtonEvent) {
 
 TEST_F(BatAdsUserActivityTest, RecordClosedTabEvent) {
   // Arrange
-
   const UserActivityEventType event_type = UserActivityEventType::kClosedTab;
 
   // Act
@@ -237,7 +228,6 @@ TEST_F(BatAdsUserActivityTest, RecordClosedTabEvent) {
 
 TEST_F(BatAdsUserActivityTest, RecordFocusedOnExistingTabEvent) {
   // Arrange
-
   const UserActivityEventType event_type =
       UserActivityEventType::kFocusedOnExistingTab;
 
@@ -260,7 +250,6 @@ TEST_F(BatAdsUserActivityTest, RecordFocusedOnExistingTabEvent) {
 
 TEST_F(BatAdsUserActivityTest, RecordGeneratedKeywordEvent) {
   // Arrange
-
   const UserActivityEventType event_type =
       UserActivityEventType::kGeneratedKeyword;
 
@@ -283,7 +272,6 @@ TEST_F(BatAdsUserActivityTest, RecordGeneratedKeywordEvent) {
 
 TEST_F(BatAdsUserActivityTest, RecordNewNavigationEvent) {
   // Arrange
-
   const UserActivityEventType event_type =
       UserActivityEventType::kNewNavigation;
 
@@ -306,7 +294,6 @@ TEST_F(BatAdsUserActivityTest, RecordNewNavigationEvent) {
 
 TEST_F(BatAdsUserActivityTest, RecordOpenedLinkFromExternalApplicationEvent) {
   // Arrange
-
   const UserActivityEventType event_type =
       UserActivityEventType::kOpenedLinkFromExternalApplication;
 
@@ -329,7 +316,6 @@ TEST_F(BatAdsUserActivityTest, RecordOpenedLinkFromExternalApplicationEvent) {
 
 TEST_F(BatAdsUserActivityTest, RecordOpenedNewTabEvent) {
   // Arrange
-
   const UserActivityEventType event_type = UserActivityEventType::kOpenedNewTab;
 
   // Act
@@ -351,7 +337,6 @@ TEST_F(BatAdsUserActivityTest, RecordOpenedNewTabEvent) {
 
 TEST_F(BatAdsUserActivityTest, RecordPlayedMediaEvent) {
   // Arrange
-
   const UserActivityEventType event_type = UserActivityEventType::kPlayedMedia;
 
   // Act
@@ -373,7 +358,6 @@ TEST_F(BatAdsUserActivityTest, RecordPlayedMediaEvent) {
 
 TEST_F(BatAdsUserActivityTest, RecordStoppedPlayingMediaEvent) {
   // Arrange
-
   const UserActivityEventType event_type =
       UserActivityEventType::kStoppedPlayingMedia;
 
@@ -396,7 +380,6 @@ TEST_F(BatAdsUserActivityTest, RecordStoppedPlayingMediaEvent) {
 
 TEST_F(BatAdsUserActivityTest, RecordSubmittedFormEvent) {
   // Arrange
-
   const UserActivityEventType event_type =
       UserActivityEventType::kSubmittedForm;
 
@@ -419,7 +402,6 @@ TEST_F(BatAdsUserActivityTest, RecordSubmittedFormEvent) {
 
 TEST_F(BatAdsUserActivityTest, RecordTabUpdatedEvent) {
   // Arrange
-
   const UserActivityEventType event_type = UserActivityEventType::kTabUpdated;
 
   // Act
@@ -441,7 +423,6 @@ TEST_F(BatAdsUserActivityTest, RecordTabUpdatedEvent) {
 
 TEST_F(BatAdsUserActivityTest, RecordTypedAndSelectedNonUrlEvent) {
   // Arrange
-
   const UserActivityEventType event_type =
       UserActivityEventType::kTypedAndSelectedNonUrl;
 
@@ -465,7 +446,6 @@ TEST_F(BatAdsUserActivityTest, RecordTypedAndSelectedNonUrlEvent) {
 TEST_F(BatAdsUserActivityTest,
        RecordTypedKeywordOtherThanDefaultSearchProviderEvent) {
   // Arrange
-
   const UserActivityEventType event_type =
       UserActivityEventType::kTypedKeywordOtherThanDefaultSearchProvider;
 
@@ -488,7 +468,6 @@ TEST_F(BatAdsUserActivityTest,
 
 TEST_F(BatAdsUserActivityTest, RecordTypedUrlEvent) {
   // Arrange
-
   const UserActivityEventType event_type = UserActivityEventType::kTypedUrl;
 
   // Act
@@ -510,7 +489,6 @@ TEST_F(BatAdsUserActivityTest, RecordTypedUrlEvent) {
 
 TEST_F(BatAdsUserActivityTest, RecordUsedAddressBarEvent) {
   // Arrange
-
   const UserActivityEventType event_type =
       UserActivityEventType::kUsedAddressBar;
 
@@ -535,9 +513,9 @@ TEST_F(BatAdsUserActivityTest, GetHistoryForTimeWindow) {
   // Arrange
   UserActivity::Get()->RecordEvent(UserActivityEventType::kInitializedAds);
   UserActivity::Get()->RecordEvent(
-      UserActivityEventType::kBrowserWindowDidBecomeActive);
+      UserActivityEventType::kBrowserDidBecomeActive);
   UserActivity::Get()->RecordEvent(
-      UserActivityEventType::kBrowserWindowDidEnterBackground);
+      UserActivityEventType::kBrowserDidEnterBackground);
   UserActivity::Get()->RecordEvent(
       UserActivityEventType::kClickedBackOrForwardNavigationButtons);
   UserActivity::Get()->RecordEvent(UserActivityEventType::kClickedBookmark);

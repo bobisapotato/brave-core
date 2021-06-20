@@ -21,7 +21,6 @@
 #include "bat/ads/internal/logging.h"
 #include "bat/ads/pref_names.h"
 #include "bat/ads/result.h"
-#include "brave/common/brave_channel_info.h"
 
 #if defined(OS_ANDROID)
 #include "base/android/build_info.h"
@@ -48,6 +47,7 @@ const char kNotificationUuidKey[] = "id";
 const char kNotificationCreativeInstanceIdKey[] = "uuid";
 const char kNotificationCreativeSetIdKey[] = "creative_set_id";
 const char kNotificationCampaignIdKey[] = "campaign_id";
+const char kNotificationAdvertiserIdKey[] = "advertiser_id";
 const char kNotificationSegmentKey[] = "segment";
 const char kNotificationTitleKey[] = "advertiser";
 const char kNotificationBodyKey[] = "text";
@@ -125,8 +125,7 @@ void AdNotifications::PopFront(const bool should_dismiss) {
   }
 }
 
-bool AdNotifications::Remove(const std::string& uuid,
-                             const bool should_dismiss) {
+bool AdNotifications::Remove(const std::string& uuid) {
   DCHECK(is_initialized_);
 
   auto iter = std::find_if(ad_notifications_.begin(), ad_notifications_.end(),
@@ -138,27 +137,27 @@ bool AdNotifications::Remove(const std::string& uuid,
     return false;
   }
 
-  if (should_dismiss) {
-    AdsClientHelper::Get()->CloseNotification(uuid);
-  }
   ad_notifications_.erase(iter);
-
   Save();
 
   return true;
 }
 
-void AdNotifications::RemoveAll(const bool should_dismiss) {
+void AdNotifications::RemoveAll() {
   DCHECK(is_initialized_);
 
-  if (should_dismiss) {
-    for (const auto& notification : ad_notifications_) {
-      AdsClientHelper::Get()->CloseNotification(notification.uuid);
-    }
-  }
   ad_notifications_.clear();
-
   Save();
+}
+
+void AdNotifications::CloseAndRemoveAll() {
+  DCHECK(is_initialized_);
+
+  for (const auto& ad_notification : ad_notifications_) {
+    AdsClientHelper::Get()->CloseNotification(ad_notification.uuid);
+  }
+
+  RemoveAll();
 }
 
 bool AdNotifications::Exists(const std::string& uuid) const {
@@ -182,10 +181,6 @@ uint64_t AdNotifications::Count() const {
 
 #if defined(OS_ANDROID)
 void AdNotifications::RemoveAllAfterReboot() {
-  if (brave::IsNightlyOrDeveloperBuild()) {
-    return;
-  }
-
   database::table::AdEvents database_table;
   database_table.GetAll([=](const Result result, const AdEventList& ad_events) {
     if (result != Result::SUCCESS) {
@@ -203,16 +198,12 @@ void AdNotifications::RemoveAllAfterReboot() {
     const int64_t boot_timestamp = boot_time.ToDoubleT();
 
     if (ad_event.timestamp <= boot_timestamp) {
-      RemoveAll(false);
+      RemoveAll();
     }
   });
 }
 
 void AdNotifications::RemoveAllAfterUpdate() {
-  if (brave::IsNightlyOrDeveloperBuild()) {
-    return;
-  }
-
   const std::string current_version_code =
       base::android::BuildInfo::GetInstance()->package_version_code();
 
@@ -224,7 +215,7 @@ void AdNotifications::RemoveAllAfterUpdate() {
 
   Client::Get()->SetVersionCode(current_version_code);
 
-  RemoveAll(false);
+  RemoveAll();
 }
 #endif
 
@@ -278,6 +269,12 @@ bool AdNotifications::GetNotificationFromDictionary(
     new_ad_notification.campaign_id = "";
   }
 
+  if (!GetAdvertiserIdFromDictionary(dictionary,
+                                     &new_ad_notification.advertiser_id)) {
+    // Migrate for legacy notifications
+    new_ad_notification.advertiser_id = "";
+  }
+
   if (!GetSegmentFromDictionary(dictionary, &new_ad_notification.segment)) {
     // Migrate for legacy notifications
     if (!GetStringFromDictionary("category", dictionary,
@@ -327,6 +324,13 @@ bool AdNotifications::GetCampaignIdFromDictionary(
     base::DictionaryValue* dictionary,
     std::string* value) const {
   return GetStringFromDictionary(kNotificationCampaignIdKey, dictionary, value);
+}
+
+bool AdNotifications::GetAdvertiserIdFromDictionary(
+    base::DictionaryValue* dictionary,
+    std::string* value) const {
+  return GetStringFromDictionary(kNotificationAdvertiserIdKey, dictionary,
+                                 value);
 }
 
 bool AdNotifications::GetSegmentFromDictionary(
@@ -491,6 +495,8 @@ base::Value AdNotifications::GetAsList() {
                       base::Value(ad_notification.creative_set_id));
     dictionary.SetKey(kNotificationCampaignIdKey,
                       base::Value(ad_notification.campaign_id));
+    dictionary.SetKey(kNotificationAdvertiserIdKey,
+                      base::Value(ad_notification.advertiser_id));
     dictionary.SetKey(kNotificationSegmentKey,
                       base::Value(ad_notification.segment));
     dictionary.SetKey(kNotificationTitleKey,

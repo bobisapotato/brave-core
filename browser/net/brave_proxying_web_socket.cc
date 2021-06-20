@@ -49,6 +49,14 @@ BraveProxyingWebSocket::~BraveProxyingWebSocket() {
   if (ctx_) {
     request_handler_->OnURLRequestDestroyed(ctx_);
   }
+  if (on_before_send_headers_callback_) {
+    std::move(on_before_send_headers_callback_)
+        .Run(net::ERR_ABORTED, base::nullopt);
+  }
+  if (on_headers_received_callback_) {
+    std::move(on_headers_received_callback_)
+        .Run(net::ERR_ABORTED, base::nullopt, base::nullopt);
+  }
 }
 
 // static
@@ -127,7 +135,8 @@ void BraveProxyingWebSocket::WebSocketFactoryRun(
     std::vector<network::mojom::HttpHeaderPtr> additional_headers,
     mojo::PendingRemote<network::mojom::WebSocketHandshakeClient>
         handshake_client,
-    mojo::PendingRemote<network::mojom::AuthenticationHandler> auth_handler,
+    mojo::PendingRemote<network::mojom::WebSocketAuthenticationHandler>
+        auth_handler,
     mojo::PendingRemote<network::mojom::TrustedHeaderClient>
         trusted_header_client) {
   DCHECK(!forwarding_handshake_client_);

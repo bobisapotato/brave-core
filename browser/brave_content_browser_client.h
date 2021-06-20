@@ -22,7 +22,15 @@ class PrefChangeRegistrar;
 
 namespace content {
 class BrowserContext;
-}
+class RenderProcessHost;
+}  // namespace content
+
+namespace blink {
+class AssociatedInterfaceRegistry;
+}  // namespace blink
+namespace web_pref {
+struct WebPreferences;
+}  // namespace web_pref
 
 class BraveContentBrowserClient : public ChromeContentBrowserClient {
  public:
@@ -33,11 +41,13 @@ class BraveContentBrowserClient : public ChromeContentBrowserClient {
   std::unique_ptr<content::BrowserMainParts> CreateBrowserMainParts(
       const content::MainFunctionParams& parameters) override;
   void BrowserURLHandlerCreated(content::BrowserURLHandler* handler) override;
+  void RenderProcessWillLaunch(content::RenderProcessHost* host) override;
 
   bool HandleExternalProtocol(
       const GURL& url,
       content::WebContents::OnceGetter web_contents_getter,
       int child_id,
+      int frame_tree_node_id,
       content::NavigationUIData* navigation_data,
       bool is_main_frame,
       ui::PageTransition page_transition,
@@ -98,13 +108,20 @@ class BraveContentBrowserClient : public ChromeContentBrowserClient {
 
   GURL GetEffectiveURL(content::BrowserContext* browser_context,
                        const GURL& url) override;
-  static bool HandleURLOverrideRewrite(GURL* url,
+  static bool HandleURLOverrideRewrite(
+      GURL* url,
       content::BrowserContext* browser_context);
   std::vector<std::unique_ptr<content::NavigationThrottle>>
-      CreateThrottlesForNavigation(content::NavigationHandle* handle) override;
+  CreateThrottlesForNavigation(content::NavigationHandle* handle) override;
 
-  std::string GetEffectiveUserAgent(content::BrowserContext* browser_context,
-                                    const GURL& url) override;
+  void ExposeInterfacesToRenderer(
+      service_manager::BinderRegistry* registry,
+      blink::AssociatedInterfaceRegistry* associated_registry,
+      content::RenderProcessHost* render_process_host) override;
+
+  bool OverrideWebPreferencesAfterNavigation(
+      content::WebContents* web_contents,
+      blink::web_pref::WebPreferences* prefs) override;
 
  private:
   uint64_t session_token_;

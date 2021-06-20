@@ -8,12 +8,9 @@
 
 #include "base/containers/flat_map.h"
 #include "base/test/bind.h"
-#include "base/time/time.h"
-#include "base/time/time_override.h"
 #include "bat/ledger/global_constants.h"
 #include "bat/ledger/internal/uphold/uphold_util.h"
 #include "brave/browser/brave_rewards/rewards_service_factory.h"
-#include "brave/browser/extensions/api/brave_action_api.h"
 #include "brave/common/brave_paths.h"
 #include "brave/components/brave_rewards/browser/rewards_service_impl.h"
 #include "brave/components/brave_rewards/browser/test/common/rewards_browsertest_context_helper.h"
@@ -28,26 +25,11 @@
 #include "chrome/test/base/in_process_browser_test.h"
 #include "chrome/test/base/testing_profile.h"
 #include "chrome/test/base/ui_test_utils.h"
-#include "components/country_codes/country_codes.h"
 #include "components/network_session_configurator/common/network_switches.h"
 #include "content/public/test/browser_test.h"
 #include "net/dns/mock_host_resolver.h"
 
 // npm run test -- brave_browser_tests --filter=RewardsBrowserTest.*
-
-namespace {
-
-base::Time GetDate(int year, int month, int day_of_month) {
-  base::Time time;
-  bool ok = base::Time::FromUTCExploded(
-      base::Time::Exploded{
-          .year = year, .month = month, .day_of_month = day_of_month},
-      &time);
-  DCHECK(ok);
-  return time;
-}
-
-}  // namespace
 
 namespace rewards_browsertest {
 
@@ -362,7 +344,7 @@ IN_PROC_BROWSER_TEST_F(RewardsBrowserTest,
 }
 
 IN_PROC_BROWSER_TEST_F(RewardsBrowserTest, BackupRestoreModalHasNoNotice) {
-  response_->SetUserFundsBalance(true);
+  response_->SetUserFundsBalance(20.0);
   rewards_browsertest_util::StartProcess(rewards_service_);
   rewards_browsertest_util::CreateWallet(rewards_service_);
   context_helper_->LoadURL(rewards_browsertest_util::GetRewardsUrl());
@@ -427,9 +409,8 @@ IN_PROC_BROWSER_TEST_F(RewardsBrowserTest, DISABLED_ResetRewardsWithBAT) {
       "[data-test-id='settings-modal-tabs-2']");
 
   rewards_browsertest_util::WaitForElementToContain(
-      contents(),
-      "[data-test-id='reset-text']",
-      "Your 30 BATs and other Rewards");
+      contents(), "[data-test-id='reset-text']",
+      "Your 30 BAT and other Rewards");
 }
 
 // https://github.com/brave/brave-browser/issues/12704
@@ -460,100 +441,25 @@ IN_PROC_BROWSER_TEST_F(RewardsBrowserTest, DISABLED_UpholdLimitNoBAT) {
   }
 }
 
-IN_PROC_BROWSER_TEST_F(RewardsBrowserTest, BAPCutoffNonJP) {
-  rewards_browsertest_util::StartProcess(rewards_service_);
-  rewards_browsertest_util::CreateWallet(rewards_service_);
-  rewards_service_->FetchPromotions();
-  promotion_->WaitForPromotionInitialization();
-  promotion_->ClaimPromotionViaCode();
-
-  {
-    base::subtle::ScopedTimeClockOverrides time_override(
-        []() { return GetDate(2021, 3, 13); }, nullptr, nullptr);
-    ASSERT_EQ(FetchBalance(), 30.0);
-  }
-}
-
-IN_PROC_BROWSER_TEST_F(RewardsBrowserTest, BAPCutoffBefore) {
-  rewards_browsertest_util::StartProcess(rewards_service_);
-  rewards_browsertest_util::CreateWallet(rewards_service_);
-  rewards_service_->FetchPromotions();
-  promotion_->WaitForPromotionInitialization();
-  promotion_->ClaimPromotionViaCode();
-
-  browser()->profile()->GetPrefs()->SetInteger(
-      country_codes::kCountryIDAtInstall, 19024);
-
-  {
-    base::subtle::ScopedTimeClockOverrides time_override(
-        []() { return GetDate(2021, 3, 12); }, nullptr, nullptr);
-    ASSERT_EQ(FetchBalance(), 30.0);
-  }
-}
-
-IN_PROC_BROWSER_TEST_F(RewardsBrowserTest, BAPCutoffAfter) {
-  rewards_browsertest_util::StartProcess(rewards_service_);
-  rewards_browsertest_util::CreateWallet(rewards_service_);
-  rewards_service_->FetchPromotions();
-  promotion_->WaitForPromotionInitialization();
-  promotion_->ClaimPromotionViaCode();
-
-  browser()->profile()->GetPrefs()->SetInteger(
-      country_codes::kCountryIDAtInstall, 19024);
-
-  {
-    base::subtle::ScopedTimeClockOverrides time_override(
-        []() { return GetDate(2021, 3, 13); }, nullptr, nullptr);
-    ASSERT_EQ(FetchBalance(), 0.0);
-  }
-}
-
-IN_PROC_BROWSER_TEST_F(RewardsBrowserTest, BAPPopup) {
-  // Open the rewards popup.
-  content::WebContents* popup_contents = context_helper_->OpenRewardsPopup();
-  ASSERT_TRUE(popup_contents);
-
-  // Attempt to open the BAP deprecation popup at the same time. The rewards
-  // panel popup should close. If both popups are shown at the same time, this
-  // test will crash on exit.
-  std::string error;
-  bool popup_shown = extensions::BraveActionAPI::ShowActionUI(
-      browser(), brave_rewards_extension_id,
-      std::make_unique<std::string>("brave_rewards_panel.html#bap-deprecation"),
-      &error);
-  EXPECT_TRUE(popup_shown);
-}
-
-IN_PROC_BROWSER_TEST_F(RewardsBrowserTest, BAPReporting) {
-  rewards_browsertest_util::StartProcess(rewards_service_);
-  rewards_browsertest_util::CreateWallet(rewards_service_);
-  rewards_service_->FetchPromotions();
-  promotion_->WaitForPromotionInitialization();
-  promotion_->ClaimPromotionViaCode();
-
-  rewards_browsertest_util::WaitForLedgerStop(rewards_service_);
-
-  rewards_browsertest_util::StartProcess(rewards_service_);
+IN_PROC_BROWSER_TEST_F(RewardsBrowserTest, EnableRewardsWithBalance) {
+  // Make sure rewards, ads, and AC prefs are off
   auto* prefs = browser()->profile()->GetPrefs();
-  rewards_browsertest_util::WaitForLedgerStop(rewards_service_);
+  prefs->SetBoolean(brave_rewards::prefs::kEnabled, false);
+  prefs->SetBoolean(brave_rewards::prefs::kAutoContributeEnabled, false);
 
-  EXPECT_FALSE(prefs->GetBoolean(brave_rewards::prefs::kBAPReported));
-
-  prefs->SetInteger(country_codes::kCountryIDAtInstall, 19024);
-
-  base::RunLoop run_loop;
-  PrefChangeRegistrar prefs_listener;
-  prefs_listener.Init(browser()->profile()->GetPrefs());
-  prefs_listener.Add(brave_rewards::prefs::kBAPReported,
-                     base::BindLambdaForTesting(
-                         [&run_loop](const std::string&) { run_loop.Quit(); }));
-
-  // Start the ledger process and wait for pref to be set, indicating that the
-  // reporting completed successfully.
+  // Load a balance into the user's wallet
   rewards_browsertest_util::StartProcess(rewards_service_);
-  run_loop.Run();
+  rewards_browsertest_util::CreateWallet(rewards_service_);
+  rewards_service_->FetchPromotions();
+  promotion_->WaitForPromotionInitialization();
+  promotion_->ClaimPromotionViaCode();
 
-  EXPECT_TRUE(prefs->GetBoolean(brave_rewards::prefs::kBAPReported));
+  rewards_service_->EnableRewards();
+  base::RunLoop().RunUntilIdle();
+
+  // Ensure that AC is not enabled
+  EXPECT_TRUE(prefs->GetBoolean(brave_rewards::prefs::kEnabled));
+  EXPECT_FALSE(prefs->GetBoolean(brave_rewards::prefs::kAutoContributeEnabled));
 }
 
 }  // namespace rewards_browsertest

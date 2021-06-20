@@ -1,3 +1,5 @@
+import("//mojo/public/tools/bindings/mojom.gni")
+
 source_set("common") {
   sources = [
     "brave_shield_constants.h",
@@ -5,6 +7,8 @@ source_set("common") {
     "brave_shield_utils.h",
     "features.cc",
     "features.h",
+    "pref_names.cc",
+    "pref_names.h",
   ]
 
   deps = [
@@ -12,4 +16,10 @@ source_set("common") {
     "//components/content_settings/core/common",
     "//url",
   ]
+}
+
+mojom("mojom") {
+  sources = [ "brave_shields.mojom" ]
+
+  deps = [ "//mojo/public/mojom/base" ]
 }

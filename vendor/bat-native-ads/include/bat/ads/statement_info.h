@@ -6,8 +6,7 @@
 #ifndef BRAVE_VENDOR_BAT_NATIVE_ADS_INCLUDE_BAT_ADS_STATEMENT_INFO_H_
 #define BRAVE_VENDOR_BAT_NATIVE_ADS_INCLUDE_BAT_ADS_STATEMENT_INFO_H_
 
-#include <stdint.h>
-
+#include <cstdint>
 #include <string>
 
 #include "base/values.h"
@@ -28,8 +27,8 @@ struct ADS_EXPORT StatementInfo {
   bool FromJson(const std::string& json);
 
   double estimated_pending_rewards = 0.0;
-  uint64_t next_payment_date = 0;
-  uint64_t ads_received_this_month = 0;
+  int64_t next_payment_date = 0;
+  int ads_received_this_month = 0;
   double earnings_this_month = 0.0;
   double earnings_last_month = 0.0;
   TransactionList transactions;

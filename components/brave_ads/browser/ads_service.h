@@ -6,7 +6,6 @@
 #ifndef BRAVE_COMPONENTS_BRAVE_ADS_BROWSER_ADS_SERVICE_H_
 #define BRAVE_COMPONENTS_BRAVE_ADS_BROWSER_ADS_SERVICE_H_
 
-#include <map>
 #include <string>
 #include <vector>
 
@@ -25,6 +24,7 @@ struct AdsHistoryInfo;
 }
 
 namespace base {
+class DictionaryValue;
 class ListValue;
 }
 
@@ -50,12 +50,15 @@ using OnToggleSaveAdCallback =
 using OnToggleFlagAdCallback =
     base::OnceCallback<void(const std::string&, bool)>;
 
-using GetStatementCallback = base::OnceCallback<void(const bool,
-                                                     const double,
-                                                     const uint64_t,
-                                                     const uint64_t,
-                                                     const double,
-                                                     const double)>;
+using OnGetInlineContentAdCallback = base::OnceCallback<
+    void(const bool, const std::string&, const base::DictionaryValue&)>;
+
+using GetAccountStatementCallback = base::OnceCallback<void(const bool,
+                                                            const double,
+                                                            const int64_t,
+                                                            const int,
+                                                            const double,
+                                                            const double)>;
 
 class AdsService : public KeyedService {
  public:
@@ -76,8 +79,8 @@ class AdsService : public KeyedService {
 
   virtual void SetAllowConversionTracking(const bool should_allow) = 0;
 
-  virtual uint64_t GetAdsPerHour() const = 0;
-  virtual void SetAdsPerHour(const uint64_t ads_per_hour) = 0;
+  virtual int64_t GetAdsPerHour() const = 0;
+  virtual void SetAdsPerHour(const int64_t ads_per_hour) = 0;
 
   virtual bool ShouldAllowAdsSubdivisionTargeting() const = 0;
   virtual std::string GetAdsSubdivisionTargetingCode() const = 0;
@@ -87,17 +90,22 @@ class AdsService : public KeyedService {
   virtual void SetAutoDetectedAdsSubdivisionTargetingCode(
       const std::string& subdivision_targeting_code) = 0;
 
-  virtual void ChangeLocale(const std::string& locale) = 0;
+  virtual void OnShowAdNotification(const std::string& notification_id) = 0;
+  virtual void OnCloseAdNotification(const std::string& notification_id,
+                                     const bool by_user) = 0;
+  virtual void OnClickAdNotification(const std::string& notification_id) = 0;
 
-  virtual void OnTextLoaded(const SessionID& tab_id,
-                            const int32_t page_transition_type,
-                            const bool has_user_gesture,
-                            const std::vector<GURL>& redirect_chain,
-                            const std::string& text) = 0;
+  virtual void ChangeLocale(const std::string& locale) = 0;
 
   virtual void OnHtmlLoaded(const SessionID& tab_id,
                             const std::vector<GURL>& redirect_chain,
                             const std::string& html) = 0;
+
+  virtual void OnTextLoaded(const SessionID& tab_id,
+                            const std::vector<GURL>& redirect_chain,
+                            const std::string& text) = 0;
+
+  virtual void OnUserGesture(const int32_t page_transition_type) = 0;
 
   virtual void OnMediaStart(const SessionID& tab_id) = 0;
   virtual void OnMediaStop(const SessionID& tab_id) = 0;
@@ -109,7 +117,7 @@ class AdsService : public KeyedService {
 
   virtual void OnTabClosed(const SessionID& tab_id) = 0;
 
-  virtual void OnUserModelUpdated(const std::string& id) = 0;
+  virtual void OnResourceComponentUpdated(const std::string& id) = 0;
 
   virtual void OnNewTabPageAdEvent(
       const std::string& uuid,
@@ -121,13 +129,21 @@ class AdsService : public KeyedService {
       const std::string& creative_instance_id,
       const ads::mojom::BraveAdsPromotedContentAdEventType event_type) = 0;
 
+  virtual void GetInlineContentAd(const std::string& dimensions,
+                                  OnGetInlineContentAdCallback callback) = 0;
+
+  virtual void OnInlineContentAdEvent(
+      const std::string& uuid,
+      const std::string& creative_instance_id,
+      const ads::mojom::BraveAdsInlineContentAdEventType event_type) = 0;
+
   virtual void ReconcileAdRewards() = 0;
 
   virtual void GetAdsHistory(const uint64_t from_timestamp,
                              const uint64_t to_timestamp,
                              OnGetAdsHistoryCallback callback) = 0;
 
-  virtual void GetStatement(GetStatementCallback callback) = 0;
+  virtual void GetAccountStatement(GetAccountStatementCallback callback) = 0;
 
   virtual void ToggleAdThumbUp(const std::string& creative_instance_id,
                                const std::string& creative_set_id,

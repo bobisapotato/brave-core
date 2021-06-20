@@ -9,7 +9,6 @@
 #include <vector>
 
 #include "base/notreached.h"
-#include "base/strings/string16.h"
 #include "base/strings/string_number_conversions.h"
 #include "base/strings/string_util.h"
 #include "base/strings/utf_string_conversions.h"
@@ -22,8 +21,6 @@
 #include "components/grit/brave_components_strings.h"
 #include "components/prefs/pref_service.h"
 #include "components/security_interstitials/content/security_interstitial_controller_client.h"
-#include "components/user_prefs/user_prefs.h"
-#include "content/public/browser/browser_context.h"
 #include "content/public/browser/web_contents.h"
 #include "content/public/common/isolated_world_ids.h"
 #include "ui/base/l10n/l10n_util.h"
@@ -32,7 +29,6 @@ namespace {
 const char kResponseScript[] =
     "window.postMessage({command: 'ipfs', value: {value}, text: '{text}'}, "
     "'*')";
-const char kBraveSettingsURL[] = "brave://settings/ipfs";
 constexpr int kOnboardingIsolatedWorldId =
     content::ISOLATED_WORLD_ID_CONTENT_END + 1;
 
@@ -64,28 +60,28 @@ IPFSOnboardingPage::IPFSOnboardingPage(
                                                        std::move(controller)),
       ipfs_service_(ipfs_service) {
   service_observer_.Observe(ipfs_service_);
+#if !defined(OS_ANDROID)
   theme_observer_.Observe(ui::NativeTheme::GetInstanceForNativeUi());
+#endif
 }
 
 IPFSOnboardingPage::~IPFSOnboardingPage() = default;
 
 void IPFSOnboardingPage::UseLocalNode() {
-  auto* context = web_contents()->GetBrowserContext();
-  auto* prefs = user_prefs::UserPrefs::Get(context);
-  prefs->SetInteger(kIPFSResolveMethod,
-                    static_cast<int>(ipfs::IPFSResolveMethodTypes::IPFS_LOCAL));
+  controller()->GetPrefService()->SetInteger(
+      kIPFSResolveMethod,
+      static_cast<int>(ipfs::IPFSResolveMethodTypes::IPFS_LOCAL));
   start_time_ticks_ = base::TimeTicks::Now();
   if (!ipfs_service_->IsDaemonLaunched()) {
     ipfs_service_->LaunchDaemon(base::NullCallback());
   } else {
-    RespondToPage(LOCAL_NODE_LAUNCHED, base::string16());
+    RespondToPage(LOCAL_NODE_LAUNCHED, std::u16string());
     GetConnectedPeers();
   }
 }
 
 void IPFSOnboardingPage::UsePublicGateway() {
-  auto* prefs = user_prefs::UserPrefs::Get(web_contents()->GetBrowserContext());
-  prefs->SetInteger(
+  controller()->GetPrefService()->SetInteger(
       kIPFSResolveMethod,
       static_cast<int>(ipfs::IPFSResolveMethodTypes::IPFS_GATEWAY));
   Proceed();
@@ -143,9 +139,7 @@ void IPFSOnboardingPage::GetConnectedPeers() {
 }
 
 bool IPFSOnboardingPage::IsLocalNodeMode() {
-  auto* context = web_contents()->GetBrowserContext();
-  auto* prefs = user_prefs::UserPrefs::Get(context);
-  return (prefs->GetInteger(kIPFSResolveMethod) ==
+  return (controller()->GetPrefService()->GetInteger(kIPFSResolveMethod) ==
           static_cast<int>(ipfs::IPFSResolveMethodTypes::IPFS_LOCAL));
 }
 
@@ -157,7 +151,7 @@ void IPFSOnboardingPage::OnIpfsLaunched(bool result, int64_t pid) {
 
   if (!IsLocalNodeMode())
     return;
-  RespondToPage(LOCAL_NODE_LAUNCHED, base::string16());
+  RespondToPage(LOCAL_NODE_LAUNCHED, std::u16string());
   GetConnectedPeers();
 }
 
@@ -167,15 +161,14 @@ void IPFSOnboardingPage::Proceed() {
 }
 
 void IPFSOnboardingPage::RespondToPage(IPFSOnboardingResponse value,
-                                       const base::string16& text) {
+                                       const std::u16string& text) {
   auto* main_frame = web_contents()->GetMainFrame();
   DCHECK(main_frame);
 
-  base::string16 script(base::UTF8ToUTF16(kResponseScript));
-  base::ReplaceSubstringsAfterOffset(&script, 0, base::UTF8ToUTF16("{value}"),
+  std::u16string script(base::UTF8ToUTF16(kResponseScript));
+  base::ReplaceSubstringsAfterOffset(&script, 0, u"{value}",
                                      base::NumberToString16(value));
-  base::ReplaceSubstringsAfterOffset(&script, 0, base::UTF8ToUTF16("{text}"),
-                                     text);
+  base::ReplaceSubstringsAfterOffset(&script, 0, u"{text}", text);
   main_frame->ExecuteJavaScriptInIsolatedWorld(script, {},
                                                kOnboardingIsolatedWorldId);
 }
@@ -199,10 +192,10 @@ void IPFSOnboardingPage::CommandReceived(const std::string& command) {
       UsePublicGateway();
       break;
     case IPFSOnboardingCommandId::LEARN_MORE:
-      controller()->OpenUrlInNewForegroundTab(GURL(kIPFSLearnMoreURL));
+      controller()->OpenUrlInNewForegroundTab(GURL(kIPFSLearnMorePrivacyURL));
       break;
     case IPFSOnboardingCommandId::OPEN_SETTINGS:
-      controller()->OpenUrlInNewForegroundTab(GURL(kBraveSettingsURL));
+      controller()->OpenUrlInNewForegroundTab(GURL(ipfs::kIPFSSettingsURL));
       break;
     default:
       NOTREACHED() << "Unsupported command: " << command;
@@ -250,8 +243,14 @@ void IPFSOnboardingPage::PopulateInterstitialStrings(
   load_time_data->SetString(
       "tryAgainText", l10n_util::GetStringUTF16(IDS_IPFS_ONBOARDING_TRY_AGAIN));
 
+#if !defined(OS_ANDROID)
   load_time_data->SetString(
       "braveTheme", GetThemeType(ui::NativeTheme::GetInstanceForNativeUi()));
+  load_time_data->SetString("os", "");
+#else
+  load_time_data->SetString("braveTheme", "light");
+  load_time_data->SetString("os", "Android");
+#endif
 }
 
 int IPFSOnboardingPage::GetHTMLTemplateId() {

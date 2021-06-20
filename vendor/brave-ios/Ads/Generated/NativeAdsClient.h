@@ -19,14 +19,26 @@ class NativeAdsClient : public ads::AdsClient {
 
   bool IsNetworkConnectionAvailable() const override;
   bool IsForeground() const override;
+  bool IsFullScreen() const override;
   bool CanShowBackgroundNotifications() const override;
   void ShowNotification(const ads::AdNotificationInfo& info) override;
   bool ShouldShowNotifications() override;
   void CloseNotification(const std::string & uuid) override;
+  void RecordAdEvent(const std::string& ad_type,
+                     const std::string& confirmation_type,
+                     const uint64_t timestamp) const override;
+  std::vector<uint64_t> GetAdEvents(
+      const std::string& ad_type,
+      const std::string& confirmation_type) const override;
   void UrlRequest(ads::UrlRequestPtr url_request, ads::UrlRequestCallback callback) override;
   void Save(const std::string & name, const std::string & value, ads::ResultCallback callback) override;
   void Load(const std::string & name, ads::LoadCallback callback) override;
-  void LoadUserModelForId(const std::string & id, ads::LoadCallback callback) override;
+  void LoadAdsResource(const std::string& id,
+                       const int version,
+                       ads::LoadCallback callback) override;
+  void GetBrowsingHistory(const int max_count,
+                          const int days_ago,
+                          ads::GetBrowsingHistoryCallback callback) override;
   std::string LoadResourceForId(const std::string & id) override;
   void Log(const char * file, const int line, const int verbose_level, const std::string & message) override;
   void RunDBTransaction(ads::DBTransactionPtr transaction, ads::RunDBTransactionCallback callback) override;

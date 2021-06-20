@@ -6,8 +6,7 @@
 #ifndef BRAVE_VENDOR_BAT_NATIVE_ADS_SRC_BAT_ADS_INTERNAL_ADS_AD_NOTIFICATIONS_AD_NOTIFICATIONS_H_
 #define BRAVE_VENDOR_BAT_NATIVE_ADS_SRC_BAT_ADS_INTERNAL_ADS_AD_NOTIFICATIONS_AD_NOTIFICATIONS_H_
 
-#include <stdint.h>
-
+#include <cstdint>
 #include <deque>
 #include <string>
 
@@ -35,8 +34,10 @@ class AdNotifications {
   void PushBack(const AdNotificationInfo& info);
   void PopFront(const bool should_dismiss);
 
-  bool Remove(const std::string& uuid, const bool should_dismiss);
-  void RemoveAll(const bool should_dismiss);
+  bool Remove(const std::string& uuid);
+  void RemoveAll();
+
+  void CloseAndRemoveAll();
 
   bool Exists(const std::string& uuid) const;
 
@@ -68,6 +69,8 @@ class AdNotifications {
                                       std::string* value) const;
   bool GetCampaignIdFromDictionary(base::DictionaryValue* dictionary,
                                    std::string* value) const;
+  bool GetAdvertiserIdFromDictionary(base::DictionaryValue* dictionary,
+                                     std::string* value) const;
   bool GetSegmentFromDictionary(base::DictionaryValue* dictionary,
                                 std::string* value) const;
   bool GetTitleFromDictionary(base::DictionaryValue* dictionary,

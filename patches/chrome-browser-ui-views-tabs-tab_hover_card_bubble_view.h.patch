@@ -1,10 +1,10 @@
 diff --git a/chrome/browser/ui/views/tabs/tab_hover_card_bubble_view.h b/chrome/browser/ui/views/tabs/tab_hover_card_bubble_view.h
-index cf92c20dd5db10698c00a469db3907e516ef34d7..6a4ee1b178326927baa271c57ce45fded94afabc 100644
+index 8f0f84a46bd2604792b6198dc7f83c31a2549aca..de714b41d0b2996692484a760544e553a83927aa 100644
 --- a/chrome/browser/ui/views/tabs/tab_hover_card_bubble_view.h
 +++ b/chrome/browser/ui/views/tabs/tab_hover_card_bubble_view.h
-@@ -61,6 +61,7 @@ class TabHoverCardBubbleView : public views::BubbleDialogDelegateView {
-     last_mouse_exit_timestamp_ = last_mouse_exit_timestamp;
-   }
+@@ -50,6 +50,7 @@ class TabHoverCardBubbleView : public views::BubbleDialogDelegateView {
+   void ClearPreviewImage();
+   void SetPreviewImage(gfx::ImageSkia preview_image);
  
 +  BRAVE_TAB_HOVER_CARD_BUBBLE_VIEW_H_
   private:

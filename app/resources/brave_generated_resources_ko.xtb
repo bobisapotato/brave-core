@@ -5,7 +5,7 @@
 <translation id="7942180974165298215">Brave 광고 차단</translation>
 <translation id="4615489450165434530">작동이 멈춘 사이트 보고</translation>
 <translation id="6406506848690869874">동기화</translation>
-<translation id="5655621391922317800">암호화폐 월렛</translation>
+<translation id="1544192797660353713">월렛</translation>
 <translation id="2445484935443597917">새 프로필 만들기</translation>
 <translation id="2666990579225592931">게스트 창 열기</translation>
 <translation id="8275068909952022340">더 보기…</translation>
@@ -59,13 +59,29 @@
 <translation id="1970435562892104727">Tor 비공개 창입니다</translation>
 <translation id="1037341607922068025">Tor 비공개 창 열기</translation>
 <translation id="1725356094208762656">Tor에서 열기</translation>
+<translation id="7643538479215207633">IPFS를 사용해서 열기</translation>
+<translation id="3094628781200061820">IPFS에서 게시 및 파일 받기</translation>
 <translation id="1672270084584211506">양파 사용 가능</translation>
+<translation id="4901618511712685702">IPFS로 가져오기</translation>
+<translation id="6794469945030154569">이 페이지</translation>
+<translation id="5037852323412456577">선택한 이미지</translation>
+<translation id="2715839724138372481">선택한 동영상</translation>
+<translation id="4227945450504703638">선택한 오디오</translation>
+<translation id="7895302206188277628">연결된 콘텐츠</translation>
+<translation id="4322612543319315652">선택한 텍스트를 IPFS로 가져오기</translation>
+<translation id="8883166554766780543">IPFS 스냅샷 링크 가져오기 및 복사</translation>
+<translation id="3654831858282189202">IPNS 키로 게시</translation>
+<translation id="7691598647605453992">IPFS</translation>
 <translation id="1434416574322382019">Tor와 함께하는 새로운 비공개 윈도우</translation>
 <translation id="4703780849509456860">Tor와 함께 비공개 윈도우에서 링크 열기</translation>
 <translation id="3488584642074079080">Brave 비공개 창의 링크를 Tor로 열기</translation>
+<translation id="7475547933708221517">IPFS를 사용하여 로컬 파일 공유</translation>
+<translation id="2286177249736199435">IPFS를 사용하여 로컬 폴더 공유</translation>
+<translation id="784573715436258741">IPFS를 사용하여 로컬 파일 공유</translation>
 <translation id="6313675821927505581">Tor를 이용한 새로운 비공개 윈도우</translation>
 <translation id="2638041073279639246">Tor를 이용해 비공개 윈도우에서 링크 열기</translation>
 <translation id="3425600262621021599">Tor를 이용해 Brave 비공개 윈도우에서 링크 열기</translation>
+<translation id="575838692088926391">IPFS를 사용하여 로컬 폴더 공유</translation>
 <translation id="5410152065859052603">Tor</translation>
 <translation id="2515126961943087659">Bat 광고 서비스</translation>
 <translation id="7924918279836988121">배트 원장 서비스</translation>
@@ -145,7 +161,7 @@
 <translation id="4112587618563511470">잘못된 동기화 코드입니다. 확인하고 다시 시도해주세요.</translation>
 <translation id="2339730291919608488">동기화 체인에서 나가기</translation>
 <translation id="115699408012835975">동기화를 초기화하면 다른 기기에서 동기화 코드를 다시 입력해야 동기화를 진행할 수 있습니다. 이대로 계속하시겠어요?</translation>
-<translation id="339086854515247923">동기화 체인에서 선택한 장치를 정말 삭제하시겠습니까?</translation>
+<translation id="6092564993102418148">선택한 기기를 동기화 체인에서 제거하시겠습니까?</translation>
 <translation id="3396347744975515056">Brave Sync가 업그레이드되었고 설정이 필요합니다</translation>
 <translation id="7473245612074035141">설정 시작하기</translation>
 <translation id="3411013544209536575">도움말 팁</translation>
@@ -156,24 +172,49 @@
 <translation id="1336940801687497203">Windows와 동일</translation>
 <translation id="8721331068159819483">macOS와 동일</translation>
 <translation id="2896916411183256228">브라우저에 직접 토렌트를 표시하려면 웹 토렌트를 사용하세요. 토렌트 파일들과 마그넷 링크들을 지원하세요.</translation>
+<translation id="8488282162676695335">Brave 월렛</translation>
 <translation id="2356070529366658676">확인</translation>
 <translation id="7701040980221191251">없음</translation>
+<translation id="5655621391922317800">암호화폐 월렛</translation>
+<translation id="1696548911367097044">더 이상 사용하지 않는 Crypto 월렛 확장 프로그램</translation>
 <translation id="1085027414516521238">메타마스크</translation>
 <translation id="7090046810227878892">Dapps 사용을 위한 이더리움 공급자</translation>
 <translation id="5913089932885076110">시작 시 암호 지갑 로드</translation>
+<translation id="757886143331967039">시작 시 더 이상 사용하지 않는 Crypto 월렛 확장 프로그램을 로드</translation>
+<translation id="1834467296210148203">툴바에 Brave 월렛 아이콘 표시</translation>
 <translation id="6864914031231797928">확장 프로그램에 대한 Google 로그인 허용</translation>
+<translation id="5927916530277631319">Unstoppable Domains 해석 방법</translation>
+<translation id="8412057160793088103">HTTPS를 통한 DNS 및 이더리움 개인정보 보호 고려 사항에 대해 <ph name="BEGIN_LINK"/>자세히 알아보세요<ph name="END_LINK"/>.</translation>
+<translation id="5248318250177143470">Ethereum Name Service(ENS) 해석 방법</translation>
+<translation id="7024553202001112871">IPNS 키 설정</translation>
+<translation id="951216659045543447">해당 비공개 키로 콘텐츠에 서명하고 IPNS에 게시</translation>
+<translation id="7611728475758612204">키 게시 가능</translation>
+<translation id="911363100236037920">새 키 이름 입력</translation>
+<translation id="6358469157239228181">사용할 수 없는 이름</translation>
+<translation id="8996633027318264334"><ph name="KEY_NAME"/>를 삭제하시겠습니까?</translation>
+<translation id="910215077892371264">노드가 시작되지 않음</translation>
+<translation id="616058968889448209">IPFS 서비스 런처 오류. 자세한 정보는 <ph name="BEGIN_LINK"/>진단 페이지<ph name="END_LINK"/>에서 확인하세요.</translation>
+<translation id="6912148685459054619">'<ph name="KEY_NAME"/>' 키 가져오기 실패</translation>
+<translation id="8275038454117074363">가져오기</translation>
+<translation id="3654980960391973513">생성</translation>
+<translation id="5531501313997312487">시작 노드</translation>
 <translation id="9170907049676078643">IPFS 리소스 리졸빙에 사용하는 방법</translation>
 <translation id="1327977588028644528">게이트웨이</translation>
 <translation id="80225669816651290">로컬 노드</translation>
 <translation id="4927734062756955434">IPFS 퍼블릭 게이트웨이 주소</translation>
+<translation id="3399481770463167943">IPFS 로컬 노드 및 게이트웨이 개인정보 보호 고려 사항에 대해 <ph name="BEGIN_LINK_MPL"/>자세히 알아보세요<ph name="END_LINK_MPL"/>.</translation>
 <translation id="8425213833346101688">변경</translation>
 <translation id="557281710253742286">IPFS 게이트웨이 설정</translation>
 <translation id="8571837315037233299">게이트웨이 주소</translation>
+<translation id="1251574393468476924">최대 IPFS 캐시 사이즈(GB)</translation>
+<translation id="2503497578400410320">IPFS 저장소의 데이터 저장 크기에 대한 소프트 상한.</translation>
 <translation id="7703184801853248830">유효하지 않은 게이트웨이 주소</translation>
 <translation id="585868419599255817">IPFS 공용 게이트웨이 대체</translation>
 <translation id="207763736230883589">로컬 노드에 접근할 수 없는 경우에 퍼블릭 IPFS 게이트웨이로 자동 전환합니다.</translation>
 <translation id="4107552920076294723">IPFS 리소스를 설정된 IPFS 게이트웨이로 리다이렉트</translation>
 <translation id="6494857428933042381">IPFS 게이트웨이 리소스가 발견될 경우에 IPFS 레졸루션에 자동으로 설정된 게이트웨이를 사용합니다.</translation>
+<translation id="8655170717758778983">가능한 경우 DNSLink를 통해 IPFS 페이지로 자동으로 리다이렉트</translation>
+<translation id="2233724520223030977">가능한 경우, 자동으로 DNSLink를 사용하여 웹 사이트의 IPFS 버전으로 이동합니다.</translation>
 <translation id="6554397389149987360">화면 공유와 다른 기능들을 브라우저에서 사용하시려면 행아웃 요소들을 사용하세요.</translation>
 <translation id="1765684547504191670">브라우저에서 Chromecast를 활성화하기 위해 Media Router 콤포넌트를 사용합니다.</translation>
 <translation id="9156965752763025780">변경사항은 다음에 Brave을 다시 시작할 때 적용됩니다.</translation>
@@ -233,12 +274,13 @@
 <translation id="1959966725083452288">아바타 봉봉 로열</translation>
 <translation id="2039034364578911089">아바타 봉봉 닌자</translation>
 <translation id="239760341987199724">Brave을 기본 브라우저로 설정</translation>
-<translation id="9185422039067880535">Brave 브라우저가 현재 기본 브라우저로 설정되어 있지 않습니다.
-주요 뉴스 사이트에서 최대 6배 빠른 웹 검색을 위해 Brave를
-기본 브라우저로 설정하세요.</translation>
+<translation id="1391855377994926460">더욱 빠른 웹 브라우징 - 주요 뉴스 사이트 속도가 최대 6배 빨라집니다.</translation>
 <translation id="9218430445555521422">기본 브라우저로 설정</translation>
 <translation id="3479552764303398839">나중에</translation>
+<translation id="6040143037577758943">닫기</translation>
+<translation id="5600566490506283344">Brave 광고 알림</translation>
 <translation id="4877147287319222750">사이드바에 추가</translation>
+<translation id="4233010476457917696">사이드바 표시</translation>
 <translation id="5404213409401164238">사이드바 표시</translation>
 <translation id="7561196759112975576">항상</translation>
 <translation id="7060352228894039151">온마우스오버</translation>
@@ -254,11 +296,9 @@
 <translation id="7090566321964540749">이 익명 정보는 Brave가 특정 기능의 전체 사용량을 추정하는 데만 사용됩니다.</translation>
 <translation id="1947672064022327074">이더리움 지원을 위해 암호 화폐 지갑을 시작하시겠습니까?</translation>
 <translation id="7583735190612229830">크립토 월렛을 설정하여 이 앱 및 기타 비슷한 앱과 소통하십시오.</translation>
-<translation id="4823406846571523661">암호 지갑 설정</translation>
+<translation id="8731422418734770661">Crypto 월렛 설정</translation>
 <translation id="8199661191594897555">암호 지갑을 시작하고 새로고침</translation>
 <translation id="8428213095426709021">설정</translation>
-<translation id="1664718502100303670">지갑 설정</translation>
-<translation id="965566669123544695">IPFS 설정</translation>
 <translation id="72868071984333667">IPFS와 프라이버시에 대해 더 알아보기</translation>
 <translation id="4552520379838695057">죄송합니다. 해당 페이지가 없습니다.</translation>
 <translation id="2609895996619941644">Wayback Machine에서 저장된 버전을 사용할 수 있는지 확인하시겠습니까?</translation>

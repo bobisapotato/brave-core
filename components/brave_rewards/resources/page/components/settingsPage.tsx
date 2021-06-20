@@ -28,6 +28,7 @@ import * as rewardsActions from '../actions/rewards_actions'
 import Promotion from './promotion'
 import { getLocale } from '../../../../common/locale'
 import { getActivePromos, getPromo, PromoType, Promo } from '../promos'
+import { getMinimumBalance } from './connect_wallet_modal'
 
 interface Props extends Rewards.ComponentProps {
 }
@@ -184,7 +185,7 @@ class SettingsPage extends React.Component<Props, State> {
   }
 
   getPromotionsClaims = () => {
-    const { promotions, ui } = this.props.rewardsData
+    const { promotions } = this.props.rewardsData
 
     if (!promotions || promotions.length === 0) {
       return null
@@ -199,7 +200,7 @@ class SettingsPage extends React.Component<Props, State> {
 
           return (
             <div key={`promotion-${index}`}>
-              <Promotion promotion={promotion} onlyAnonWallet={ui.onlyAnonWallet} />
+              <Promotion promotion={promotion} />
             </div>
           )
         })}
@@ -250,11 +251,12 @@ class SettingsPage extends React.Component<Props, State> {
 
     if (ui.modalRedirect === 'batLimit') {
       // NOTE: The minimum BAT limit error is currently Uphold-specific
+      const text = getLocale('redirectModalBatLimitText')
       return (
         <ModalRedirect
           id={'redirect-modal-bat-limit'}
           titleText={getLocale('redirectModalBatLimitTitle')}
-          errorText={getLocale('redirectModalBatLimitText')}
+          errorText={text.replace('$1', String(getMinimumBalance(walletType)))}
           buttonText={getLocale('redirectModalClose')}
           walletType={walletType}
           onClick={this.actions.hideRedirectModal}
@@ -270,7 +272,9 @@ class SettingsPage extends React.Component<Props, State> {
           buttonText={getLocale('processingRequestButton')}
           titleText={getLocale('processingRequest')}
           walletType={walletType}
+          displayCloseButton={true}
           onClick={this.onRedirectError}
+          onClose={this.actions.hideRedirectModal}
         />
       )
     }
@@ -345,11 +349,17 @@ class SettingsPage extends React.Component<Props, State> {
     const {
       adsData,
       contributionMonthly,
-      parameters,
-      ui
+      externalWallet,
+      parameters
     } = this.props.rewardsData
 
-    const { autoContributeChoices } = parameters
+    const externalWalletType = externalWallet ? externalWallet.type : ''
+
+    // Hide AC options in rewards onboarding for bitFlyer-associated regions.
+    let { autoContributeChoices } = parameters
+    if (externalWalletType === 'bitflyer') {
+      autoContributeChoices = []
+    }
 
     const onDone = () => {
       this.setState({ showRewardsTour: false, firstTimeSetup: false })
@@ -363,16 +373,23 @@ class SettingsPage extends React.Component<Props, State> {
       this.actions.onSettingSave('contributionMonthly', amount)
     }
 
+    const onVerifyClick = () => {
+      if (externalWallet && externalWallet.verifyUrl) {
+        window.open(externalWallet.verifyUrl, '_self')
+      }
+    }
+
     return (
       <RewardsTourModal
         layout='wide'
         firstTimeSetup={this.state.firstTimeSetup}
-        onlyAnonWallet={ui.onlyAnonWallet}
         adsPerHour={adsData.adsPerHour}
         autoContributeAmount={contributionMonthly}
         autoContributeAmountOptions={autoContributeChoices}
+        externalWalletProvider={externalWalletType}
         onAdsPerHourChanged={onAdsPerHourChanged}
         onAutoContributeAmountChanged={onAcAmountChanged}
+        onVerifyWalletClick={onVerifyClick}
         onDone={onDone}
         onClose={onDone}
       />

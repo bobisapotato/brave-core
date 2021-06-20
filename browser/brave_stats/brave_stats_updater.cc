@@ -13,13 +13,13 @@
 #include "bat/ads/pref_names.h"
 #include "brave/browser/brave_stats/brave_stats_updater_params.h"
 #include "brave/browser/brave_stats/switches.h"
-#include "brave/browser/version_info.h"
 #include "brave/common/brave_channel_info.h"
 #include "brave/common/network_constants.h"
 #include "brave/common/pref_names.h"
 #include "brave/components/brave_referrals/buildflags/buildflags.h"
 #include "brave/components/brave_stats/browser/brave_stats_updater_util.h"
 #include "brave/components/rpill/common/rpill.h"
+#include "brave/components/version_info/version_info.h"
 #include "chrome/browser/browser_process.h"
 #include "chrome/browser/net/system_network_context_manager.h"
 #include "chrome/browser/profiles/profile_manager.h"
@@ -43,6 +43,12 @@
 namespace brave_stats {
 
 namespace {
+
+BraveStatsUpdater::StatsUpdatedCallback* g_testing_stats_updated_callback =
+    nullptr;
+BraveStatsUpdater::StatsUpdatedCallback* g_testing_stats_threshold_callback =
+    nullptr;
+
 // Ping the update server shortly after startup.
 static constexpr int kUpdateServerStartupPingDelaySeconds = 3;
 
@@ -119,9 +125,23 @@ BraveStatsUpdater::BraveStatsUpdater(PrefService* pref_service)
   } else {
     usage_server_ = BRAVE_USAGE_SERVER;
   }
+
+  // Track initial profile creation
+  if (g_browser_process->profile_manager()) {
+    g_browser_process->profile_manager()->AddObserver(this);
+    DCHECK_EQ(0U,
+              g_browser_process->profile_manager()->GetLoadedProfiles().size());
+  }
 }
 
 BraveStatsUpdater::~BraveStatsUpdater() {}
+
+void BraveStatsUpdater::OnProfileAdded(Profile* profile) {
+  if (profile == ProfileManager::GetPrimaryUserProfile()) {
+    g_browser_process->profile_manager()->RemoveObserver(this);
+    Start();
+  }
+}
 
 void BraveStatsUpdater::Start() {
   // Startup timer, only initiated once we've checked for a promo
@@ -167,14 +187,16 @@ bool BraveStatsUpdater::MaybeDoThresholdPing(int score) {
   return false;
 }
 
-void BraveStatsUpdater::SetStatsUpdatedCallback(
-    StatsUpdatedCallback stats_updated_callback) {
-  stats_updated_callback_ = std::move(stats_updated_callback);
+// static
+void BraveStatsUpdater::SetStatsUpdatedCallbackForTesting(
+    StatsUpdatedCallback* stats_updated_callback) {
+  g_testing_stats_updated_callback = stats_updated_callback;
 }
 
-void BraveStatsUpdater::SetStatsThresholdCallback(
-    StatsUpdatedCallback stats_threshold_callback) {
-  stats_threshold_callback_ = std::move(stats_threshold_callback);
+// static
+void BraveStatsUpdater::SetStatsThresholdCallbackForTesting(
+    StatsUpdatedCallback* stats_threshold_callback) {
+  g_testing_stats_threshold_callback = stats_threshold_callback;
 }
 
 GURL BraveStatsUpdater::BuildStatsEndpoint(const std::string& path) {
@@ -214,8 +236,8 @@ void BraveStatsUpdater::OnSimpleLoaderComplete(
   stats_updater_params->SavePrefs();
 
   // Inform the client that the stats ping completed, if requested.
-  if (!stats_updated_callback_.is_null())
-    stats_updated_callback_.Run(final_url);
+  if (g_testing_stats_updated_callback)
+    g_testing_stats_updated_callback->Run(final_url);
 
   // In case the first call was blocked by our timer.
   (void)MaybeDoThresholdPing(0);
@@ -241,8 +263,8 @@ void BraveStatsUpdater::OnThresholdLoaderComplete(
   }
 
   // Inform the client that the threshold ping completed, if requested.
-  if (!stats_threshold_callback_.is_null())
-    stats_threshold_callback_.Run(final_url);
+  if (g_testing_stats_threshold_callback)
+    g_testing_stats_threshold_callback->Run(final_url);
 
   // We only send this query once.
   DisableThresholdPing();
@@ -309,8 +331,8 @@ void BraveStatsUpdater::QueueServerPing() {
     pref_change_registrar_->Init(pref_service_);
     pref_change_registrar_->Add(
         kReferralInitialization,
-        base::Bind(&BraveStatsUpdater::OnReferralInitialization,
-                   base::Unretained(this)));
+        base::BindRepeating(&BraveStatsUpdater::OnReferralInitialization,
+                            base::Unretained(this)));
   }
   if (ads_enabled) {
     DetectUncertainFuture();
@@ -368,6 +390,8 @@ void BraveStatsUpdater::SendServerPing() {
           ->GetURLLoaderFactory();
   simple_url_loader_ = network::SimpleURLLoader::Create(
       std::move(resource_request), traffic_annotation);
+  simple_url_loader_->SetRetryOptions(
+      1, network::SimpleURLLoader::RETRY_ON_NETWORK_CHANGE);
   simple_url_loader_->DownloadHeadersOnly(
       loader_factory,
       base::BindOnce(&BraveStatsUpdater::OnSimpleLoaderComplete,
@@ -398,6 +422,8 @@ void BraveStatsUpdater::SendUserTriggeredPing() {
           ->GetURLLoaderFactory();
   simple_url_loader_ = network::SimpleURLLoader::Create(
       std::move(resource_request), traffic_annotation);
+  simple_url_loader_->SetRetryOptions(
+      1, network::SimpleURLLoader::RETRY_ON_NETWORK_CHANGE);
   simple_url_loader_->DownloadHeadersOnly(
       loader_factory,
       base::BindOnce(&BraveStatsUpdater::OnThresholdLoaderComplete,
@@ -405,11 +431,6 @@ void BraveStatsUpdater::SendUserTriggeredPing() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-std::unique_ptr<BraveStatsUpdater> BraveStatsUpdaterFactory(
-    PrefService* pref_service) {
-  return std::make_unique<BraveStatsUpdater>(pref_service);
-}
 
 void RegisterLocalStatePrefs(PrefRegistrySimple* registry) {
   registry->RegisterBooleanPref(kFirstCheckMade, false);

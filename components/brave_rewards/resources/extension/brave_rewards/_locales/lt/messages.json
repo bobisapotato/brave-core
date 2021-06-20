@@ -235,6 +235,18 @@
     "message": "Sukurkite savo „Brave“ piniginės atsarginę kopiją.",
     "description": "Description for backup wallet notification"
   },
+  "deviceLimitReachedLearnMore": {
+    "message": "Sužinokite daugiau",
+    "description": "Notification button text to learn more about device limit"
+  },
+  "deviceLimitReachedTitle": {
+    "message": "Pasiektas įrenginių limitas",
+    "description": "Title for device limit reached notification"
+  },
+  "deviceLimitReachedNotification": {
+    "message": "Jūsų piniginės nebuvo galima patvirtinti, nes pasiekėte maksimalų patvirtintų įrenginių limitą.",
+    "description": "Description for device limit reached notification"
+  },
   "insufficientFundsNotification": {
     "message": "Jūsų „Brave Rewards“ paskyroje laukiama įnašo.",
     "description": "Description for new insufficient funds notification"
@@ -515,9 +527,15 @@
     "message": "Piniginė patvirtinta",
     "description": "Displayed in wallet that tells users that he is verified"
   },
-  "walletGoToUphold":  {
-    "message": "Eiti į mano „Uphold“ paskyrą",
-    "description": "CTA to open uphold account"
+  "walletGoToProvider":  {
+    "message": "Eiti į mano $provider$ paskyrą",
+    "description": "CTA to open an external wallet account",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Uphold"
+      }
+    }
   },
   "walletDisconnect":  {
     "message": "Atsijungti nuo „Brave Rewards“",
@@ -612,8 +630,14 @@
     "description": "Text for login button"
   },
   "loginMessageText":  {
-    "message": "Jums reikia turėti mažiausiai 25 BAT, kad galėtumėte susikurti „Uphold“ paskyrą. Bandykite dar kartą vėliau.\nJei jau turite patvirtintą „Uphold“ paskyrą, tęskite, kad prisijungtumėte.",
-    "description": "Text for login button"
+    "message": "Jums reikia turėti mažiausiai $amount$ BAT, kad galėtumėte susikurti „Uphold“ paskyrą. Jei jau turite patvirtintą „Uphold“ paskyrą, tęskite, kad prisijungtumėte.",
+    "description": "Text for login button",
+    "placeholders": {
+      "amount": {
+        "content": "$1",
+        "example": "15"
+      }
+    }
   },
   "walletConnected":  {
     "message": "Prijungta",
@@ -624,8 +648,14 @@
     "description": "Status button that tells user that he is currently pending"
   },
   "walletVerificationNote3":  {
-    "message": "Pastaba. Jūsų operacijos „Uphold“  bus matomos tada, kai duosite leidimą; pavyzdžiui, bus matomas jūsų gavėjas ir arbatpinigių suma.",
-    "description": "Displayed in login modal for uphold"
+    "message": "Pastaba. Jūsų operacijos $provider$ bus matomos tada, kai duosite leidimą; pavyzdžiui, bus matomas jūsų arbatpinigių gavėjas ir suma.",
+    "description": "Displayed in login modal for external wallet providers",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Uphold"
+      }
+    }
   },
   "onboardingEarnHeader": {
     "message": "Gaukite žetonų ir atsilyginkite",
@@ -718,7 +748,7 @@
     "description": ""
   },
   "onboardingPanelScheduleHeader": {
-    "message": "Kada gaunate atlygį",
+    "message": "Kada gaunate atlygį?",
     "description": ""
   },
   "onboardingPanelScheduleText": {
@@ -764,6 +794,42 @@
   "onboardingPanelCompleteText": {
     "message": "Naudodami „Brave Rewards“ padedate siekti, kad žiniatinklis visiems taptų geresne vieta. Juk tai puiku!",
     "description": ""
+  },
+  "onboardingPanelVerifyHeader": {
+    "message": "Patvirtinkite savo piniginę",
+    "description": ""
+  },
+  "onboardingPanelVerifySubtext": {
+    "message": "Norėdami išsiimti žetonus, pelnytus už reklamų peržiūrą, turėsite patvirtinti savo piniginę.",
+    "description": ""
+  },
+  "onboardingPanelVerifyLater": {
+    "message": "Atlikti vėliau",
+    "description": ""
+  },
+  "onboardingPanelVerifyNow": {
+    "message": "Patvirtinti mano piniginę",
+    "description": ""
+  },
+  "onboardingPanelBitflyerNote": {
+    "message": "„bitFlyer“ piniginė yra „bitFlyer, Inc.“ valdoma paslauga.",
+    "description": ""
+  },
+  "onboardingPanelBitflyerText": {
+    "message": "Patvirtindami savo piniginę ir susiedami ją su „bitFlyer“ paskyra, galėsite lengviau laikyti ir tvarkyti žetonus, pelnytus per „Brave Rewards“",
+    "description": ""
+  },
+  "onboardingPanelBitflyerLearnMore": {
+    "message": "$link_begin$Sužinokite daugiau$link_end$ apie tai, kaip susieti „Brave“ naršyklę su turima „bitFlyer“ sąskaita.",
+    "description": "",
+    "placeholders": {
+      "link_begin": {
+        "content": "$1"
+      },
+      "link_end": {
+        "content": "$2"
+      }
+    }
   },
   "bapDeprecationHeader": {
     "message": "„Brave Rewards“ Japonijoje pereina prie naujos sistemos!",

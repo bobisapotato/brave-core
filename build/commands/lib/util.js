@@ -61,10 +61,14 @@ async function applyPatches() {
 
 const util = {
 
+  runProcess: (cmd, args = [], options = {}) => {
+    Log.command(options.cwd, cmd, args)
+    return spawnSync(cmd, args, options)
+  },
+
   run: (cmd, args = [], options = {}) => {
     const { continueOnFail, ...cmdOptions } = options
-    Log.command(cmdOptions.cwd, cmd, args)
-    const prog = spawnSync(cmd, args, cmdOptions)
+    const prog = util.runProcess(cmd, args, cmdOptions)
     if (prog.status !== 0) {
       if (!continueOnFail) {
         console.log(prog.stdout && prog.stdout.toString())
@@ -189,7 +193,7 @@ const util = {
   },
 
   calculateFileChecksum: (filename) => {
-    // adapted from https://github.com/roryrjb/md5-file
+    // adapted from https://github.com/kodie/md5-file
     const BUFFER_SIZE = 8192
     const fd = fs.openSync(filename, 'r')
     const buffer = Buffer.alloc(BUFFER_SIZE)
@@ -255,9 +259,13 @@ const util = {
     fileMap.add([path.join(braveBrowserResourcesDir, 'chrome-logo-faded.png'), path.join(chromeBrowserResourcesDir, 'chrome-logo-faded.png')])
     fileMap.add([path.join(braveBrowserResourcesDir, 'downloads', 'images', 'incognito_marker.svg'), path.join(chromeBrowserResourcesDir, 'downloads', 'images', 'incognito_marker.svg')])
     fileMap.add([path.join(braveBrowserResourcesDir, 'settings', 'images'), path.join(chromeBrowserResourcesDir, 'settings', 'images')])
+    fileMap.add([path.join(braveBrowserResourcesDir, 'signin', 'profile_picker', 'images'), path.join(chromeBrowserResourcesDir, 'signin', 'profile_picker', 'images')])
     // Copy to make our ${branding_path_component}_behaviors.cc
     fileMap.add([path.join(config.braveCoreDir, 'chromium_src', 'chrome', 'installer', 'setup', 'brave_behaviors.cc'),
                  path.join(config.srcDir, 'chrome', 'installer', 'setup', 'brave_behaviors.cc')])
+    // Replace webui CSS to use our fonts.
+    fileMap.add([path.join(config.braveCoreDir, 'ui', 'webui', 'resources', 'css', 'text_defaults_md.css'),
+                 path.join(config.srcDir, 'ui', 'webui', 'resources', 'css', 'text_defaults_md.css')])
 
     for (const [source, output] of fileMap) {
       if (!fs.existsSync(source)) {
@@ -320,6 +328,33 @@ const util = {
     }
     if (config.targetOS === 'android') {
 
+      let braveOverwrittenFiles = new Set();
+      const removeUnlistedAndroidResources = (braveOverwrittenFiles) => {
+        const suspectedDir = path.join(config.srcDir, 'chrome', 'android', 'java', 'res')
+
+        let untrackedChromiumFiles = util.runGit(suspectedDir, ['ls-files', '--others', '--exclude-standard'], true).split('\n')
+        let untrackedChromiumPaths = [];
+        for (const untrackedChromiumFile of untrackedChromiumFiles) {
+          untrackedChromiumPath = path.join(suspectedDir, untrackedChromiumFile)
+
+          if (!fs.statSync(untrackedChromiumPath).isDirectory()) {
+            untrackedChromiumPaths.push(untrackedChromiumPath);
+          }
+        }
+
+        const isChildOf = (child, parent) => {
+          const relative = path.relative(parent, child);
+          return relative && !relative.startsWith('..') && !path.isAbsolute(relative);
+        }
+
+        for (const untrackedChromiumPath of untrackedChromiumPaths) {
+          if (isChildOf(untrackedChromiumPath, suspectedDir) && !braveOverwrittenFiles.has(untrackedChromiumPath)) {
+            fs.removeSync(untrackedChromiumPath);
+            console.log(`Deleted not listed file: ${untrackedChromiumPath}`);
+          }
+        }
+      }
+
       let androidIconSet = ''
       if (config.channel === 'development') {
         androidIconSet = 'res_brave_default'
@@ -345,6 +380,12 @@ const util = {
       const androidContentPublicResDest = path.join(config.srcDir, 'content', 'public', 'android', 'java', 'res')
       const androidTouchtoFillResSource = path.join(config.braveCoreDir, 'browser', 'touch_to_fill', 'android', 'internal', 'java', 'res')
       const androidTouchtoFillResDest = path.join(config.srcDir, 'chrome', 'browser', 'touch_to_fill', 'android', 'internal', 'java', 'res')
+      const androidToolbarResSource = path.join(config.braveCoreDir, 'browser', 'ui', 'android', 'toolbar', 'java', 'res')
+      const androidToolbarResDest = path.join(config.srcDir, 'chrome', 'browser', 'ui', 'android', 'toolbar', 'java', 'res')
+      const androidComponentsResSource = path.join(config.braveCoreDir, 'components', 'browser_ui', 'widget', 'android', 'java', 'res')
+      const androidComponentsResDest = path.join(config.srcDir, 'components', 'browser_ui', 'widget', 'android', 'java', 'res')
+      const androidSafeBrowsingResSource = path.join(config.braveCoreDir, 'browser', 'safe_browsing', 'android', 'java', 'res')
+      const androidSafeBrowsingResDest = path.join(config.srcDir, 'chrome', 'browser', 'safe_browsing', 'android', 'java', 'res')
 
       // Mapping for copying Brave's Android resource into chromium folder.
       const copyAndroidResourceMapping = {
@@ -353,7 +394,10 @@ const util = {
         [androidResSource]: [androidResDest],
         [androidResTemplateSource]: [androidResTemplateDest],
         [androidContentPublicResSource]: [androidContentPublicResDest],
-        [androidTouchtoFillResSource]: [androidTouchtoFillResDest]
+        [androidTouchtoFillResSource]: [androidTouchtoFillResDest],
+        [androidToolbarResSource]: [androidToolbarResDest],
+        [androidComponentsResSource]: [androidComponentsResDest],
+        [androidSafeBrowsingResSource]: [androidSafeBrowsingResDest]
       }
 
       console.log('copy Android app icons and app resources')
@@ -371,9 +415,11 @@ const util = {
             if (!fs.existsSync(destinationFile) || util.calculateFileChecksum(androidSourceFile) != util.calculateFileChecksum(destinationFile)) {
               fs.copySync(androidSourceFile, destinationFile)
             }
+            braveOverwrittenFiles.add(destinationFile);
           }
         }
       })
+      removeUnlistedAndroidResources(braveOverwrittenFiles)
     }
   },
 
@@ -433,38 +479,100 @@ const util = {
         '--private_key_passphrase=' + passwd])
   },
 
-  copyRedirectCC: () => {
-    // On Windows copy redirect-cc.py to the output dir so we can execute it
-    // from there to shorten the command line in brave/script/redirect-cc.cmd
-    console.log('Copying redirect-cc.py...')
-    const src = path.join(config.braveCoreDir, 'script', 'redirect-cc.py')
-    const dst = path.join(config.outputDir, 'redirect.py')
-    if (!fs.existsSync(config.outputDir)) {
-      fs.mkdirSync(config.outputDir);
+  getVisualStudioInfo: () => {
+    // Determine Visual Studio path and version using Chromium's script.
+    const vsToolchainPath = path.join(config.srcDir, 'build', 'vs_toolchain.py')
+    // Prevent depot_tools from checking for an update.
+    const depotToolsWinToolchain = process.env.DEPOT_TOOLS_WIN_TOOLCHAIN
+    process.env.DEPOT_TOOLS_WIN_TOOLCHAIN = '0'
+    const vsInfo = util.run('python', [vsToolchainPath, 'get_toolchain_dir']).stdout.toString()
+    if (depotToolsWinToolchain) {
+      process.env.DEPOT_TOOLS_WIN_TOOLCHAIN = depotToolsWinToolchain
+    } else {
+      delete process.env.DEPOT_TOOLS_WIN_TOOLCHAIN
     }
-    fs.copyFileSync(src, dst)
+    const vsPath = vsInfo.split('\n', 1)[0].split('=', 2)[1].trim().replace(/"/g, '')
+    const vsVersion = vsInfo.split('\n', 3)[2].split('=', 2)[1].trim().replace(/"/g, '')
+    return { vsPath, vsVersion }
+  },
+
+  buildRedirectCCTool: () => {
+    // Expected path to redirect-cc.exe
+    const redirectCCExe = path.join(config.braveCoreDir, 'buildtools', 'win', 'redirect-cc', 'bin', 'redirect-cc.exe')
+    // Only build if missing
+    if (fs.existsSync(redirectCCExe)) {
+      return
+    }
+
+    console.log('building redirect-cc.exe...')
+    // Path to MSBuild.exe
+    const { vsPath, vsVersion } = util.getVisualStudioInfo()
+    let msBuild = ''
+    if (vsVersion === '2017') {
+      msBuild = path.join(vsPath, 'MSBuild', '15.0', 'Bin', 'MSBuild.exe')
+    } else if (vsVersion === '2019') {
+      msBuild = path.join(vsPath, 'MSBuild', 'Current', 'Bin', 'MSBuild.exe')
+    } else {
+      throw 'Error: unexpected version of Visual Studio: ' + vsVersion
+    }
+
+    // Build redirect-cc.sln
+    const arch = process.arch === 'x32' ? 'x86' : process.arch
+    const toolset = vsVersion === '2017' ? 'v141' : 'v142'
+    const msBuildArgs = [
+      path.join(config.braveCoreDir, 'buildtools', 'win', 'redirect-cc', 'redirect-cc.sln'),
+      '/p:Configuration=Release',
+      '/p:Platform=' + arch,
+      '/p:PlatformToolset=' + toolset,
+      '/verbosity:quiet'
+    ]
+    util.run(msBuild, msBuildArgs)
+  },
+
+  runGnGen: (options) => {
+    const buildArgsStr = util.buildArgsToString(config.buildArgs())
+    const buildArgsFile = path.join(config.outputDir, 'brave_build_args.txt')
+    const buildNinjaFile = path.join(config.outputDir, 'build.ninja')
+
+    const shouldRunGnGen = !config.auto_gn_gen ||
+        !fs.existsSync(buildNinjaFile) || !fs.existsSync(buildArgsFile) ||
+        fs.readFileSync(buildArgsFile) != buildArgsStr
+
+    if (shouldRunGnGen) {
+      util.run('gn', ['gen', config.outputDir, '--args="' + buildArgsStr + '"'], options)
+      fs.writeFileSync(buildArgsFile, buildArgsStr)
+    }
   },
 
   buildTarget: (options = config.defaultOptions) => {
     console.log('building ' + config.buildTarget + '...')
 
     if (process.platform === 'win32') {
-      util.copyRedirectCC()
       util.updateOmahaMidlFiles()
+      util.buildRedirectCCTool()
     }
+    util.runGnGen(options)
 
     let num_compile_failure = 1
     if (config.ignore_compile_failure)
       num_compile_failure = 0
-
-    const args = util.buildArgsToString(config.buildArgs())
-    util.run('gn', ['gen', config.outputDir, '--args="' + args + '"'], options)
 
     let ninjaOpts = [
       '-C', config.outputDir, config.buildTarget,
       '-k', num_compile_failure,
       ...config.extraNinjaOpts
     ]
+
+    if (config.use_goma) {
+      const gomaLoginInfo = util.runProcess('goma_auth', ['info'], options)
+      if (gomaLoginInfo.status !== 0) {
+        console.log('Login required for using Goma. This is only needed once')
+        util.run('goma_auth', ['login'], options)
+      }
+      util.run('goma_ctl', ['ensure_start'], options)
+      ninjaOpts.push('-j', config.gomaJValue)
+    }
+
     util.run('ninja', ninjaOpts, options)
   },
 

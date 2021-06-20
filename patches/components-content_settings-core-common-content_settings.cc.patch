@@ -1,20 +1,12 @@
 diff --git a/components/content_settings/core/common/content_settings.cc b/components/content_settings/core/common/content_settings.cc
-index b76c3410b56f117d12d4639af48280a81765b7d3..aa572ffd561d78cb6bdcf2d83617105d3456fad7 100644
+index 5906e8452977cd100487f58874703f8766582ec8..ddbfa12431a34e394088cc5686dd239c1b4db793 100644
 --- a/components/content_settings/core/common/content_settings.cc
 +++ b/components/content_settings/core/common/content_settings.cc
 @@ -94,6 +94,7 @@ constexpr HistogramValue kHistogramValue[] = {
-     {ContentSettingsType::PERMISSION_AUTOREVOCATION_DATA, 72},
      {ContentSettingsType::FILE_SYSTEM_LAST_PICKED_DIRECTORY, 73},
      {ContentSettingsType::DISPLAY_CAPTURE, 74},
+     {ContentSettingsType::FILE_HANDLING, 75},
 +    BRAVE_HISTOGRAM_VALUE_LIST
  };
  
  }  // namespace
-@@ -180,6 +181,7 @@ bool RendererContentSettingRules::IsRendererContentSetting(
-          content_type == ContentSettingsType::JAVASCRIPT ||
-          content_type == ContentSettingsType::CLIENT_HINTS ||
-          content_type == ContentSettingsType::POPUPS ||
-+         BRAVE_IS_RENDERER_CONTENT_SETTING
-          content_type == ContentSettingsType::MIXEDSCRIPT;
- }
- 

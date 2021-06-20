@@ -51,6 +51,7 @@ class Generator(generator.Generator):
       "objc_enum_formatter": self._ObjCEnumFormatter,
       "cpp_to_objc_assign": self._CppToObjCAssign,
       "objc_to_cpp_assign": self._ObjCToCppAssign,
+      "swift_enum_name_formatter": self._SwiftEnumNameFormatter,
     }
     return objc_filters
 
@@ -144,9 +145,54 @@ class Generator(generator.Generator):
       return reserved[name]
     return name
 
+  def _SwiftEnumNameFormatter(self, enum):
+    name = enum.name
+    # A set of reserved names that would conflict with commonly used standard Swift types
+    reserved = [
+      # Swift
+      'Character',
+      'Collection',
+      'Result',
+      # SwiftUI
+      'Environment',
+      # Foundation
+      'AffineTransform',
+      'Array',
+      'Calendar',
+      'CharacterSet',
+      'Data',
+      'DateComponents',
+      'DateInterval',
+      'Date',
+      'Decimal',
+      'Dictionary',
+      'IndexPath',
+      'IndexSet',
+      'Locale',
+      'Measurement',
+      'Notification',
+      'PersonNameComponents',
+      'Set',
+      'String',
+      'TimeZone',
+      'URL',
+      'URLComponents',
+      'URLQueryItem',
+      'URLRequest',
+      'UUID',
+    ]
+    if name in reserved:
+      # Keep them prefixed in Swift
+      return "%s%s" % (self.class_prefix, name)
+    return name
+
   def _ObjCEnumFormatter(self, str):
-    """ uppercased & snake case to upper camel case """
-    return ''.join(map(lambda p: p.capitalize(), str.split('_')))
+    """ Formats uppercased, k-prefixed & snake case to upper camel case """
+    name = str
+    if len(str) >= 2 and str[0] == "k" and str[1].isupper():
+      # k-prefixed is already cased correctly
+      return str[1:]
+    return ''.join(map(lambda p: p.capitalize(), name.split('_')))
 
   def _IsObjCNumberKind(self, kind):
     return kind in _kind_to_nsnumber_getter

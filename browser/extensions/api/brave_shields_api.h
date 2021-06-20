@@ -48,6 +48,38 @@ class BraveShieldsHiddenClassIdSelectorsFunction : public ExtensionFunction {
       std::unique_ptr<base::ListValue> selectors);
 };
 
+class BraveShieldsMigrateLegacyCosmeticFiltersFunction
+    : public ExtensionFunction {
+ public:
+  DECLARE_EXTENSION_FUNCTION("braveShields.migrateLegacyCosmeticFilters",
+                             UNKNOWN)
+
+ protected:
+  ~BraveShieldsMigrateLegacyCosmeticFiltersFunction() override {}
+
+  ResponseAction Run() override;
+};
+
+class BraveShieldsAddSiteCosmeticFilterFunction : public ExtensionFunction {
+ public:
+  DECLARE_EXTENSION_FUNCTION("braveShields.addSiteCosmeticFilter", UNKNOWN)
+
+ protected:
+  ~BraveShieldsAddSiteCosmeticFilterFunction() override {}
+
+  ResponseAction Run() override;
+};
+
+class BraveShieldsOpenFilterManagementPageFunction : public ExtensionFunction {
+ public:
+  DECLARE_EXTENSION_FUNCTION("braveShields.openFilterManagementPage", UNKNOWN)
+
+ protected:
+  ~BraveShieldsOpenFilterManagementPageFunction() override {}
+
+  ResponseAction Run() override;
+};
+
 class BraveShieldsAllowScriptsOnceFunction : public ExtensionFunction {
  public:
   DECLARE_EXTENSION_FUNCTION("braveShields.allowScriptsOnce", UNKNOWN)

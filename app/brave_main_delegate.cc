@@ -30,13 +30,13 @@
 #include "components/autofill/core/common/autofill_features.h"
 #include "components/autofill/core/common/autofill_payments_features.h"
 #include "components/embedder_support/switches.h"
+#include "components/federated_learning/features/features.h"
 #include "components/feed/feed_feature_list.h"
 #include "components/language/core/common/language_experiments.h"
 #include "components/network_time/network_time_tracker.h"
 #include "components/offline_pages/core/offline_page_feature.h"
 #include "components/omnibox/common/omnibox_features.h"
 #include "components/password_manager/core/common/password_manager_features.h"
-#include "components/safe_browsing/core/features.h"
 #include "components/security_state/core/features.h"
 #include "components/sync/base/sync_base_switches.h"
 #include "components/translate/core/browser/translate_prefs.h"
@@ -44,6 +44,7 @@
 #include "content/public/common/content_features.h"
 #include "content/public/common/content_switches.h"
 #include "google_apis/gaia/gaia_switches.h"
+#include "media/base/media_switches.h"
 #include "net/base/features.h"
 #include "services/device/public/cpp/device_features.h"
 #include "services/network/public/cpp/features.h"
@@ -57,6 +58,9 @@
 #if defined(OS_ANDROID)
 #include "base/android/jni_android.h"
 #include "brave/build/android/jni_headers/BraveQAPreferences_jni.h"
+#include "components/signin/public/base/account_consistency_method.h"
+#else
+#include "chrome/browser/ui/profile_picker.h"
 #endif
 
 namespace {
@@ -163,15 +167,6 @@ bool BraveMainDelegate::BasicStartupComplete(int* exit_code) {
   command_line.AppendSwitch(switches::kDisableDomainReliability);
   command_line.AppendSwitch(switches::kNoPings);
 
-  // Setting these to default values in Chromium to maintain parity
-  // See: ChromeContentVerifierDelegate::GetDefaultMode for ContentVerification
-  // See: GetStatus in install_verifier.cc for InstallVerification
-  command_line.AppendSwitchASCII(
-      switches::kExtensionContentVerification,
-      switches::kExtensionContentVerificationEnforceStrict);
-  command_line.AppendSwitchASCII(switches::kExtensionsInstallVerification,
-                                 "enforce");
-
   if (!base::CommandLine::ForCurrentProcess()->HasSwitch(
           embedder_support::kOriginTrialPublicKey)) {
     command_line.AppendSwitchASCII(embedder_support::kOriginTrialPublicKey,
@@ -215,25 +210,36 @@ bool BraveMainDelegate::BasicStartupComplete(int* exit_code) {
   std::unordered_set<const char*> disabled_features = {
     autofill::features::kAutofillEnableAccountWalletStorage.name,
     autofill::features::kAutofillServerCommunication.name,
+    blink::features::kFledgeInterestGroupAPI.name,
+    blink::features::kFledgeInterestGroups.name,
+    blink::features::kHandwritingRecognitionWebPlatformApi.name,
+    blink::features::kHandwritingRecognitionWebPlatformApiFinch.name,
+    blink::features::kInterestCohortAPIOriginTrial.name,
+    blink::features::kInterestCohortFeaturePolicy.name,
     blink::features::kTextFragmentAnchor.name,
     features::kDirectSockets.name,
     features::kIdleDetection.name,
     features::kLangClientHintHeader.name,
     features::kNotificationTriggers.name,
-    features::kPrivacySettingsRedesign.name,
     features::kSignedExchangePrefetchCacheForNavigations.name,
     features::kSignedExchangeSubresourcePrefetch.name,
     features::kSubresourceWebBundles.name,
-    features::kTabHoverCards.name,
     features::kWebOTP.name,
+    federated_learning::kFederatedLearningOfCohorts.name,
+    federated_learning::kFlocIdComputedEventLogging.name,
+    media::kLiveCaption.name,
+    net::features::kFirstPartySets.name,
+    network::features::kTrustTokens.name,
     network_time::kNetworkTimeServiceQuerying.name,
-    safe_browsing::kEnhancedProtection.name,
-    safe_browsing::kEnhancedProtectionMessageInInterstitials.name,
 #if defined(OS_ANDROID)
     features::kWebNfc.name,
     feed::kInterestFeedContentSuggestions.name,
+    feed::kInterestFeedV2.name,
     offline_pages::kPrefetchingOfflinePagesFeature.name,
+    signin::kMobileIdentityConsistency.name,
     translate::kTranslate.name,
+#else
+    kEnableProfilePickerOnStartupFeature.name,
 #endif
   };
 

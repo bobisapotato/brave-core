@@ -15,6 +15,7 @@
 #include "base/files/file_util.h"
 #include "base/logging.h"
 #include "base/task/post_task.h"
+#include "base/task/thread_pool.h"
 #include "base/task_runner.h"
 #include "base/task_runner_util.h"
 #include "brave/components/tor/pref_names.h"
@@ -114,8 +115,8 @@ BraveTorClientUpdater::BraveTorClientUpdater(
     PrefService* local_state,
     const base::FilePath& user_data_dir)
     : BraveComponent(component_delegate),
-      task_runner_(base::CreateSequencedTaskRunner(
-          {base::ThreadPool(), base::MayBlock()})),
+      task_runner_(
+          base::ThreadPool::CreateSequencedTaskRunner({base::MayBlock()})),
       registered_(false),
       local_state_(local_state),
       user_data_dir_(user_data_dir),
@@ -150,6 +151,10 @@ void BraveTorClientUpdater::Cleanup() {
       user_data_dir_.AppendASCII(kTorClientComponentId);
   task_runner_->PostTask(FROM_HERE,
                          base::BindOnce(&DeleteDir, tor_component_dir));
+  task_runner_->PostTask(FROM_HERE,
+                         base::BindOnce(&DeleteDir, GetTorDataPath()));
+  task_runner_->PostTask(FROM_HERE,
+                         base::BindOnce(&DeleteDir, GetTorWatchPath()));
 }
 
 void BraveTorClientUpdater::SetExecutablePath(const base::FilePath& path) {
@@ -160,6 +165,18 @@ void BraveTorClientUpdater::SetExecutablePath(const base::FilePath& path) {
 
 base::FilePath BraveTorClientUpdater::GetExecutablePath() const {
   return executable_path_;
+}
+
+base::FilePath BraveTorClientUpdater::GetTorDataPath() const {
+  DCHECK(!user_data_dir_.empty());
+  return user_data_dir_.Append(FILE_PATH_LITERAL("tor"))
+      .Append(FILE_PATH_LITERAL("data"));
+}
+
+base::FilePath BraveTorClientUpdater::GetTorWatchPath() const {
+  DCHECK(!user_data_dir_.empty());
+  return user_data_dir_.Append(FILE_PATH_LITERAL("tor"))
+      .Append(FILE_PATH_LITERAL("watch"));
 }
 
 void BraveTorClientUpdater::OnComponentReady(

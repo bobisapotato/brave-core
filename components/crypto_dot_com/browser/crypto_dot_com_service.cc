@@ -15,6 +15,7 @@
 #include "base/files/file_util.h"
 #include "base/strings/utf_string_conversions.h"
 #include "base/task/post_task.h"
+#include "base/task/thread_pool.h"
 #include "base/task_runner_util.h"
 #include "base/time/time.h"
 #include "base/token.h"
@@ -199,9 +200,9 @@ bool CryptoDotComService::NetworkRequest(const GURL &url,
       default_storage_partition->GetURLLoaderFactoryForBrowserProcess().get();
 
   iter->get()->DownloadToStringOfUnboundedSizeUntilCrashAndDie(
-      url_loader_factory, base::BindOnce(
-          &CryptoDotComService::OnURLLoaderComplete,
-          base::Unretained(this), std::move(iter), std::move(callback)));
+      url_loader_factory,
+      base::BindOnce(&CryptoDotComService::OnURLLoaderComplete,
+                     base::Unretained(this), iter, std::move(callback)));
 
   return true;
 }
@@ -235,8 +236,8 @@ void CryptoDotComService::OnURLLoaderComplete(
 
 base::SequencedTaskRunner* CryptoDotComService::io_task_runner() {
   if (!io_task_runner_) {
-    io_task_runner_ = base::CreateSequencedTaskRunner(
-        {base::ThreadPool(), base::MayBlock(), base::TaskPriority::BEST_EFFORT,
+    io_task_runner_ = base::ThreadPool::CreateSequencedTaskRunner(
+        {base::MayBlock(), base::TaskPriority::BEST_EFFORT,
          base::TaskShutdownBehavior::SKIP_ON_SHUTDOWN});
   }
   return io_task_runner_.get();

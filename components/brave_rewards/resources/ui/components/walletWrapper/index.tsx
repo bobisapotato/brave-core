@@ -37,10 +37,7 @@ import {
   StyledVerifiedButtonIcon,
   StyledVerifiedButtonText,
   StyledDialogList,
-  StyledLink,
-  LoginMessage,
-  LoginMessageButtons,
-  LoginMessageText
+  StyledLink
 } from './style'
 import { getLocale } from 'brave-ui/helpers'
 import { GrantCaptcha, GrantComplete, GrantError, GrantWrapper, WalletPopup } from '../'
@@ -54,6 +51,8 @@ import {
   UpholdSystemIcon,
   CaratCircleRightIcon
 } from 'brave-ui/components/icons'
+
+import { BitflyerIcon } from '../../../shared/components/icons/bitflyer_icon'
 
 import giftIconUrl from './assets/gift.svg'
 import loveIconUrl from './assets/love.svg'
@@ -145,23 +144,19 @@ export interface Props {
   onDisconnectClick?: () => void
   goToExternalWallet?: () => void
   greetings?: string
-  onlyAnonWallet?: boolean
-  showLoginMessage?: boolean
 }
 
 export type Step = '' | 'captcha' | 'complete'
 
 interface State {
   verificationDetails: boolean
-  showLoginMessage: boolean
 }
 
 export default class WalletWrapper extends React.PureComponent<Props, State> {
   constructor (props: Props) {
     super(props)
     this.state = {
-      verificationDetails: false,
-      showLoginMessage: false
+      verificationDetails: false
     }
   }
 
@@ -182,14 +177,7 @@ export default class WalletWrapper extends React.PureComponent<Props, State> {
       return
     }
 
-    if (!this.props.showLoginMessage) {
-      action()
-      return
-    }
-
-    this.setState({
-      showLoginMessage: true
-    })
+    action()
   }
 
   onNotificationClick = () => {
@@ -334,6 +322,7 @@ export default class WalletWrapper extends React.PureComponent<Props, State> {
     const { walletType } = this.props
     const walletProviderIcon =
       walletType === 'uphold' ? <UpholdSystemIcon /> :
+      walletType === 'bitflyer' ? <BitflyerIcon white={true} /> :
       null
 
     const buttonProps: Partial<ButtonProps> = {
@@ -508,9 +497,7 @@ export default class WalletWrapper extends React.PureComponent<Props, State> {
         typeText = getLocale('deviceLimitReachedTitle')
         break
       case 'grant':
-        typeText = this.props.onlyAnonWallet
-          ? getLocale('pointGrants')
-          : getLocale('tokenGrants')
+        typeText = getLocale('tokenGrants')
         break
       case 'insufficientFunds':
         typeText = getLocale('insufficientFunds')
@@ -542,12 +529,6 @@ export default class WalletWrapper extends React.PureComponent<Props, State> {
     )
   }
 
-  toggleLoginMessage = () => {
-    this.setState({
-      showLoginMessage: false
-    })
-  }
-
   render () {
     const {
       id,
@@ -569,8 +550,7 @@ export default class WalletWrapper extends React.PureComponent<Props, State> {
       notification,
       isMobile,
       onVerifyClick,
-      onDisconnectClick,
-      onlyAnonWallet
+      onDisconnectClick
     } = this.props
 
     let date = ''
@@ -606,7 +586,6 @@ export default class WalletWrapper extends React.PureComponent<Props, State> {
               amount={grantAmount}
               date={date}
               tokenTitle={grant.finishTokenTitle}
-              onlyAnonWallet={onlyAnonWallet}
             />
           </GrantWrapper>
         )
@@ -615,9 +594,7 @@ export default class WalletWrapper extends React.PureComponent<Props, State> {
 
     const walletVerified = walletState === 'verified' || walletState === 'disconnected_verified'
     const connectedVerified = walletState === 'verified'
-    const batFormatString = onlyAnonWallet ? getLocale('batPoints') : getLocale('bat')
-
-    const upholdLoginText = getLocale('loginMessageText').split('$1')
+    const batFormatString = getLocale('bat')
     const rewardsText1 = getLocale('rewardsPanelText1').split(/\$\d/g)
     const rewardsText2 = getLocale('rewardsPanelText2').split(/\$\d/g)
 
@@ -659,9 +636,9 @@ export default class WalletWrapper extends React.PureComponent<Props, State> {
                       : null
                   }
                   {
-                    walletState && !onlyAnonWallet
+                    walletState
                       ? this.generateWalletButton(walletState)
-                      : <StyledTitle>{onlyAnonWallet ? getLocale('yourBalance') : getLocale('yourWallet')}</StyledTitle>
+                      : <StyledTitle>{getLocale('yourWallet')}</StyledTitle>
                   }
                   {
                     showSecActions
@@ -687,38 +664,6 @@ export default class WalletWrapper extends React.PureComponent<Props, State> {
                 : this.generateNotification(notification)
             }
             <StyledCurve background={gradientTop} />
-            {
-              this.state.showLoginMessage
-              ? <LoginMessage>
-                  <LoginMessageText>
-                    <b>{getLocale('loginMessageTitle')}</b>
-                    <p>
-                      {upholdLoginText[0]}
-                      <br />
-                      {upholdLoginText[1]}
-                    </p>
-                    <br/>
-                    {getLocale('walletVerificationNote3').replace('$1', walletProvider)}
-                  </LoginMessageText>
-                  <LoginMessageButtons>
-                    <Button
-                      level={'secondary'}
-                      type={'accent'}
-                      text={getLocale('cancel')}
-                      onClick={this.toggleLoginMessage}
-                      id={'cancel-login-button'}
-                    />
-                    <Button
-                      level={'primary'}
-                      type={'accent'}
-                      text={getLocale('login')}
-                      onClick={this.props.onVerifyClick}
-                      id={'login-button'}
-                    />
-                  </LoginMessageButtons>
-              </LoginMessage>
-              : null
-            }
           </StyledHeader>
           <StyledContent
             contentPadding={contentPadding}
@@ -726,7 +671,7 @@ export default class WalletWrapper extends React.PureComponent<Props, State> {
             {children}
           </StyledContent>
           {
-            showCopy && !onlyAnonWallet
+            showCopy
               ? <StyledCopy connected={connectedVerified}>
                 {
                   walletVerified
@@ -762,7 +707,7 @@ export default class WalletWrapper extends React.PureComponent<Props, State> {
           }
         </StyledWrapper>
         {
-          showCopy && !onlyAnonWallet
+          showCopy
             ? <StyledBAT>
               {getLocale('rewardsPanelText3')} <a href={'https://basicattentiontoken.org/'} target={'_blank'}>{getLocale('rewardsPanelText4')}</a>
             </StyledBAT>

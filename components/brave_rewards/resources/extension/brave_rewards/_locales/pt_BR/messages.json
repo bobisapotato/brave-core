@@ -235,6 +235,18 @@
     "message": "Faça o backup da sua carteira Brave.",
     "description": "Description for backup wallet notification"
   },
+  "deviceLimitReachedLearnMore": {
+    "message": "Saiba mais",
+    "description": "Notification button text to learn more about device limit"
+  },
+  "deviceLimitReachedTitle": {
+    "message": "Limite de dispositivos atingido",
+    "description": "Title for device limit reached notification"
+  },
+  "deviceLimitReachedNotification": {
+    "message": "Sua carteira não pode ser verificada porque você alcançou o limite máximo de dispositivos verificados.",
+    "description": "Description for device limit reached notification"
+  },
   "insufficientFundsNotification": {
     "message": "Sua conta de Recompensas do Brave está aguardando um depósito.",
     "description": "Description for new insufficient funds notification"
@@ -515,9 +527,15 @@
     "message": "Carteira verificada",
     "description": "Displayed in wallet that tells users that he is verified"
   },
-  "walletGoToUphold":  {
-    "message": "Ir à minha conta Uphold",
-    "description": "CTA to open uphold account"
+  "walletGoToProvider":  {
+    "message": "Acessar minha conta do $provider$",
+    "description": "CTA to open an external wallet account",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Uphold"
+      }
+    }
   },
   "walletDisconnect":  {
     "message": "Desconectar de Brave Rewards",
@@ -612,8 +630,14 @@
     "description": "Text for login button"
   },
   "loginMessageText":  {
-    "message": "Você precisa ter, no mínimo, 25 BAT para criar uma conta no Uphold. Por favor, tente novamente mais tarde. \nSe você já tem uma conta verificada no Uphold, prossiga para fazer login.",
-    "description": "Text for login button"
+    "message": "Você precisa de no mínimo $amount$ BAT para criar uma conta do Uphold. Se você já tem uma conta verificada do Uphold, continue para fazer login.",
+    "description": "Text for login button",
+    "placeholders": {
+      "amount": {
+        "content": "$1",
+        "example": "15"
+      }
+    }
   },
   "walletConnected":  {
     "message": "Conectado",
@@ -624,8 +648,14 @@
     "description": "Status button that tells user that he is currently pending"
   },
   "walletVerificationNote3":  {
-    "message": "Observação: as suas transações estarão visíveis para o Uphold quando você autorizar; por exemplo, eles poderão ver o beneficiário e a quantia das suas gorjetas.",
-    "description": "Displayed in login modal for uphold"
+    "message": "Observação: suas transações ficarão visíveis para $provider$ quando você autorizar. Eles conseguirão ver, por exemplo, o beneficiário e o valor de suas gorjetas.",
+    "description": "Displayed in login modal for external wallet providers",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Uphold"
+      }
+    }
   },
   "onboardingEarnHeader": {
     "message": "Ganhe Tokens e Retribua",
@@ -718,7 +748,7 @@
     "description": ""
   },
   "onboardingPanelScheduleHeader": {
-    "message": "Quando você ganha recompensas",
+    "message": "Quando você recebe recompensas?",
     "description": ""
   },
   "onboardingPanelScheduleText": {
@@ -764,6 +794,42 @@
   "onboardingPanelCompleteText": {
     "message": "Utilizando as Recompensas Brave, você está ajudando a transformar a web em um lugar melhor para todos. E isso é incrível!",
     "description": ""
+  },
+  "onboardingPanelVerifyHeader": {
+    "message": "Verificar sua carteira",
+    "description": ""
+  },
+  "onboardingPanelVerifySubtext": {
+    "message": "Para sacar os tokens que ganha com a visualização de anúncios, você precisará verificar sua carteira.",
+    "description": ""
+  },
+  "onboardingPanelVerifyLater": {
+    "message": "Fazer isso depois",
+    "description": ""
+  },
+  "onboardingPanelVerifyNow": {
+    "message": "Verificar minha carteira",
+    "description": ""
+  },
+  "onboardingPanelBitflyerNote": {
+    "message": "A carteira bitFlyer é um serviço gerenciado pela bitFlyer, Inc.",
+    "description": ""
+  },
+  "onboardingPanelBitflyerText": {
+    "message": "Ao verificar sua carteira e vinculá-la a uma conta da bitFlyer, você poderá armazenar e gerenciar com mais facilidade os tokens que ganhou por meio do Brave Rewards",
+    "description": ""
+  },
+  "onboardingPanelBitflyerLearnMore": {
+    "message": "$link_begin$Saiba mais$link_end$ sobre como vincular seu navegador Brave à sua conta do bitFlyer.",
+    "description": "",
+    "placeholders": {
+      "link_begin": {
+        "content": "$1"
+      },
+      "link_end": {
+        "content": "$2"
+      }
+    }
   },
   "bapDeprecationHeader": {
     "message": "As Recompensas Brave no Japão estão mudando para um novo sistema!",

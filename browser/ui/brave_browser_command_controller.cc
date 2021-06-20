@@ -8,16 +8,17 @@
 #include <vector>
 
 #include "brave/app/brave_command_ids.h"
-#include "brave/browser/brave_browser_process_impl.h"
 #include "brave/browser/profiles/profile_util.h"
 #include "brave/browser/ui/brave_pages.h"
 #include "brave/browser/ui/browser_commands.h"
 #include "brave/common/pref_names.h"
 #include "brave/components/brave_rewards/browser/buildflags/buildflags.h"
 #include "brave/components/brave_sync/buildflags/buildflags.h"
-#include "brave/components/brave_wallet/buildflags/buildflags.h"
+#include "brave/components/brave_wallet/common/buildflags/buildflags.h"
+#include "brave/components/ipfs/buildflags/buildflags.h"
 #include "brave/components/sidebar/buildflags/buildflags.h"
 #include "chrome/app/chrome_command_ids.h"
+#include "chrome/browser/browser_process.h"
 #include "chrome/browser/profiles/profile.h"
 #include "chrome/browser/ui/browser.h"
 #include "chrome/browser/ui/browser_commands.h"
@@ -31,6 +32,12 @@
 
 #if BUILDFLAG(ENABLE_SIDEBAR)
 #include "brave/browser/ui/sidebar/sidebar_utils.h"
+#endif
+
+#if BUILDFLAG(IPFS_ENABLED)
+#include "brave/components/ipfs/ipfs_constants.h"
+#include "brave/components/ipfs/ipfs_utils.h"
+#include "brave/components/ipfs/pref_names.h"
 #endif
 
 namespace {
@@ -180,6 +187,8 @@ void BraveBrowserCommandController::UpdateCommandForBraveSync() {
 
 void BraveBrowserCommandController::UpdateCommandForBraveWallet() {
   UpdateCommandEnabled(IDC_SHOW_BRAVE_WALLET, true);
+  UpdateCommandEnabled(IDC_SHOW_BRAVE_WALLET_PANEL, true);
+  UpdateCommandEnabled(IDC_CLOSE_BRAVE_WALLET_PANEL, true);
 }
 
 bool BraveBrowserCommandController::ExecuteBraveCommandWithDisposition(
@@ -238,6 +247,12 @@ bool BraveBrowserCommandController::ExecuteBraveCommandWithDisposition(
       break;
     case IDC_TOGGLE_SPEEDREADER:
       brave::ToggleSpeedreader(browser_);
+      break;
+    case IDC_SHOW_BRAVE_WALLET_PANEL:
+      brave::ShowWalletBubble(browser_);
+      break;
+    case IDC_CLOSE_BRAVE_WALLET_PANEL:
+      brave::CloseWalletBubble(browser_);
       break;
     default:
       LOG(WARNING) << "Received Unimplemented Command: " << id;

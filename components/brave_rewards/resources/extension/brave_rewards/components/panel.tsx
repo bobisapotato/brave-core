@@ -8,7 +8,7 @@ import { connect } from 'react-redux'
 import { WalletAddIcon, BatColorIcon } from 'brave-ui/components/icons'
 import { WalletWrapper, WalletSummary, WalletSummarySlider, WalletPanel } from '../../../ui/components'
 import { Provider } from '../../../ui/components/profile'
-import { NotificationType, WalletState } from '../../../ui/components/walletWrapper'
+import { NotificationType } from '../../../ui/components/walletWrapper'
 import { RewardsNotificationType } from '../constants/rewards_panel_types'
 import { Type as AlertType } from '../../../ui/components/alert'
 import { RewardsOptInModal, RewardsTourModal } from '../../../shared/components/onboarding'
@@ -22,8 +22,7 @@ import * as style from './panel.style'
 import { getMessage } from '../background/api/locale_api'
 
 interface Props extends RewardsExtension.ComponentProps {
-  tabId: number,
-  onlyAnonWallet: boolean
+  tabId: number
 }
 
 interface State {
@@ -358,7 +357,6 @@ export class Panel extends React.Component<Props, State> {
 
   getNotification = () => {
     const { notifications, currentNotification } = this.props.rewardsPanelData
-    const { onlyAnonWallet } = this.props
 
     if (
       currentNotification === undefined ||
@@ -391,7 +389,7 @@ export class Panel extends React.Component<Props, State> {
         // 16 - error while tipping
 
         if (result === '0') {
-          const currency = onlyAnonWallet ? getMessage('bap') : getMessage('bat')
+          const currency = getMessage('bat')
           const contributionAmount = utils.handleContributionAmount(notification.args[3])
           text = getMessage('contributeNotificationSuccess', [contributionAmount, currency])
         } else if (result === '15') {
@@ -451,9 +449,7 @@ export class Panel extends React.Component<Props, State> {
           break
         }
 
-        const type = args[0]
-
-        switch (type) {
+        switch (args[0]) {
           case 'wallet_new_verified': {
             text = (
               <>
@@ -474,16 +470,16 @@ export class Panel extends React.Component<Props, State> {
             isAlert = 'error'
             break
           }
+          case 'wallet_device_limit_reached':
+            type = 'deviceLimitReached'
+            text = getMessage('deviceLimitReachedNotification')
+            break
           default:
             break
         }
 
         break
       }
-      case RewardsNotificationType.REWARDS_NOTIFICATION_DEVICE_LIMIT_REACHED:
-        type = 'deviceLimitReached'
-        text = getMessage('deviceLimitReachedNotification')
-        break
       default:
         type = ''
         break
@@ -597,7 +593,9 @@ export class Panel extends React.Component<Props, State> {
   }
 
   onDisconnectClick = () => {
-    chrome.braveRewards.disconnectWallet()
+    chrome.tabs.create({
+      url: 'chrome://rewards#disconnect-wallet'
+    })
   }
 
   shouldShowConnectedMessage = () => {
@@ -605,7 +603,7 @@ export class Panel extends React.Component<Props, State> {
     const { wallets } = balance
     const publisher: RewardsExtension.Publisher | undefined = this.getPublisher()
     const notVerified = publisher && utils.isPublisherNotVerified(publisher.status)
-    const connected = publisher && utils.isPublisherConnected(publisher.status)
+    const connected = publisher && utils.isPublisherConnectedOrVerified(publisher.status)
     const status = utils.getWalletStatus(externalWallet)
 
     if (notVerified) {
@@ -634,6 +632,8 @@ export class Panel extends React.Component<Props, State> {
         return nonUserFunds === 0
       case 2: // UPHOLD_VERIFIED
         return walletType !== 'uphold'
+      case 3: // BITFLYER_VERIFIED
+        return walletType !== 'bitflyer'
       default:
         return false
     }
@@ -642,14 +642,12 @@ export class Panel extends React.Component<Props, State> {
   getActions = () => {
     let actions = []
 
-    if (!this.props.onlyAnonWallet) {
-      actions.push({
-        name: getMessage('addFunds'),
-        action: this.onAddFunds,
-        icon: <WalletAddIcon />,
-        externalWallet: true
-      })
-    }
+    actions.push({
+      name: getMessage('addFunds'),
+      action: this.onAddFunds,
+      icon: <WalletAddIcon />,
+      externalWallet: true
+    })
 
     return actions.concat([{
       name:  getMessage('rewardsSettings'),
@@ -659,7 +657,7 @@ export class Panel extends React.Component<Props, State> {
     }])
   }
 
-  getCurrentPromotion = (onlyAnonWallet: boolean) => {
+  getCurrentPromotion = () => {
     const { promotions } = this.props.rewardsPanelData
 
     if (!promotions) {
@@ -674,31 +672,26 @@ export class Panel extends React.Component<Props, State> {
       return undefined
     }
 
-    return utils.getPromotion(currentPromotion[0], onlyAnonWallet)
-  }
-
-  showLoginMessage = () => {
-    const { balance, externalWallet } = this.props.rewardsPanelData
-    const walletStatus = utils.getWalletStatus(externalWallet)
-    const walletType = externalWallet ? externalWallet.type : ''
-
-    return (
-      (!walletStatus || walletStatus === 'unverified') &&
-      walletType === 'uphold' &&
-      balance &&
-      balance.total < 25
-    )
+    return utils.getPromotion(currentPromotion[0])
   }
 
   showOnboarding () {
     const {
+      balance,
       showOnboarding,
       parameters,
+      externalWallet,
       adsPerHour,
       autoContributeAmount
     } = this.props.rewardsPanelData
 
-    const { autoContributeChoices } = parameters
+    const externalWalletType = externalWallet ? externalWallet.type : ''
+
+    // Hide AC options in rewards onboarding for bitFlyer-associated regions.
+    let { autoContributeChoices } = parameters
+    if (externalWalletType === 'bitflyer') {
+      autoContributeChoices = []
+    }
 
     if (this.state.showRewardsTour) {
       const onDone = () => {
@@ -720,16 +713,21 @@ export class Panel extends React.Component<Props, State> {
         this.actions.updatePrefs({ autoContributeAmount })
       }
 
+      const onVerifyClick = () => {
+        utils.handleExternalWalletLink(balance, externalWallet)
+      }
+
       return (
         <style.rewardsTourSpacer>
           <RewardsTourModal
             firstTimeSetup={this.state.firstTimeSetup}
-            onlyAnonWallet={this.props.onlyAnonWallet}
             adsPerHour={adsPerHour}
             autoContributeAmount={autoContributeAmount}
             autoContributeAmountOptions={autoContributeChoices}
+            externalWalletProvider={externalWalletType}
             onAdsPerHourChanged={onAdsPerHourChanged}
             onAutoContributeAmountChanged={onAcAmountChanged}
+            onVerifyWalletClick={onVerifyClick}
             onDone={onDone}
             onClose={onClose}
           />
@@ -781,7 +779,6 @@ export class Panel extends React.Component<Props, State> {
     const notificationClick = this.getNotificationClickEvent(notificationType, notificationId)
     const defaultContribution = this.getContribution(publisher)
     const checkmark = publisher && utils.isPublisherConnectedOrVerified(publisher.status)
-    const { onlyAnonWallet } = this.props
 
     const pendingTotal = parseFloat(
       (pendingContributionTotal || 0).toFixed(3))
@@ -794,14 +791,10 @@ export class Panel extends React.Component<Props, State> {
       }
     }
 
-    let currentPromotion = this.getCurrentPromotion(onlyAnonWallet)
+    let currentPromotion = this.getCurrentPromotion()
 
-    let walletStatus: WalletState | undefined = undefined
-    let onVerifyClick = undefined
-    if (!this.props.onlyAnonWallet) {
-      walletStatus = utils.getWalletStatus(externalWallet)
-      onVerifyClick = utils.handleExternalWalletLink.bind(this, balance, externalWallet)
-    }
+    const walletStatus = utils.getWalletStatus(externalWallet)
+    const onVerifyClick = utils.handleExternalWalletLink.bind(this, balance, externalWallet)
 
     return (
       <WalletWrapper
@@ -826,8 +819,6 @@ export class Panel extends React.Component<Props, State> {
         onDisconnectClick={this.onDisconnectClick}
         goToExternalWallet={this.goToExternalWallet}
         greetings={utils.getGreetings(externalWallet)}
-        onlyAnonWallet={this.props.onlyAnonWallet}
-        showLoginMessage={this.showLoginMessage()}
         {...notification}
       >
         <WalletSummarySlider
@@ -857,14 +848,12 @@ export class Panel extends React.Component<Props, State> {
               publisherRefreshed={this.state.publisherRefreshed}
               setMonthlyAction={this.showTipSiteDetail.bind(this, 'set-monthly')}
               cancelMonthlyAction={this.showTipSiteDetail.bind(this, 'clear-monthly')}
-              onlyAnonWallet={onlyAnonWallet}
             />
             : null
           }
           <WalletSummary
             compact={true}
             reservedAmount={pendingTotal}
-            onlyAnonWallet={this.props.onlyAnonWallet}
             reservedMoreLink={'https://brave.com/faq/#unclaimed-funds'}
             {...this.getWalletSummary()}
           />

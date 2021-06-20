@@ -89,8 +89,8 @@ class CreativePromotedContentAds : public Table {
 
   CreativePromotedContentAdInfo GetFromRecord(DBRecord* record) const;
 
-  void CreateTableV10(DBTransaction* transaction);
-  void MigrateToV10(DBTransaction* transaction);
+  void CreateTableV15(DBTransaction* transaction);
+  void MigrateToV15(DBTransaction* transaction);
 
   int batch_size_;
 

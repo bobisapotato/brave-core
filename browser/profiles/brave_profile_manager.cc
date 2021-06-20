@@ -11,11 +11,10 @@
 #include <vector>
 
 #include "base/metrics/histogram_macros.h"
+#include "brave/browser/brave_ads/ads_service_factory.h"
 #include "brave/browser/brave_rewards/rewards_service_factory.h"
 #include "brave/browser/profiles/profile_util.h"
 #include "brave/common/pref_names.h"
-#include "brave/components/brave_ads/browser/ads_service_factory.h"
-#include "brave/components/brave_wallet/buildflags/buildflags.h"
 #include "brave/components/content_settings/core/browser/brave_content_settings_pref_provider.h"
 #include "brave/components/decentralized_dns/buildflags/buildflags.h"
 #include "brave/components/ipfs/buildflags/buildflags.h"
@@ -34,14 +33,8 @@
 #include "components/prefs/pref_service.h"
 #include "components/signin/public/base/signin_pref_names.h"
 #include "content/public/browser/browser_thread.h"
-#include "content/public/browser/notification_service.h"
-#include "content/public/browser/notification_source.h"
 #include "content/public/browser/url_data_source.h"
 #include "ui/base/l10n/l10n_util.h"
-
-#if BUILDFLAG(BRAVE_WALLET_ENABLED)
-#include "brave/browser/brave_wallet/brave_wallet_service_factory.h"
-#endif
 
 #if !BUILDFLAG(USE_GCM_FROM_PLATFORM)
 #include "brave/browser/gcm_driver/brave_gcm_channel_status.h"
@@ -57,12 +50,21 @@
 
 using content::BrowserThread;
 
+namespace {
+
+void AddBraveSharedResourcesDataSourceToProfile(Profile* profile) {
+  content::URLDataSource::Add(
+      profile,
+      std::make_unique<brave_content::BraveSharedResourcesDataSource>());
+}
+
+}  // namespace
+
 BraveProfileManager::BraveProfileManager(const base::FilePath& user_data_dir)
     : ProfileManager(user_data_dir) {
   MigrateProfileNames();
 
-  registrar_.Add(this, chrome::NOTIFICATION_PROFILE_CREATED,
-                 content::NotificationService::AllSources());
+  AddObserver(this);
 }
 
 BraveProfileManager::~BraveProfileManager() {
@@ -73,6 +75,7 @@ BraveProfileManager::~BraveProfileManager() {
       OnProfileCreated(profile, false, false);
     }
   }
+  RemoveObserver(this);
 }
 
 void BraveProfileManager::InitProfileUserPrefs(Profile* profile) {
@@ -87,19 +90,6 @@ void BraveProfileManager::InitProfileUserPrefs(Profile* profile) {
   brave::SetDefaultSearchVersion(profile, profile->IsNewProfile());
 }
 
-std::string BraveProfileManager::GetLastUsedProfileName() {
-  PrefService* local_state = g_browser_process->local_state();
-  DCHECK(local_state);
-  const std::string last_used_profile_name =
-      local_state->GetString(prefs::kProfileLastUsed);
-  // Keep this for legacy tor profile migration because tor profile might be
-  // last active profile before upgrading
-  if (last_used_profile_name ==
-      base::FilePath(tor::kTorProfileDir).AsUTF8Unsafe())
-    return chrome::kInitialProfile;
-  return ProfileManager::GetLastUsedProfileName();
-}
-
 void BraveProfileManager::DoFinalInitForServices(Profile* profile,
                                                  bool go_off_the_record) {
   ProfileManager::DoFinalInitForServices(profile, go_off_the_record);
@@ -107,9 +97,6 @@ void BraveProfileManager::DoFinalInitForServices(Profile* profile,
     return;
   brave_ads::AdsServiceFactory::GetForProfile(profile);
   brave_rewards::RewardsServiceFactory::GetForProfile(profile);
-#if BUILDFLAG(BRAVE_WALLET_ENABLED)
-  BraveWalletServiceFactory::GetForProfile(profile);
-#endif
 #if BUILDFLAG(IPFS_ENABLED)
   ipfs::IpfsServiceFactory::GetForContext(profile);
 #endif
@@ -183,21 +170,21 @@ void BraveProfileManager::MigrateProfileNames() {
 #endif
 }
 
-void BraveProfileManager::Observe(int type,
-                                  const content::NotificationSource& source,
-                                  const content::NotificationDetails& details) {
-  switch (type) {
-    case chrome::NOTIFICATION_PROFILE_CREATED: {
-      Profile* profile = content::Source<Profile>(source).ptr();
-      content::URLDataSource::Add(
-          profile,
-          std::make_unique<brave_content::BraveSharedResourcesDataSource>());
-      break;
-    }
-    default: {
-      ProfileManager::Observe(type, source, details);
-      break;
-    }
+void BraveProfileManager::OnProfileAdded(Profile* profile) {
+  // Observe new profiles for creation of OTR profiles so that we can add our
+  // shared resources to them.
+  observed_profiles_.AddObservation(profile);
+  AddBraveSharedResourcesDataSourceToProfile(profile);
+}
+
+void BraveProfileManager::OnOffTheRecordProfileCreated(
+    Profile* off_the_record) {
+  AddBraveSharedResourcesDataSourceToProfile(off_the_record);
+}
+
+void BraveProfileManager::OnProfileWillBeDestroyed(Profile* profile) {
+  if (!profile->IsOffTheRecord()) {
+    observed_profiles_.RemoveObservation(profile);
   }
 }
 

@@ -7,16 +7,17 @@
 
 #include "base/command_line.h"
 #include "brave/browser/browsing_data/brave_clear_browsing_data.h"
+#include "brave/browser/ethereum_remote_client/buildflags/buildflags.h"
 #include "brave/common/brave_constants.h"
 #include "brave/common/pref_names.h"
 #include "brave/components/brave_sync/buildflags/buildflags.h"
 #include "brave/components/brave_sync/features.h"
-#include "brave/components/brave_wallet/buildflags/buildflags.h"
 #include "brave/components/tor/buildflags/buildflags.h"
 #include "chrome/common/chrome_features.h"
 #include "components/prefs/pref_service.h"
 #include "components/sync/driver/sync_driver_switches.h"
 #include "content/public/browser/render_frame_host.h"
+#include "extensions/buildflags/buildflags.h"
 #include "media/base/media_switches.h"
 
 #if BUILDFLAG(ENABLE_TOR)
@@ -33,9 +34,9 @@
 #if !defined(OS_ANDROID)
 #include "brave/browser/infobars/brave_confirm_p3a_infobar_delegate.h"
 #include "brave/browser/infobars/crypto_wallets_infobar_delegate.h"
+#include "chrome/browser/infobars/infobar_service.h"
 #include "chrome/browser/ui/browser.h"
 #include "chrome/browser/ui/browser_finder.h"
-#include "chrome/browser/infobars/infobar_service.h"
 #include "content/public/browser/web_contents.h"
 #endif
 
@@ -45,12 +46,12 @@
 
 #if BUILDFLAG(ENABLE_BRAVE_SYNC) && !defined(OS_ANDROID)
 #include "brave/browser/infobars/sync_v2_migrate_infobar_delegate.h"
+#include "chrome/browser/sync/profile_sync_service_factory.h"
 #include "components/sync/driver/sync_service.h"
 #include "components/sync/driver/sync_user_settings.h"
-#include "chrome/browser/sync/profile_sync_service_factory.h"
 #endif
 
-#if BUILDFLAG(BRAVE_WALLET_ENABLED)
+#if BUILDFLAG(ETHEREUM_REMOTE_CLIENT_ENABLED) && BUILDFLAG(ENABLE_EXTENSIONS)
 #include "brave/browser/extensions/brave_component_loader.h"
 #include "chrome/browser/extensions/extension_service.h"
 #include "extensions/browser/extension_system.h"
@@ -70,12 +71,13 @@ void BraveBrowserMainParts::PostBrowserStart() {
     // because we will hit DCHECK(!GetProfileAttributesWithPath(...))  in
     // ProfileInfoCache::DeleteProfileFromCache when we trying to delete it
     // without this being added into the storage first.
-    ProfileAttributesEntry* entry = nullptr;
     ProfileAttributesStorage& storage =
         profile_manager->GetProfileAttributesStorage();
-    if (!storage.GetProfileAttributesWithPath(tor_legacy_path, &entry)) {
-      storage.AddProfile(tor_legacy_path, base::string16(), std::string(),
-                         base::string16(),
+    ProfileAttributesEntry* entry =
+        storage.GetProfileAttributesWithPath(tor_legacy_path);
+    if (!entry) {
+      storage.AddProfile(tor_legacy_path, std::u16string(), std::string(),
+                         std::u16string(),
                          /* is_consented_primary_account*/ false, 0,
                          std::string(), EmptyAccountId());
     }
@@ -112,13 +114,15 @@ void BraveBrowserMainParts::PostBrowserStart() {
         BraveConfirmP3AInfoBarDelegate::Create(
             infobar_service, g_browser_process->local_state());
 #if BUILDFLAG(ENABLE_BRAVE_SYNC)
-      auto* sync_service = ProfileSyncServiceFactory::IsSyncAllowed(profile())
-             ? ProfileSyncServiceFactory::GetForProfile(profile())
-             : nullptr;
-      const bool is_v2_user = sync_service &&
-          sync_service->GetUserSettings()->IsFirstSetupComplete();
-      SyncV2MigrateInfoBarDelegate::Create(infobar_service, is_v2_user,
-          profile(), browser);
+        auto* sync_service =
+            ProfileSyncServiceFactory::IsSyncAllowed(profile())
+                ? ProfileSyncServiceFactory::GetForProfile(profile())
+                : nullptr;
+        const bool is_v2_user =
+            sync_service &&
+            sync_service->GetUserSettings()->IsFirstSetupComplete();
+        SyncV2MigrateInfoBarDelegate::Create(infobar_service, is_v2_user,
+                                             profile(), browser);
 #endif  // BUILDFLAG(ENABLE_BRAVE_SYNC)
       }
     }
@@ -137,7 +141,7 @@ void BraveBrowserMainParts::PreProfileInit() {
   if (!base::FeatureList::IsEnabled(brave_sync::features::kBraveSync)) {
     // Disable sync temporarily
     if (!command_line->HasSwitch(switches::kDisableSync))
-        command_line->AppendSwitch(switches::kDisableSync);
+      command_line->AppendSwitch(switches::kDisableSync);
   } else {
     // Relaunch after flag changes will still have the switch
     // when switching from disabled to enabled
@@ -157,7 +161,7 @@ void BraveBrowserMainParts::PostProfileInit() {
   }
 #endif
 
-#if BUILDFLAG(BRAVE_WALLET_ENABLED)
+#if BUILDFLAG(ETHEREUM_REMOTE_CLIENT_ENABLED) && BUILDFLAG(ENABLE_EXTENSIONS)
   extensions::ExtensionService* service =
       extensions::ExtensionSystem::Get(profile())->extension_service();
   if (service) {

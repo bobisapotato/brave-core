@@ -5,7 +5,7 @@
 <translation id="7942180974165298215">Brave 廣告阻擋</translation>
 <translation id="4615489450165434530">回報壞掉的網站</translation>
 <translation id="6406506848690869874">同步</translation>
-<translation id="5655621391922317800">加密錢包</translation>
+<translation id="1544192797660353713">錢包</translation>
 <translation id="2445484935443597917">建立新的個人資料</translation>
 <translation id="2666990579225592931">開啟訪客視窗</translation>
 <translation id="8275068909952022340">其他…</translation>
@@ -59,13 +59,29 @@
 <translation id="1970435562892104727">這是 Tor 的私人視窗</translation>
 <translation id="1037341607922068025">用 Tor 開啟私人視窗</translation>
 <translation id="1725356094208762656">在 Tor 中開啟</translation>
+<translation id="7643538479215207633">使用 IPFS 開啟</translation>
+<translation id="3094628781200061820">在 IPFS 發佈並擷取檔案</translation>
 <translation id="1672270084584211506">Onion 可用</translation>
+<translation id="4901618511712685702">匯入至 IPFS</translation>
+<translation id="6794469945030154569">此頁面</translation>
+<translation id="5037852323412456577">選取的圖片</translation>
+<translation id="2715839724138372481">選取的影片</translation>
+<translation id="4227945450504703638">選取的音訊</translation>
+<translation id="7895302206188277628">連結的內容</translation>
+<translation id="4322612543319315652">將選取的文字匯入至 IPFS</translation>
+<translation id="8883166554766780543">匯入並複製連結至 IPFS 快照</translation>
+<translation id="3654831858282189202">使用 IPNS 金鑰發佈</translation>
+<translation id="7691598647605453992">IPFS</translation>
 <translation id="1434416574322382019">以 Tor 開啟新私有窗口</translation>
 <translation id="4703780849509456860">使用 Tor 在隱私視窗中打開連結</translation>
 <translation id="3488584642074079080">使用 Tor 在隱私視窗中打開連結</translation>
+<translation id="7475547933708221517">使用 IPFS 共用本機檔案</translation>
+<translation id="2286177249736199435">使用 IPFS 分享本機資料夾</translation>
+<translation id="784573715436258741">使用 IPFS 共用本機檔案</translation>
 <translation id="6313675821927505581">新的使用 Tor 的視窗</translation>
 <translation id="2638041073279639246">在使用 Tor 的隱私視窗中開啟連結</translation>
 <translation id="3425600262621021599">在使用 Tor 的 Brave 隱私視窗中開啟連結</translation>
+<translation id="575838692088926391">使用 IPFS 分享本機資料夾</translation>
 <translation id="5410152065859052603">Tor</translation>
 <translation id="2515126961943087659">BAT 廣告服務</translation>
 <translation id="7924918279836988121">Bat 分類帳服務</translation>
@@ -145,7 +161,7 @@
 <translation id="4112587618563511470">無效的同步代碼，請檢查並再試一次。</translation>
 <translation id="2339730291919608488">離開同步鏈結</translation>
 <translation id="115699408012835975">如果您重設同步，您將必須重新輸入從其他裝置而來的同步代碼以與其同步。您確定您想要繼續嗎？</translation>
-<translation id="339086854515247923">您確定您想要從您的同步鏈刪除選定的裝置嗎？</translation>
+<translation id="6092564993102418148">您確定您想要從同步鏈移除選定的裝置嗎？</translation>
 <translation id="3396347744975515056">Brave 同步已升級並需要設定</translation>
 <translation id="7473245612074035141">開始設定</translation>
 <translation id="3411013544209536575">協助小費</translation>
@@ -156,24 +172,49 @@
 <translation id="1336940801687497203">與 Windows 相同</translation>
 <translation id="8721331068159819483">與 macOS 相同</translation>
 <translation id="2896916411183256228">使用 WebTorrent 直接在瀏覽器顯示種子檔案。支援種子檔案和磁力連結。</translation>
+<translation id="8488282162676695335">Brave 錢包</translation>
 <translation id="2356070529366658676">詢問</translation>
 <translation id="7701040980221191251">無</translation>
+<translation id="5655621391922317800">加密錢包</translation>
+<translation id="1696548911367097044">不推薦使用的加密錢包擴充</translation>
 <translation id="1085027414516521238">MetaMask</translation>
 <translation id="7090046810227878892">用於使用去中央化應用程式 (Dapp) 的乙太坊提供者</translation>
 <translation id="5913089932885076110">啟動時載入加密錢包</translation>
+<translation id="757886143331967039">在啟動時載入不推薦使用的加密錢包擴充</translation>
+<translation id="1834467296210148203">在工具列上顯示 Brave Wallet 圖示</translation>
 <translation id="6864914031231797928">允許延伸套件登入 Google</translation>
+<translation id="5927916530277631319">處理 Unstoppable Domains 的方式</translation>
+<translation id="8412057160793088103"><ph name="BEGIN_LINK"/>進一步了解<ph name="END_LINK"/> 關於 DNS over HTTPS 與以太坊的隱私考量。</translation>
+<translation id="5248318250177143470">處理以太坊域名服務 (ENS) 的方式</translation>
+<translation id="7024553202001112871">設定您的 IPNS 金鑰</translation>
+<translation id="951216659045543447">透過對應的私鑰簽署內容並將其發佈到 IPNS</translation>
+<translation id="7611728475758612204">用於發佈的金鑰</translation>
+<translation id="911363100236037920">輸入新金鑰名稱</translation>
+<translation id="6358469157239228181">此名稱無法使用</translation>
+<translation id="8996633027318264334">您真的想要刪除 <ph name="KEY_NAME"/> 嗎？</translation>
+<translation id="910215077892371264">節點未啟動</translation>
+<translation id="616058968889448209">IPFS 服務啟動錯誤，更多資訊已提供於 <ph name="BEGIN_LINK"/>診斷頁面<ph name="END_LINK"/></translation>
+<translation id="6912148685459054619">'<ph name="KEY_NAME"/>' 金鑰匯入失敗</translation>
+<translation id="8275038454117074363">匯入</translation>
+<translation id="3654980960391973513">產生</translation>
+<translation id="5531501313997312487">啟動節點</translation>
 <translation id="9170907049676078643">解析 IPFS 資源的方法</translation>
 <translation id="1327977588028644528">閘道</translation>
 <translation id="80225669816651290">本地節點</translation>
 <translation id="4927734062756955434">IPFS 公用閘道器位址</translation>
+<translation id="3399481770463167943"><ph name="BEGIN_LINK_MPL"/>進一步了解<ph name="END_LINK_MPL"/> 關於 IPFS 本機節點與閘道的隱私考量。</translation>
 <translation id="8425213833346101688">變更</translation>
 <translation id="557281710253742286">設定 IPFS 閘道器</translation>
 <translation id="8571837315037233299">閘道器位址</translation>
+<translation id="1251574393468476924">IPFS 快取大小上限 (GB)</translation>
+<translation id="2503497578400410320">IPFS 儲存庫 datastore 大小的軟上限。</translation>
 <translation id="7703184801853248830">無效的閘道器位址</translation>
 <translation id="585868419599255817">IPFS 公開閘道器汰退</translation>
 <translation id="207763736230883589">若無法連接您的本地節點，則自動返回公用 IPFS 閘道器。</translation>
 <translation id="4107552920076294723">將 IPFS 資源重新導向到已設定的 IPFS 閘道器</translation>
 <translation id="6494857428933042381">當遇到 IPFS 閘道器資源時，自動使用設定的閘道器進行 IPFS 解析。</translation>
+<translation id="8655170717758778983">可行時，自動透過 DNSLink 重新導向至 IPFS 頁面</translation>
+<translation id="2233724520223030977">可行時，會自動使用 DNSLink 來導向至網站的 IPFS 版本</translation>
 <translation id="6554397389149987360">使用 Hangouts 元件來啟用畫面分享和其它瀏覽器功能。</translation>
 <translation id="1765684547504191670">使用媒體路由器元件以在瀏覽器中啟用 Chromecast。</translation>
 <translation id="9156965752763025780">你的變更將於下次重新啟動 Brave 時生效。</translation>
@@ -233,12 +274,13 @@
 <translation id="1959966725083452288">高貴糖果化身</translation>
 <translation id="2039034364578911089">糖果忍者化身</translation>
 <translation id="239760341987199724">將 Brave 設為預設瀏覽器</translation>
-<translation id="9185422039067880535">Brave 瀏覽器目前未設定為您的預設瀏覽器。
-將 Brave 設定為您的預設瀏覽器，讓瀏覽主要
-的新聞網站的速度提升到六倍快。</translation>
+<translation id="1391855377994926460">保持更快的瀏覽網路速度，在主要新聞網站上的瀏覽速度是六倍快。</translation>
 <translation id="9218430445555521422">設定為預設瀏覽器</translation>
 <translation id="3479552764303398839">現在不要</translation>
+<translation id="6040143037577758943">關閉</translation>
+<translation id="5600566490506283344">Brave 廣告通知</translation>
 <translation id="4877147287319222750">新增到側邊欄</translation>
+<translation id="4233010476457917696">顯示側邊欄</translation>
 <translation id="5404213409401164238">顯示側邊欄</translation>
 <translation id="7561196759112975576">總是</translation>
 <translation id="7060352228894039151">滑鼠游標懸停其上時</translation>
@@ -254,11 +296,9 @@
 <translation id="7090566321964540749">此匿名資訊只會讓 Brave 評估特定功能的整題使用量。</translation>
 <translation id="1947672064022327074">您想開啟加密錢包以支援乙太坊嗎？</translation>
 <translation id="7583735190612229830">設定 Crypto Wallets 以與此應用程式和其他類似的應用程式互動。</translation>
-<translation id="4823406846571523661">設定加密錢包</translation>
+<translation id="8731422418734770661">設定加密錢包</translation>
 <translation id="8199661191594897555">啟動加密錢包並重新載入</translation>
 <translation id="8428213095426709021">設定</translation>
-<translation id="1664718502100303670">電子錢包設定</translation>
-<translation id="965566669123544695">IPFS 設定</translation>
 <translation id="72868071984333667">深入了解 IPFS 和隱私權</translation>
 <translation id="4552520379838695057">抱歉，頁面遺失。</translation>
 <translation id="2609895996619941644">您想要檢查 Wayback Machine 上是否有已儲存的版本嗎？</translation>

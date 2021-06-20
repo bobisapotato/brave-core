@@ -5,16 +5,12 @@
 
 #include "bat/ads/internal/unittest_util.h"
 
-#include <stdint.h>
-
 #include <limits>
-#include <vector>
 
 #include "base/base_paths.h"
 #include "base/containers/flat_map.h"
 #include "base/files/file_util.h"
 #include "base/path_service.h"
-#include "base/strings/string16.h"
 #include "base/strings/string_number_conversions.h"
 #include "base/strings/string_split.h"
 #include "base/strings/string_util.h"
@@ -42,6 +38,8 @@ namespace ads {
 namespace {
 
 static std::map<std::string, uint16_t> g_url_endpoint_indexes;
+
+static std::map<std::string, std::vector<uint64_t>> g_ad_events;
 
 static std::map<std::string, std::string> g_prefs;
 
@@ -385,7 +383,7 @@ void MockClearPref(const std::unique_ptr<AdsClientMock>& mock) {
 void MockDefaultPrefs(const std::unique_ptr<AdsClientMock>& mock) {
   mock->SetBooleanPref(prefs::kEnabled, true);
 
-  mock->SetUint64Pref(prefs::kAdsPerHour, 0);
+  mock->SetInt64Pref(prefs::kAdsPerHour, -1);
 
   mock->SetIntegerPref(prefs::kIdleTimeThreshold, 15);
 
@@ -535,6 +533,11 @@ void MockIsForeground(const std::unique_ptr<AdsClientMock>& mock,
   ON_CALL(*mock, IsForeground()).WillByDefault(Return(is_foreground));
 }
 
+void MockIsFullScreen(const std::unique_ptr<AdsClientMock>& mock,
+                      const bool is_full_screen) {
+  ON_CALL(*mock, IsFullScreen()).WillByDefault(Return(is_full_screen));
+}
+
 void MockShouldShowNotifications(const std::unique_ptr<AdsClientMock>& mock,
                                  const bool should_show) {
   ON_CALL(*mock, ShouldShowNotifications()).WillByDefault(Return(should_show));
@@ -548,6 +551,61 @@ void MockShowNotification(const std::unique_ptr<AdsClientMock>& mock) {
 void MockCloseNotification(const std::unique_ptr<AdsClientMock>& mock) {
   ON_CALL(*mock, CloseNotification(_))
       .WillByDefault(Invoke([](const std::string& uuid) {}));
+}
+
+void MockRecordAdEvent(const std::unique_ptr<AdsClientMock>& mock) {
+  ON_CALL(*mock, RecordAdEvent(_, _, _))
+      .WillByDefault(Invoke([](const std::string& ad_type,
+                               const std::string& confirmation_type,
+                               const uint64_t timestamp) {
+        DCHECK(!ad_type.empty());
+        DCHECK(!confirmation_type.empty());
+
+        const std::string name = ad_type + confirmation_type;
+        const std::string uuid = GetUuid(name);
+
+        const auto iter = g_ad_events.find(uuid);
+        if (iter == g_ad_events.end()) {
+          g_ad_events.insert({uuid, {timestamp}});
+        } else {
+          iter->second.push_back(timestamp);
+        }
+      }));
+}
+
+void MockGetAdEvents(const std::unique_ptr<AdsClientMock>& mock) {
+  ON_CALL(*mock, GetAdEvents(_, _))
+      .WillByDefault(Invoke(
+          [](const std::string& ad_type,
+             const std::string& confirmation_type) -> std::vector<uint64_t> {
+            DCHECK(!ad_type.empty());
+            DCHECK(!confirmation_type.empty());
+
+            const std::string name = ad_type + confirmation_type;
+            const std::string uuid = GetUuid(name);
+
+            const auto iter = g_ad_events.find(uuid);
+            if (iter == g_ad_events.end()) {
+              return {};
+            }
+
+            return iter->second;
+          }));
+}
+
+void MockGetBrowsingHistory(const std::unique_ptr<AdsClientMock>& mock) {
+  ON_CALL(*mock, GetBrowsingHistory(_, _, _))
+      .WillByDefault(Invoke([](const int max_count, const int days_ago,
+                               GetBrowsingHistoryCallback callback) {
+        std::vector<std::string> history;
+        for (int i = 0; i < max_count; i++) {
+          const std::string entry =
+              base::StringPrintf("https://www.brave.com/%d", i);
+          history.push_back(entry);
+        }
+
+        callback(history);
+      }));
 }
 
 void MockSave(const std::unique_ptr<AdsClientMock>& mock) {
@@ -573,21 +631,41 @@ void MockLoad(const std::unique_ptr<AdsClientMock>& mock) {
       }));
 }
 
-void MockLoadUserModelForId(const std::unique_ptr<AdsClientMock>& mock) {
-  ON_CALL(*mock, LoadUserModelForId(_, _))
-      .WillByDefault(Invoke([](const std::string& id, LoadCallback callback) {
-        base::FilePath path = GetTestPath();
-        path = path.AppendASCII("user_models");
-        path = path.AppendASCII(id);
+void MockLoad(const std::unique_ptr<AdsClientMock>& mock,
+              const std::string& filename,
+              const std::string& filename_override) {
+  ON_CALL(*mock, Load(filename, _))
+      .WillByDefault(
+          Invoke([=](const std::string& name, LoadCallback callback) {
+            base::FilePath path = GetTestPath();
+            path = path.AppendASCII(filename_override);
 
-        std::string value;
-        if (!base::ReadFileToString(path, &value)) {
-          callback(FAILED, value);
-          return;
-        }
+            std::string value;
+            if (!base::ReadFileToString(path, &value)) {
+              callback(FAILED, value);
+              return;
+            }
 
-        callback(SUCCESS, value);
-      }));
+            callback(SUCCESS, value);
+          }));
+}
+
+void MockLoadAdsResource(const std::unique_ptr<AdsClientMock>& mock) {
+  ON_CALL(*mock, LoadAdsResource(_, _, _))
+      .WillByDefault(Invoke(
+          [](const std::string& id, const int version, LoadCallback callback) {
+            base::FilePath path = GetTestPath();
+            path = path.AppendASCII("resources");
+            path = path.AppendASCII(id);
+
+            std::string value;
+            if (!base::ReadFileToString(path, &value)) {
+              callback(FAILED, value);
+              return;
+            }
+
+            callback(SUCCESS, value);
+          }));
 }
 
 void MockLoadResourceForId(const std::unique_ptr<AdsClientMock>& mock) {

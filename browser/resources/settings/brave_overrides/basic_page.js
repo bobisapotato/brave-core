@@ -5,7 +5,7 @@
 
 import {html} from 'chrome://resources/polymer/v3_0/polymer/polymer_bundled.min.js'
 import {RegisterStyleOverride,RegisterPolymerTemplateModifications} from 'chrome://brave-resources/polymer_overriding.js'
-import {Router} from '../router.m.js'
+import {Router} from '../router.js'
 import {loadTimeData} from '../i18n_setup.js'
 import {pageVisibility} from './page_visibility.js'
 
@@ -82,6 +82,8 @@ RegisterPolymerTemplateModifications({
     }
     if (pageVisibility.braveIPFS) {
       r.BRAVE_IPFS = r.BASIC.createSection('/ipfs', 'ipfs')
+      r.BRAVE_IPFS_KEYS = r.BRAVE_IPFS.createChild('/ipfs/keys');
+      r.BRAVE_IPFS_PEERS = r.BRAVE_IPFS.createChild('/ipfs/peers');
     }
     if (pageVisibility.braveWallet) {
       r.BRAVE_WALLET = r.BASIC.createSection('/wallet', 'wallet')
@@ -147,7 +149,7 @@ RegisterPolymerTemplateModifications({
       const sectionIPFS = document.createElement('template')
       sectionIPFS.setAttribute('is', 'dom-if')
       sectionIPFS.setAttribute('restamp', true)
-      sectionIPFS.setAttribute('if', '[[showPage_(pageVisibility.ipfs)]]')
+      sectionIPFS.setAttribute('if', '[[showPage_(pageVisibility.braveIPFS)]]')
       sectionIPFS.content.appendChild(createSectionElement(
         'ipfs',
         'braveIPFS',
@@ -159,7 +161,7 @@ RegisterPolymerTemplateModifications({
       const sectionWallet = document.createElement('template')
       sectionWallet.setAttribute('is', 'dom-if')
       sectionWallet.setAttribute('restamp', true)
-      sectionWallet.setAttribute('if', '[[showPage_(pageVisibility.wallet)]]')
+      sectionWallet.setAttribute('if', '[[showPage_(pageVisibility.braveWallet)]]')
       sectionWallet.content.appendChild(createSectionElement(
         'wallet',
         'braveWallet',

@@ -235,6 +235,18 @@
     "message": "Пожалуйста, создайте резервную копию вашего кошелька Brave.",
     "description": "Description for backup wallet notification"
   },
+  "deviceLimitReachedLearnMore": {
+    "message": "Подробнее…",
+    "description": "Notification button text to learn more about device limit"
+  },
+  "deviceLimitReachedTitle": {
+    "message": "Достигнуто ограничение на число устройств",
+    "description": "Title for device limit reached notification"
+  },
+  "deviceLimitReachedNotification": {
+    "message": "Ваш кошелек не может быть подтвержден, потому что вы достигли максимального количества подтвержденных устройств.",
+    "description": "Description for device limit reached notification"
+  },
   "insufficientFundsNotification": {
     "message": "Ваш аккаунт Brave Rewards ожидает внесения депозита.",
     "description": "Description for new insufficient funds notification"
@@ -515,9 +527,15 @@
     "message": "Кошелек верифицирован",
     "description": "Displayed in wallet that tells users that he is verified"
   },
-  "walletGoToUphold":  {
-    "message": "Перейти к моей учетной записи Uphold",
-    "description": "CTA to open uphold account"
+  "walletGoToProvider":  {
+    "message": "Перейти в мой аккаунт $provider$",
+    "description": "CTA to open an external wallet account",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Uphold"
+      }
+    }
   },
   "walletDisconnect":  {
     "message": "Отключиться от Brave Rewards",
@@ -612,8 +630,14 @@
     "description": "Text for login button"
   },
   "loginMessageText":  {
-    "message": "Для создания аккаунта Uphold вам нужно иметь минимум 25 BAT. Пожалуйста, повторите попытку позже. \n Если у вас уже есть верифицированный аккаунт Uphold, переходите ко входу в систему.",
-    "description": "Text for login button"
+    "message": "Если вы хотите создать аккаунт Uphold, у вас должно быть не менее $amount$ BAT. Если у вас уже есть подтвержденный аккаунт, войдите в него.",
+    "description": "Text for login button",
+    "placeholders": {
+      "amount": {
+        "content": "$1",
+        "example": "15"
+      }
+    }
   },
   "walletConnected":  {
     "message": "Подключено",
@@ -624,8 +648,14 @@
     "description": "Status button that tells user that he is currently pending"
   },
   "walletVerificationNote3":  {
-    "message": "Примечание: ваши транзакции будут видимы для Uphold с момента вашей авторизации; например, они смогут просмотреть получателя и сумму ваших чаевых.",
-    "description": "Displayed in login modal for uphold"
+    "message": "Внимание: ваши транзакции будут видны $provider$ после авторизации; например, они смогут увидеть получателя и сумму чаевых.",
+    "description": "Displayed in login modal for external wallet providers",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Uphold"
+      }
+    }
   },
   "onboardingEarnHeader": {
     "message": "Зарабатывайте жетоны и выражайте благодарность",
@@ -718,7 +748,7 @@
     "description": ""
   },
   "onboardingPanelScheduleHeader": {
-    "message": "Когда вы получаете вознаграждения",
+    "message": "Когда вы получаете вознаграждение?",
     "description": ""
   },
   "onboardingPanelScheduleText": {
@@ -764,6 +794,42 @@
   "onboardingPanelCompleteText": {
     "message": "Используя Brave Rewards, вы помогаете сделать Интернет лучше для всех. И это прекрасно!",
     "description": ""
+  },
+  "onboardingPanelVerifyHeader": {
+    "message": "Подтвердите свой кошелек",
+    "description": ""
+  },
+  "onboardingPanelVerifySubtext": {
+    "message": "Чтобы вывести баллы, полученные за просмотр рекламы, подтвердите ваш кошелек.",
+    "description": ""
+  },
+  "onboardingPanelVerifyLater": {
+    "message": "Позже",
+    "description": ""
+  },
+  "onboardingPanelVerifyNow": {
+    "message": "Подтверждаю",
+    "description": ""
+  },
+  "onboardingPanelBitflyerNote": {
+    "message": "Кошелек bitFlyer — сервис, предоставляемый компанией bitFlyer, Inc.",
+    "description": ""
+  },
+  "onboardingPanelBitflyerText": {
+    "message": "Подтвердите ваш кошелек и свяжите его с аккаунтом bitFlyer. Хранить баллы Brave Rewards и управлять ими станет еще удобнее.",
+    "description": ""
+  },
+  "onboardingPanelBitflyerLearnMore": {
+    "message": "$link_begin$Подробнее$link_end$ о том, как привязать аккаунт bitFlyer к браузеру Brave.",
+    "description": "",
+    "placeholders": {
+      "link_begin": {
+        "content": "$1"
+      },
+      "link_end": {
+        "content": "$2"
+      }
+    }
   },
   "bapDeprecationHeader": {
     "message": "Brave Rewards в Японии переходит на новую систему!",

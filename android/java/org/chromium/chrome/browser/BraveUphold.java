@@ -34,6 +34,10 @@ public class BraveUphold implements BraveRewardsObserver {
     public static final String UPHOLD_SUPPORT_URL = "http://uphold.com/en/brave/support";
     public static final String UPHOLD_ORIGIN_URL = "http://uphold.com";
 
+    // Wallet types
+    public static final String UPHOLD = "uphold";
+    public static final String BITFLYER = "bitflyer";
+
     private static int UNKNOWN_ERROR_CODE = -1;
 
     private ExternalNavigationParams mExternalNavigationParams;

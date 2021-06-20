@@ -24,6 +24,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
+import androidx.collection.ArraySet;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
@@ -31,33 +33,41 @@ import org.json.JSONException;
 
 import org.chromium.base.ApplicationStatus;
 import org.chromium.base.BraveReflectionUtil;
+import org.chromium.base.CollectionUtil;
 import org.chromium.base.CommandLine;
 import org.chromium.base.ContextUtils;
 import org.chromium.base.IntentUtils;
 import org.chromium.base.Log;
 import org.chromium.base.annotations.JNINamespace;
+import org.chromium.base.annotations.NativeMethods;
 import org.chromium.base.supplier.ObservableSupplier;
 import org.chromium.base.task.PostTask;
 import org.chromium.base.task.TaskTraits;
 import org.chromium.chrome.R;
 import org.chromium.chrome.browser.ApplicationLifetime;
 import org.chromium.chrome.browser.BraveConfig;
-import org.chromium.chrome.browser.BraveFeatureList;
 import org.chromium.chrome.browser.BraveHelper;
+import org.chromium.chrome.browser.BraveRelaunchUtils;
 import org.chromium.chrome.browser.BraveRewardsHelper;
 import org.chromium.chrome.browser.BraveRewardsNativeWorker;
-import org.chromium.chrome.browser.BraveRewardsObserver;
 import org.chromium.chrome.browser.BraveSyncReflectionUtils;
 import org.chromium.chrome.browser.ChromeTabbedActivity;
 import org.chromium.chrome.browser.CrossPromotionalModalDialogFragment;
-import org.chromium.chrome.browser.DeprecateBAPModalDialogFragment;
 import org.chromium.chrome.browser.LaunchIntentDispatcher;
 import org.chromium.chrome.browser.SetDefaultBrowserActivity;
 import org.chromium.chrome.browser.bookmarks.BookmarkBridge;
 import org.chromium.chrome.browser.bookmarks.BookmarkModel;
 import org.chromium.chrome.browser.brave_stats.BraveStatsUtil;
+import org.chromium.chrome.browser.browsing_data.BrowsingDataBridge;
+import org.chromium.chrome.browser.browsing_data.BrowsingDataType;
+import org.chromium.chrome.browser.browsing_data.ClearBrowsingDataFragmentAdvanced;
+import org.chromium.chrome.browser.browsing_data.TimePeriod;
+import org.chromium.chrome.browser.compositor.layouts.Layout;
+import org.chromium.chrome.browser.compositor.layouts.LayoutManagerChrome;
+import org.chromium.chrome.browser.compositor.layouts.LayoutManagerImpl;
+import org.chromium.chrome.browser.compositor.layouts.phone.StackLayout;
+import org.chromium.chrome.browser.crypto_wallet.CryptoWalletActivity;
 import org.chromium.chrome.browser.dependency_injection.ChromeActivityComponent;
-import org.chromium.chrome.browser.flags.ChromeFeatureList;
 import org.chromium.chrome.browser.flags.ChromeSwitches;
 import org.chromium.chrome.browser.informers.BraveAndroidSyncDisabledInformer;
 import org.chromium.chrome.browser.notifications.BraveSetDefaultBrowserNotificationService;
@@ -65,12 +75,13 @@ import org.chromium.chrome.browser.notifications.retention.RetentionNotification
 import org.chromium.chrome.browser.ntp.NewTabPage;
 import org.chromium.chrome.browser.onboarding.OnboardingActivity;
 import org.chromium.chrome.browser.onboarding.OnboardingPrefManager;
-import org.chromium.chrome.browser.onboarding.P3aOnboardingActivity;
 import org.chromium.chrome.browser.onboarding.v2.HighlightDialogFragment;
 import org.chromium.chrome.browser.preferences.BravePrefServiceBridge;
 import org.chromium.chrome.browser.preferences.BravePreferenceKeys;
 import org.chromium.chrome.browser.preferences.Pref;
 import org.chromium.chrome.browser.preferences.SharedPreferencesManager;
+import org.chromium.chrome.browser.preferences.website.BraveShieldsContentSettings;
+import org.chromium.chrome.browser.privacy.settings.BravePrivacySettings;
 import org.chromium.chrome.browser.profiles.Profile;
 import org.chromium.chrome.browser.rate.RateDialogFragment;
 import org.chromium.chrome.browser.rate.RateUtils;
@@ -98,18 +109,20 @@ import org.chromium.components.search_engines.TemplateUrl;
 import org.chromium.components.user_prefs.UserPrefs;
 import org.chromium.ui.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 /**
  * Brave's extension for ChromeActivity
  */
 @JNINamespace("chrome::android")
 public abstract class BraveActivity<C extends ChromeActivityComponent>
-        extends ChromeActivity implements BraveRewardsObserver {
+        extends ChromeActivity implements BrowsingDataBridge.OnClearBrowsingDataListener {
     public static final int SITE_BANNER_REQUEST_CODE = 33;
     public static final int VERIFY_WALLET_ACTIVITY_REQUEST_CODE = 34;
     public static final int USER_WALLET_ACTIVITY_REQUEST_CODE = 35;
@@ -123,13 +136,14 @@ public abstract class BraveActivity<C extends ChromeActivityComponent>
     public static final String P3A_URL = "https://brave.com/p3a";
     public static final String BRAVE_PRIVACY_POLICY = "https://brave.com/privacy/#rewards";
     private static final String PREF_CLOSE_TABS_ON_EXIT = "close_tabs_on_exit";
+    private static final String PREF_CLEAR_ON_EXIT = "clear_on_exit";
     public static final String OPEN_URL = "open_url";
 
     public static final String BRAVE_PRODUCTION_PACKAGE_NAME = "com.brave.browser";
     public static final String BRAVE_BETA_PACKAGE_NAME = "com.brave.browser_beta";
     public static final String BRAVE_NIGHTLY_PACKAGE_NAME = "com.brave.browser_nightly";
 
-    private static final int DAYS_3 = 3;
+    private static final int DAYS_1 = 1;
     private static final int DAYS_4 = 4;
     private static final int DAYS_5 = 5;
     private static final int DAYS_12 = 12;
@@ -142,12 +156,9 @@ public abstract class BraveActivity<C extends ChromeActivityComponent>
     public static final String ANDROID_PACKAGE_NAME = "android";
     public static final String BRAVE_BLOG_URL = "http://www.brave.com/blog";
 
-    private static final String JAPAN_COUNTRY_CODE = "JP";
-
     // Explicitly declare this variable to avoid build errors.
     // It will be removed in asm and parent variable will be used instead.
     protected ObservableSupplier<Profile> mTabModelProfileSupplier;
-    private BraveRewardsNativeWorker mBraveRewardsNativeWorker;
 
     private static final List<String> yandexRegions =
             Arrays.asList("AM", "AZ", "BY", "KG", "KZ", "MD", "RU", "TJ", "TM", "UZ");
@@ -160,20 +171,7 @@ public abstract class BraveActivity<C extends ChromeActivityComponent>
     @Override
     public void onResumeWithNative() {
         super.onResumeWithNative();
-        nativeRestartStatsUpdater();
-        if (ChromeFeatureList.isEnabled(BraveFeatureList.BRAVE_REWARDS)
-                && !BravePrefServiceBridge.getInstance().getSafetynetCheckFailed()) {
-            if (mBraveRewardsNativeWorker == null)
-                mBraveRewardsNativeWorker = BraveRewardsNativeWorker.getInstance();
-            mBraveRewardsNativeWorker.AddObserver(this);
-        }
-    }
-
-    @Override
-    public void onPauseWithNative() {
-        if (mBraveRewardsNativeWorker != null) {
-            mBraveRewardsNativeWorker.RemoveObserver(this);
-        }
+        BraveActivityJni.get().restartStatsUpdater();
     }
 
     @Override
@@ -199,6 +197,8 @@ public abstract class BraveActivity<C extends ChromeActivityComponent>
             handleBraveSetDefaultBrowserDialog();
         } else if (id == R.id.brave_rewards_id) {
             openNewOrSelectExistingTab(REWARDS_SETTINGS_URL);
+        } else if (id == R.id.brave_wallet_id) {
+            openBraveWallet();
         } else {
             return false;
         }
@@ -209,12 +209,28 @@ public abstract class BraveActivity<C extends ChromeActivityComponent>
     @Override
     public void initializeState() {
         super.initializeState();
+
         if (isNoRestoreState()) {
             CommandLine.getInstance().appendSwitch(ChromeSwitches.NO_RESTORE_STATE);
         }
 
+        if (isClearBrowsingDataOnExit()) {
+            List<Integer> dataTypes = Arrays.asList(
+                    BrowsingDataType.HISTORY, BrowsingDataType.COOKIES, BrowsingDataType.CACHE);
+
+            int[] dataTypesArray = CollectionUtil.integerListToIntArray(new ArrayList<>(dataTypes));
+
+            // has onBrowsingDataCleared() as an @Override callback from implementing
+            // BrowsingDataBridge.OnClearBrowsingDataListener
+            BrowsingDataBridge.getInstance().clearBrowsingData(
+                    this, dataTypesArray, TimePeriod.ALL_TIME);
+        }
+
         BraveSearchEngineUtils.initializeBraveSearchEngineStates(getTabModelSelector());
     }
+
+    @Override
+    public void onBrowsingDataCleared() {}
 
     @Override
     public void onResume() {
@@ -227,6 +243,7 @@ public abstract class BraveActivity<C extends ChromeActivityComponent>
         // Set proper active DSE whenever brave returns to foreground.
         // If active tab is private, set private DSE as an active DSE.
         BraveSearchEngineUtils.updateActiveDSE(tab.isIncognito());
+        BraveStatsUtil.removeShareStatsFile();
     }
 
     @Override
@@ -248,7 +265,6 @@ public abstract class BraveActivity<C extends ChromeActivityComponent>
     public void performPostInflationStartup() {
         super.performPostInflationStartup();
 
-        BraveReferrer.getInstance().initReferrer(this);
         createNotificationChannel();
         setupBraveSetDefaultBrowserNotification();
     }
@@ -265,6 +281,14 @@ public abstract class BraveActivity<C extends ChromeActivityComponent>
     @Override
     public void finishNativeInitialization() {
         super.finishNativeInitialization();
+
+        if (SharedPreferencesManager.getInstance().readBoolean(
+                    BravePreferenceKeys.BRAVE_DOUBLE_RESTART, false)) {
+            SharedPreferencesManager.getInstance().writeBoolean(
+                    BravePreferenceKeys.BRAVE_DOUBLE_RESTART, false);
+            BraveRelaunchUtils.restart();
+            return;
+        }
 
         if (BraveRewardsHelper.hasRewardsEnvChange()) {
             BravePrefServiceBridge.getInstance().resetPromotionLastFetchStamp();
@@ -345,13 +369,6 @@ public abstract class BraveActivity<C extends ChromeActivityComponent>
             OnboardingPrefManager.getInstance().setP3AEnabledForExistingUsers(true);
         }
 
-        if (BraveConfig.P3A_ENABLED
-                && !OnboardingPrefManager.getInstance().isP3aOnboardingShown()) {
-            Intent p3aOnboardingIntent = new Intent(this, P3aOnboardingActivity.class);
-            p3aOnboardingIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            startActivity(p3aOnboardingIntent);
-        }
-
         if (!OnboardingPrefManager.getInstance().isOneTimeNotificationStarted()
                 && PackageUtils.isFirstInstall(this)) {
             RetentionNotificationUtil.scheduleNotification(this, RetentionNotificationUtil.HOUR_3);
@@ -398,69 +415,31 @@ public abstract class BraveActivity<C extends ChromeActivityComponent>
                     calender.getTimeInMillis());
         }
         checkSetDefaultBrowserModal();
-        if (mBraveRewardsNativeWorker != null
-                && ChromeFeatureList.isEnabled(BraveFeatureList.BRAVE_REWARDS)
-                && !BravePrefServiceBridge.getInstance().getSafetynetCheckFailed()) {
-            mBraveRewardsNativeWorker.StartProcess();
-        }
+        checkFingerPrintingOnUpgrade();
     }
 
-    @Override
-    public void OnRewardsParameters(int errorCode) {
-        if (errorCode == BraveRewardsNativeWorker.LEDGER_OK && mBraveRewardsNativeWorker != null
-                && mBraveRewardsNativeWorker.GetWalletBalance() != null
-                && mBraveRewardsNativeWorker.GetWalletBalance().getTotal() > 0) {
-            checkForDeprecateBAPDialog();
-        }
-    }
-
-    @Override
-    public void OnStartProcess() {
-        mBraveRewardsNativeWorker.GetRewardsParameters();
-    }
-
-    private void checkForDeprecateBAPDialog() {
-        String countryCode = Locale.getDefault().getCountry();
-        if (countryCode.equals(JAPAN_COUNTRY_CODE) && !isRewardsPanelOpened()
-                && System.currentTimeMillis() > BraveRewardsHelper.getNextBAPModalDate()) {
-            Calendar toDayCalendar = Calendar.getInstance();
-            Date todayDate = toDayCalendar.getTime();
-
-            Calendar march6Calendar = Calendar.getInstance();
-            march6Calendar.set(Calendar.DAY_OF_MONTH, 6);
-            march6Calendar.set(Calendar.YEAR, 2021);
-            march6Calendar.set(Calendar.MONTH, 2);
-            march6Calendar.set(Calendar.HOUR_OF_DAY, 0);
-            march6Calendar.set(Calendar.MINUTE, 0);
-            march6Calendar.set(Calendar.SECOND, 0);
-            march6Calendar.set(Calendar.MILLISECOND, 0);
-            Date march6Date = march6Calendar.getTime();
-
-            Calendar march13Calendar = Calendar.getInstance();
-            march13Calendar.set(Calendar.DAY_OF_MONTH, 13);
-            march13Calendar.set(Calendar.YEAR, 2021);
-            march13Calendar.set(Calendar.MONTH, 2);
-            march13Calendar.set(Calendar.HOUR_OF_DAY, 0);
-            march13Calendar.set(Calendar.MINUTE, 0);
-            march13Calendar.set(Calendar.SECOND, 0);
-            march13Calendar.set(Calendar.MILLISECOND, 0);
-            Date march13Date = march13Calendar.getTime();
-
-            boolean shouldSetNextDate = false;
-            if (todayDate.compareTo(march6Date) < 0) {
-                showRewardsTooltip();
-                shouldSetNextDate = true;
-            } else if (todayDate.compareTo(march6Date) > 0
-                    && todayDate.compareTo(march13Date) < 0) {
-                showDeprecateBAPDialog();
-                shouldSetNextDate = true;
-            }
-            if (shouldSetNextDate) {
-                Calendar calender = toDayCalendar;
-                calender.add(Calendar.DATE, DAYS_3);
-                BraveRewardsHelper.setNextBAPModalDate(calender.getTimeInMillis());
+    private void checkFingerPrintingOnUpgrade() {
+        if (!PackageUtils.isFirstInstall(this)
+                && SharedPreferencesManager.getInstance().readInt(
+                           BravePreferenceKeys.BRAVE_APP_OPEN_COUNT)
+                        == 0) {
+            SharedPreferences sharedPreferences = ContextUtils.getAppSharedPreferences();
+            boolean value = sharedPreferences.getBoolean(
+                    BravePrivacySettings.PREF_FINGERPRINTING_PROTECTION, true);
+            if (value) {
+                BravePrefServiceBridge.getInstance().setFingerprintingControlType(
+                        BraveShieldsContentSettings.DEFAULT);
+            } else {
+                BravePrefServiceBridge.getInstance().setFingerprintingControlType(
+                        BraveShieldsContentSettings.ALLOW_RESOURCE);
             }
         }
+    }
+
+    private void openBraveWallet() {
+        Intent cryptoWalletIntent = new Intent(this, CryptoWalletActivity.class);
+        cryptoWalletIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        startActivity(cryptoWalletIntent);
     }
 
     private void checkSetDefaultBrowserModal() {
@@ -575,14 +554,6 @@ public abstract class BraveActivity<C extends ChromeActivityComponent>
         }
     }
 
-    public void showRewardsTooltip() {
-        BraveToolbarLayout layout = (BraveToolbarLayout) findViewById(R.id.toolbar);
-        assert layout != null;
-        if (layout != null) {
-            layout.showRewardsTooltip();
-        }
-    }
-
     private void createNotificationChannel() {
         Context context = ContextUtils.getApplicationContext();
         // Create the NotificationChannel, but only on API 26+ because
@@ -616,6 +587,10 @@ public abstract class BraveActivity<C extends ChromeActivityComponent>
 
     private boolean isNoRestoreState() {
         return ContextUtils.getAppSharedPreferences().getBoolean(PREF_CLOSE_TABS_ON_EXIT, false);
+    }
+
+    private boolean isClearBrowsingDataOnExit() {
+        return ContextUtils.getAppSharedPreferences().getBoolean(PREF_CLEAR_ON_EXIT, false);
     }
 
     public void handleBraveSetDefaultBrowserDialog() {
@@ -703,24 +678,6 @@ public abstract class BraveActivity<C extends ChromeActivityComponent>
         }
     }
 
-    public boolean isRewardsPanelOpened() {
-        BraveToolbarLayout layout = (BraveToolbarLayout) findViewById(R.id.toolbar);
-        assert layout != null;
-        if (layout != null) {
-            return layout.isRewardsPanelOpened();
-        }
-        return false;
-    }
-
-    public boolean isShieldsTooltipShown() {
-        BraveToolbarLayout layout = (BraveToolbarLayout) findViewById(R.id.toolbar);
-        assert layout != null;
-        if (layout != null) {
-            return layout.isShieldsTooltipShown();
-        }
-        return false;
-    }
-
     public Tab selectExistingTab(String url) {
         Tab tab = getActivityTab();
         if (tab != null && tab.getUrlString().equals(url)) {
@@ -733,11 +690,8 @@ public abstract class BraveActivity<C extends ChromeActivityComponent>
         // Find if tab exists
         if (tabIndex != TabModel.INVALID_TAB_INDEX) {
             tab = tabModel.getTabAt(tabIndex);
-            // Moving tab forward
-            tabModel.moveTab(tab.getId(), tabModel.getCount());
-            tabModel.setIndex(
-                TabModelUtils.getTabIndexById(tabModel, tab.getId()),
-                TabSelectionType.FROM_USER);
+            // Set active tab
+            tabModel.setIndex(tabIndex, TabSelectionType.FROM_USER);
             return tab;
         } else {
             return null;
@@ -767,16 +721,6 @@ public abstract class BraveActivity<C extends ChromeActivityComponent>
         mCrossPromotionalModalDialogFragment.setCancelable(false);
         mCrossPromotionalModalDialogFragment.show(getSupportFragmentManager(), "CrossPromotionalModalDialogFragment");
     }
-
-    public void showDeprecateBAPDialog() {
-        DeprecateBAPModalDialogFragment mDeprecateBAPModalDialogFragment =
-                new DeprecateBAPModalDialogFragment();
-        mDeprecateBAPModalDialogFragment.setCancelable(false);
-        mDeprecateBAPModalDialogFragment.show(
-                getSupportFragmentManager(), "DeprecateBAPModalDialogFragment");
-    }
-
-    private native void nativeRestartStatsUpdater();
 
     static public ChromeTabbedActivity getChromeTabbedActivity() {
         for (Activity ref : ApplicationStatus.getRunningActivities()) {
@@ -812,6 +756,17 @@ public abstract class BraveActivity<C extends ChromeActivityComponent>
             }
         }
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(
+            int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == BraveStatsUtil.SHARE_STATS_WRITE_EXTERNAL_STORAGE_PERM
+                && grantResults.length != 0
+                && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            BraveStatsUtil.shareStats(R.layout.brave_stats_share_layout);
+        }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     /**
@@ -878,5 +833,17 @@ public abstract class BraveActivity<C extends ChromeActivityComponent>
 
         editor.putLong(BravePreferenceKeys.BRAVE_MILLISECONDS_NAME, milliSeconds);
         editor.apply();
+    }
+
+    public void hideOverview(LayoutManagerChrome layoutManager) {
+        Layout activeLayout = layoutManager.getActiveLayout();
+        if (activeLayout instanceof StackLayout) {
+            ((StackLayout) activeLayout).commitOutstandingModelState(LayoutManagerImpl.time());
+        }
+    }
+
+    @NativeMethods
+    interface Natives {
+        void restartStatsUpdater();
     }
 }

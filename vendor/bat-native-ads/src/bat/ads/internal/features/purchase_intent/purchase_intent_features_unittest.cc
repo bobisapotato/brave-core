@@ -4,6 +4,7 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "bat/ads/internal/features/purchase_intent/purchase_intent_features.h"
+
 #include "base/time/time.h"
 #include "bat/ads/internal/unittest_base.h"
 
@@ -37,6 +38,15 @@ TEST(BatAdsPurchaseIntentFeaturesTest, PurchaseIntentTimeWindowInSeconds) {
   // Assert
   const int64_t expected_window = 7 * (24 * base::Time::kSecondsPerHour);
   EXPECT_EQ(expected_window, features::GetPurchaseIntentTimeWindowInSeconds());
+}
+
+TEST(BatAdsPurchaseIntentFeaturesTest, PurchaseIntentResource) {
+  // Arrange
+
+  // Act
+
+  // Assert
+  EXPECT_EQ(1, features::GetPurchaseIntentResourceVersion());
 }
 
 }  // namespace ads

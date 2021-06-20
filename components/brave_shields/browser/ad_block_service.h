@@ -56,6 +56,10 @@ class AdBlockService : public AdBlockBaseService {
                           bool* did_match_exception,
                           bool* did_match_important,
                           std::string* mock_data_url) override;
+  base::Optional<std::string> GetCspDirectives(
+      const GURL& url,
+      blink::mojom::ResourceType resource_type,
+      const std::string& tab_host);
   base::Optional<base::Value> UrlCosmeticResources(
       const std::string& url) override;
   base::Optional<base::Value> HiddenClassIdSelectors(
@@ -101,21 +105,6 @@ std::unique_ptr<AdBlockService> AdBlockServiceFactory(
 
 // Registers the local_state preferences used by Adblock
 void RegisterPrefsForAdBlockService(PrefRegistrySimple* registry);
-
-// Eventually we should merge |AdBlockService| into this class. At the moment
-// it's only responsibility is tracking some adblocking preferences.
-class AdBlockPrefService : public KeyedService {
- public:
-  explicit AdBlockPrefService(PrefService* prefs);
-  ~AdBlockPrefService() override;
-
- private:
-  void OnPreferenceChanged(const std::string& pref_name);
-
-  PrefService* prefs_ = nullptr;
-  std::unique_ptr<PrefChangeRegistrar, content::BrowserThread::DeleteOnUIThread>
-      pref_change_registrar_;
-};
 
 }  // namespace brave_shields
 

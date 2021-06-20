@@ -6,14 +6,14 @@
 #ifndef BRAVE_VENDOR_BAT_NATIVE_ADS_INCLUDE_BAT_ADS_PREF_NAMES_H_
 #define BRAVE_VENDOR_BAT_NATIVE_ADS_INCLUDE_BAT_ADS_PREF_NAMES_H_
 
-#include <stdint.h>
+#include <cstdint>
 
 namespace ads {
 
 // Ads per hour are user configurable within the brave://rewards ads UI
-const uint64_t kMinimumAdNotificationsPerHour = 1;
-const uint64_t kMaximumAdNotificationsPerHour = 5;
-const uint64_t kDefaultAdNotificationsPerHour = 5;
+const int64_t kMinimumAdNotificationsPerHour = 0;
+const int64_t kMaximumAdNotificationsPerHour = 10;
+const int64_t kDefaultAdNotificationsPerHour = 5;
 
 namespace prefs {
 

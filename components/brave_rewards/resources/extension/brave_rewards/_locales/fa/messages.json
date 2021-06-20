@@ -235,6 +235,18 @@
     "message": "لطفاً از کیف پول Brave‌ خود پشتیبان‌گیری کنید.",
     "description": "Description for backup wallet notification"
   },
+  "deviceLimitReachedLearnMore": {
+    "message": "بیشتر بدانید",
+    "description": "Notification button text to learn more about device limit"
+  },
+  "deviceLimitReachedTitle": {
+    "message": "دستگاه به حداکثر مجاز رسیده است",
+    "description": "Title for device limit reached notification"
+  },
+  "deviceLimitReachedNotification": {
+    "message": "کیف پول شما تأیید نشد زیرا به حداکثر مجاز دستگاه تأییدشده رسیده‌اید.",
+    "description": "Description for device limit reached notification"
+  },
   "insufficientFundsNotification": {
     "message": "حساب «پاداش‌های Brave» منتظر سپرده است.",
     "description": "Description for new insufficient funds notification"
@@ -515,9 +527,15 @@
     "message": "کیف پول تأیید شد!‍",
     "description": "Displayed in wallet that tells users that he is verified"
   },
-  "walletGoToUphold":  {
-    "message": "رفتن به حساب Uphold من",
-    "description": "CTA to open uphold account"
+  "walletGoToProvider":  {
+    "message": "رفتن به حساب $provider$ من",
+    "description": "CTA to open an external wallet account",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Uphold"
+      }
+    }
   },
   "walletDisconnect":  {
     "message": "قطع ارتباط از پاداش‌های Brave",
@@ -612,8 +630,14 @@
     "description": "Text for login button"
   },
   "loginMessageText":  {
-    "message": "برای ایجاد حساب Uphold، به حداقل 25 BAT نیاز دارید. لطفاً بعداً دوباره امتحان کنید. \nدر صورتی که ازقبل یک حساب تأییدشده Uphold دارید، ورود به سیستم را ادامه دهید.",
-    "description": "Text for login button"
+    "message": "برای ایجاد حساب Uphold، باید حداقل $amount$BAT داشته باشید. اگر ازقبل حساب Uphold تأییدشده‌ای دارید، ورود به سیستم را ادامه دهید.",
+    "description": "Text for login button",
+    "placeholders": {
+      "amount": {
+        "content": "$1",
+        "example": "15"
+      }
+    }
   },
   "walletConnected":  {
     "message": "متصل",
@@ -624,8 +648,14 @@
     "description": "Status button that tells user that he is currently pending"
   },
   "walletVerificationNote3":  {
-    "message": "توجه: تراکنش‌های شما به‌محض این‌که اجازه دهید برای Uphold قابل‌مشاهده خواهد بود؛ برای مثال، آن‌ها قادر به دیدن گیرنده و مقدار انعام‌های شما خواهند بود.",
-    "description": "Displayed in login modal for uphold"
+    "message": "توجه: بعدازاینکه مجوز دهید، تراکنش‌هایتان برای $provider$ قابل مشاهده خواهند بود؛ برای مثال، Uphold می‌تواند گیرنده و مقدار انعام را ببیند.",
+    "description": "Displayed in login modal for external wallet providers",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Uphold"
+      }
+    }
   },
   "onboardingEarnHeader": {
     "message": "کسب توکن و برگرداندن",
@@ -718,7 +748,7 @@
     "description": ""
   },
   "onboardingPanelScheduleHeader": {
-    "message": "چه زمانی پاداش دریافت می‌کنید",
+    "message": "چه زمانی پاداش دریافت می‌کنید؟",
     "description": ""
   },
   "onboardingPanelScheduleText": {
@@ -764,6 +794,42 @@
   "onboardingPanelCompleteText": {
     "message": "با استفاده از Brave Rewards کمک می‌کنید وب به مکانی بهتر برای همه تبدیل شود. و این فوق‌العاده است!",
     "description": ""
+  },
+  "onboardingPanelVerifyHeader": {
+    "message": "تأیید کیف پول",
+    "description": ""
+  },
+  "onboardingPanelVerifySubtext": {
+    "message": "برای برداشت کردن توکن‌هایی که بابت تماشای آگهی کسب می‌کنید، باید کیف پول خود را تأیید کنید.",
+    "description": ""
+  },
+  "onboardingPanelVerifyLater": {
+    "message": "بعداً انجام می‌دهم",
+    "description": ""
+  },
+  "onboardingPanelVerifyNow": {
+    "message": "تأیید کیف پول",
+    "description": ""
+  },
+  "onboardingPanelBitflyerNote": {
+    "message": "کیف پول bitFlyer سرویسی است که توسط bitFlyer Inc مدیریت می‌شود.",
+    "description": ""
+  },
+  "onboardingPanelBitflyerText": {
+    "message": "با تأیید کیف پول و پیوند دادن آن به حساب bitFlyer، می‌توانید توکن‌هایی را که ازطریق «پاداش‌های Brave» کسب کرده‌اید آسان‌تر ذخیره و مدیریت کنید.",
+    "description": ""
+  },
+  "onboardingPanelBitflyerLearnMore": {
+    "message": "درباره نحوه پیوند دادن مرورگر Brave خود با حساب bitFlyer، ‍$link_begin$بیشتر بدانید$link_end$.",
+    "description": "",
+    "placeholders": {
+      "link_begin": {
+        "content": "$1"
+      },
+      "link_end": {
+        "content": "$2"
+      }
+    }
   },
   "bapDeprecationHeader": {
     "message": "Brave Rewards در ژاپن در حال جابجایی به یک سیستم جدید است!",

@@ -11,107 +11,61 @@
 #include <vector>
 
 #include "base/base64url.h"
+#include "base/feature_list.h"
 #include "base/strings/string_util.h"
-#include "brave/browser/brave_browser_process_impl.h"
+#include "brave/browser/brave_browser_process.h"
+#include "brave/browser/brave_shields/brave_shields_web_contents_observer.h"
 #include "brave/browser/net/url_context.h"
 #include "brave/common/network_constants.h"
 #include "brave/common/url_constants.h"
 #include "brave/components/brave_shields/browser/ad_block_service.h"
-#include "brave/components/brave_shields/browser/brave_shields_util.h"
-#include "brave/components/brave_shields/browser/brave_shields_web_contents_observer.h"
 #include "brave/components/brave_shields/common/brave_shield_constants.h"
+#include "brave/components/brave_shields/common/features.h"
 #include "brave/grit/brave_generated_resources.h"
+#include "chrome/browser/net/proxy_service_factory.h"
+#include "chrome/browser/net/secure_dns_config.h"
+#include "chrome/browser/net/system_network_context_manager.h"
+#include "chrome/browser/profiles/profile.h"
+#include "components/prefs/pref_service.h"
+#include "components/proxy_config/pref_proxy_config_tracker.h"
 #include "content/public/browser/browser_context.h"
 #include "content/public/browser/browser_thread.h"
 #include "content/public/browser/render_frame_host.h"
 #include "content/public/browser/storage_partition.h"
 #include "content/public/browser/web_contents.h"
+#include "content/public/common/url_constants.h"
 #include "extensions/common/url_pattern.h"
 #include "mojo/public/cpp/bindings/remote.h"
+#include "net/proxy_resolution/proxy_config.h"
+#include "net/proxy_resolution/proxy_config_service.h"
+#include "net/proxy_resolution/proxy_config_with_annotation.h"
+#include "services/network/host_resolver.h"
 #include "services/network/network_context.h"
 #include "ui/base/resource/resource_bundle.h"
 #include "url/url_canon.h"
 
 namespace brave {
 
-namespace {
+network::HostResolver* g_testing_host_resolver;
 
-content::WebContents* GetWebContents(int render_process_id,
-                                     int render_frame_id,
-                                     int frame_tree_node_id) {
-  DCHECK_CURRENTLY_ON(content::BrowserThread::UI);
-  content::WebContents* web_contents =
-      content::WebContents::FromFrameTreeNodeId(frame_tree_node_id);
-  if (!web_contents) {
-    content::RenderFrameHost* rfh =
-        content::RenderFrameHost::FromID(render_process_id, render_frame_id);
-    if (!rfh) {
-      return nullptr;
-    }
-    web_contents = content::WebContents::FromRenderFrameHost(rfh);
-  }
-  return web_contents;
+void SetAdblockCnameHostResolverForTesting(
+    network::HostResolver* host_resolver) {
+  g_testing_host_resolver = host_resolver;
 }
 
-}  // namespace
-
-void ShouldBlockAdOnTaskRunner(std::shared_ptr<BraveRequestInfo> ctx,
-                               base::Optional<std::string> canonical_name) {
+// Used to keep track of state between a primary adblock engine query and one
+// after CNAME uncloaking the request.
+struct EngineFlags {
   bool did_match_rule = false;
   bool did_match_exception = false;
   bool did_match_important = false;
-  if (!ctx->initiator_url.is_valid()) {
-    return;
-  }
-  std::string source_host = ctx->initiator_url.host();
+};
 
-  g_brave_browser_process->ad_block_service()->ShouldStartRequest(
-      ctx->request_url, ctx->resource_type, source_host, &did_match_rule,
-      &did_match_exception, &did_match_important, &ctx->mock_data_url);
-  if (did_match_important) {
-    ctx->blocked_by = kAdBlocked;
-    return;
-  }
-
-  if (canonical_name.has_value() &&
-      ctx->request_url.host() != *canonical_name && *canonical_name != "") {
-    GURL::Replacements replacements = GURL::Replacements();
-    replacements.SetHost(
-        canonical_name->c_str(),
-        url::Component(0, static_cast<int>(canonical_name->length())));
-    const GURL canonical_url = ctx->request_url.ReplaceComponents(replacements);
-
-    g_brave_browser_process->ad_block_service()->ShouldStartRequest(
-        ctx->request_url, ctx->resource_type, source_host, &did_match_rule,
-        &did_match_exception, &did_match_important, &ctx->mock_data_url);
-  }
-
-  if (did_match_important || (did_match_rule && !did_match_exception)) {
-    ctx->blocked_by = kAdBlocked;
-  }
-}
-
-void OnShouldBlockAdResult(const ResponseCallback& next_callback,
-                           std::shared_ptr<BraveRequestInfo> ctx) {
-  DCHECK_CURRENTLY_ON(content::BrowserThread::UI);
-  if (ctx->blocked_by == kAdBlocked) {
-    brave_shields::DispatchBlockedEvent(
-        ctx->request_url, ctx->render_frame_id, ctx->render_process_id,
-        ctx->frame_tree_node_id, brave_shields::kAds);
-  }
-  next_callback.Run();
-}
-
-void ShouldBlockAdWithOptionalCname(
-    scoped_refptr<base::SequencedTaskRunner> task_runner,
-    const ResponseCallback& next_callback,
-    std::shared_ptr<BraveRequestInfo> ctx,
-    const base::Optional<std::string> cname) {
-  DCHECK_CURRENTLY_ON(content::BrowserThread::UI);
-  task_runner->PostTaskAndReply(
-      FROM_HERE, base::BindOnce(&ShouldBlockAdOnTaskRunner, ctx, cname),
-      base::BindOnce(&OnShouldBlockAdResult, next_callback, ctx));
-}
+void UseCnameResult(scoped_refptr<base::SequencedTaskRunner> task_runner,
+                    const ResponseCallback& next_callback,
+                    std::shared_ptr<BraveRequestInfo> ctx,
+                    EngineFlags previous_result,
+                    base::Optional<std::string> cname);
 
 class AdblockCnameResolveHostClient : public network::mojom::ResolveHostClient {
  private:
@@ -123,39 +77,52 @@ class AdblockCnameResolveHostClient : public network::mojom::ResolveHostClient {
   AdblockCnameResolveHostClient(
       const ResponseCallback& next_callback,
       scoped_refptr<base::SequencedTaskRunner> task_runner,
-      std::shared_ptr<BraveRequestInfo> ctx) {
-    cb_ = base::BindOnce(&ShouldBlockAdWithOptionalCname, task_runner,
-                         std::move(next_callback), ctx);
-
-    auto* web_contents = GetWebContents(
-        ctx->render_process_id, ctx->render_frame_id, ctx->frame_tree_node_id);
-    if (!web_contents) {
-      start_time_ = base::TimeTicks::Now();
-      this->OnComplete(net::ERR_FAILED, net::ResolveErrorInfo(), base::nullopt);
-      return;
-    }
-
-    content::BrowserContext* context = web_contents->GetBrowserContext();
+      std::shared_ptr<BraveRequestInfo> ctx,
+      EngineFlags previous_result) {
+    DCHECK_CURRENTLY_ON(content::BrowserThread::UI);
+    cb_ = base::BindOnce(&UseCnameResult, task_runner, std::move(next_callback),
+                         ctx, previous_result);
 
     const auto network_isolation_key = ctx->network_isolation_key;
 
     network::mojom::ResolveHostParametersPtr optional_parameters =
         network::mojom::ResolveHostParameters::New();
     optional_parameters->include_canonical_name = true;
-    // Explicitly specify source to avoid using `HostResolverProc`
-    // which will be handled by system resolver
-    // See https://crbug.com/872665
-    optional_parameters->source = net::HostResolverSource::DNS;
 
-    network::mojom::NetworkContext* network_context =
-        content::BrowserContext::GetDefaultStoragePartition(context)
-            ->GetNetworkContext();
+    SecureDnsConfig secure_dns_config =
+        SystemNetworkContextManager::GetStubResolverConfigReader()
+            ->GetSecureDnsConfiguration(false);
+    // Explicitly specify source when DNS over HTTPS is enabled to avoid
+    // using `HostResolverProc` which will be handled by system resolver
+    // See https://crbug.com/872665
+    if (secure_dns_config.mode() == net::SecureDnsMode::kSecure)
+      optional_parameters->source = net::HostResolverSource::DNS;
 
     start_time_ = base::TimeTicks::Now();
 
-    network_context->ResolveHost(
-        net::HostPortPair::FromURL(ctx->request_url), network_isolation_key,
-        std::move(optional_parameters), receiver_.BindNewPipeAndPassRemote());
+    if (g_testing_host_resolver) {
+      g_testing_host_resolver->ResolveHost(
+          net::HostPortPair::FromURL(ctx->request_url), network_isolation_key,
+          std::move(optional_parameters), receiver_.BindNewPipeAndPassRemote());
+    } else {
+      auto* web_contents =
+          content::WebContents::FromFrameTreeNodeId(ctx->frame_tree_node_id);
+      if (!web_contents) {
+        start_time_ = base::TimeTicks::Now();
+        this->OnComplete(net::ERR_FAILED, net::ResolveErrorInfo(),
+                         base::nullopt);
+        return;
+      }
+
+      network::mojom::NetworkContext* network_context =
+          content::BrowserContext::GetDefaultStoragePartition(
+              web_contents->GetBrowserContext())
+              ->GetNetworkContext();
+
+      network_context->ResolveHost(
+          net::HostPortPair::FromURL(ctx->request_url), network_isolation_key,
+          std::move(optional_parameters), receiver_.BindNewPipeAndPassRemote());
+    }
 
     receiver_.set_disconnect_handler(
         base::BindOnce(&AdblockCnameResolveHostClient::OnComplete,
@@ -191,6 +158,118 @@ class AdblockCnameResolveHostClient : public network::mojom::ResolveHostClient {
   }
 };
 
+// If `canonical_url` is specified, this will only check if the CNAME-uncloaked
+// response should be blocked. Otherwise, it will run the check for the
+// original request URL.
+EngineFlags ShouldBlockRequestOnTaskRunner(
+    std::shared_ptr<BraveRequestInfo> ctx,
+    EngineFlags previous_result,
+    base::Optional<GURL> canonical_url) {
+  if (!ctx->initiator_url.is_valid()) {
+    return previous_result;
+  }
+  const std::string source_host = ctx->initiator_url.host();
+
+  GURL url_to_check;
+  if (canonical_url.has_value()) {
+    url_to_check = *canonical_url;
+  } else {
+    url_to_check = ctx->request_url;
+  }
+
+  g_brave_browser_process->ad_block_service()->ShouldStartRequest(
+      url_to_check, ctx->resource_type, source_host,
+      &previous_result.did_match_rule, &previous_result.did_match_exception,
+      &previous_result.did_match_important, &ctx->mock_data_url);
+
+  if (previous_result.did_match_important ||
+      (previous_result.did_match_rule &&
+       !previous_result.did_match_exception)) {
+    ctx->blocked_by = kAdBlocked;
+  }
+
+  return previous_result;
+}
+
+void OnShouldBlockRequestResult(
+    bool then_check_uncloaked,
+    scoped_refptr<base::SequencedTaskRunner> task_runner,
+    const ResponseCallback& next_callback,
+    std::shared_ptr<BraveRequestInfo> ctx,
+    EngineFlags result) {
+  DCHECK_CURRENTLY_ON(content::BrowserThread::UI);
+  if (ctx->blocked_by == kAdBlocked) {
+    brave_shields::BraveShieldsWebContentsObserver::DispatchBlockedEvent(
+        ctx->request_url, ctx->frame_tree_node_id, brave_shields::kAds);
+  } else if (then_check_uncloaked) {
+    // This will be deleted by `AdblockCnameResolveHostClient::OnComplete`.
+    new AdblockCnameResolveHostClient(std::move(next_callback), task_runner,
+                                      ctx, result);
+    return;
+  }
+  next_callback.Run();
+}
+
+void UseCnameResult(scoped_refptr<base::SequencedTaskRunner> task_runner,
+                    const ResponseCallback& next_callback,
+                    std::shared_ptr<BraveRequestInfo> ctx,
+                    EngineFlags previous_result,
+                    base::Optional<std::string> cname) {
+  DCHECK_CURRENTLY_ON(content::BrowserThread::UI);
+
+  if (cname.has_value() && ctx->request_url.host() != *cname &&
+      !cname->empty()) {
+    GURL::Replacements replacements;
+    replacements.SetHost(cname->c_str(),
+                         url::Component(0, static_cast<int>(cname->length())));
+    const GURL canonical_url = ctx->request_url.ReplaceComponents(replacements);
+
+    task_runner->PostTaskAndReplyWithResult(
+        FROM_HERE,
+        base::BindOnce(&ShouldBlockRequestOnTaskRunner, ctx, previous_result,
+                       base::make_optional<GURL>(canonical_url)),
+        base::BindOnce(&OnShouldBlockRequestResult, false, task_runner,
+                       next_callback, ctx));
+  } else {
+    next_callback.Run();
+  }
+}
+
+// If only particular types of network traffic are being proxied, or if no
+// proxy is configured, it should be safe to continue making unproxied DNS
+// queries. However, in SingleProxy mode all types of network traffic should go
+// through the proxy, so additional DNS queries should be avoided.
+bool ProxySettingsAllowUncloaking(content::BrowserContext* browser_context) {
+  DCHECK(browser_context);
+
+  bool can_uncloak = true;
+
+  Profile* profile = Profile::FromBrowserContext(browser_context);
+
+  std::unique_ptr<PrefProxyConfigTracker> config_tracker =
+      ProxyServiceFactory::CreatePrefProxyConfigTrackerOfProfile(
+          profile->GetPrefs(), nullptr);
+  std::unique_ptr<net::ProxyConfigService> proxy_config_service =
+      ProxyServiceFactory::CreateProxyConfigService(config_tracker.get());
+
+  net::ProxyConfigWithAnnotation config;
+  net::ProxyConfigService::ConfigAvailability availability =
+      proxy_config_service->GetLatestProxyConfig(&config);
+
+  if (availability ==
+      net::ProxyConfigService::ConfigAvailability::CONFIG_VALID) {
+    // PROXY_LIST corresponds to SingleProxy mode.
+    if (config.value().proxy_rules().type ==
+        net::ProxyConfig::ProxyRules::Type::PROXY_LIST) {
+      can_uncloak = false;
+    }
+  }
+
+  config_tracker->DetachFromPrefService();
+
+  return can_uncloak;
+}
+
 void OnBeforeURLRequestAdBlockTP(const ResponseCallback& next_callback,
                                  std::shared_ptr<BraveRequestInfo> ctx) {
   DCHECK_CURRENTLY_ON(content::BrowserThread::UI);
@@ -201,32 +280,47 @@ void OnBeforeURLRequestAdBlockTP(const ResponseCallback& next_callback,
   scoped_refptr<base::SequencedTaskRunner> task_runner =
       g_brave_browser_process->ad_block_service()->GetTaskRunner();
 
-  DCHECK(ctx->browser_context);
-  // DoH or standard DNS quries won't be routed through Tor, so we need to skip
-  // it.
-  if (ctx->browser_context->IsTor()) {
-    ShouldBlockAdWithOptionalCname(task_runner, std::move(next_callback), ctx,
-                                   base::nullopt);
-  } else {
-    new AdblockCnameResolveHostClient(std::move(next_callback), task_runner,
-                                      ctx);
-  }
+  // DoH or standard DNS queries won't be routed through Tor, so we need to
+  // skip it.
+  // Also, skip CNAME uncloaking if there is currently a configured proxy.
+  bool should_check_uncloaked =
+      base::FeatureList::IsEnabled(
+          brave_shields::features::kBraveAdblockCnameUncloaking) &&
+      ctx->browser_context && !ctx->browser_context->IsTor() &&
+      ProxySettingsAllowUncloaking(ctx->browser_context);
+
+  task_runner->PostTaskAndReplyWithResult(
+      FROM_HERE,
+      base::BindOnce(&ShouldBlockRequestOnTaskRunner, ctx, EngineFlags(),
+                     base::nullopt),
+      base::BindOnce(&OnShouldBlockRequestResult, should_check_uncloaked,
+                     task_runner, next_callback, ctx));
 }
 
 int OnBeforeURLRequest_AdBlockTPPreWork(const ResponseCallback& next_callback,
                                         std::shared_ptr<BraveRequestInfo> ctx) {
   // If the following info isn't available, then proper content settings can't
   // be looked up, so do nothing.
-  if (ctx->request_url.is_empty() || ctx->initiator_url.is_empty() ||
-      !ctx->initiator_url.has_host() || !ctx->allow_brave_shields ||
-      ctx->allow_ads ||
+  if (ctx->request_url.is_empty() ||
+      ctx->request_url.SchemeIs(content::kChromeDevToolsScheme) ||
+      ctx->initiator_url.is_empty() || !ctx->initiator_url.has_host() ||
+      !ctx->allow_brave_shields || ctx->allow_ads ||
       ctx->resource_type == BraveRequestInfo::kInvalidResourceType) {
     return net::OK;
   }
 
   // Also, until a better solution is available, we explicitly allow any
   // request from an extension.
-  if (ctx->initiator_url.SchemeIs(kChromeExtensionScheme)) {
+  if (ctx->initiator_url.SchemeIs(kChromeExtensionScheme) &&
+      !base::FeatureList::IsEnabled(
+          ::brave_shields::features::kBraveExtensionNetworkBlocking)) {
+    return net::OK;
+  }
+
+  // Requests for main frames are handled by DomainBlockNavigationThrottle,
+  // which can display a custom interstitial with an option to proceed if a
+  // block is made. We don't need to check these twice.
+  if (ctx->resource_type == blink::mojom::ResourceType::kMainFrame) {
     return net::OK;
   }
 

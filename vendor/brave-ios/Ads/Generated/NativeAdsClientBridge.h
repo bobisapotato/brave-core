@@ -14,10 +14,16 @@
 - (bool)isAdsEnabled;
 - (bool)shouldAllowAdConversionTracking;
 - (bool)isForeground;
+- (bool)isFullScreen;
 - (bool)canShowBackgroundNotifications;
 - (bool)isNetworkConnectionAvailable;
 - (bool)shouldShowNotifications;
-- (void)loadUserModelForId:(const std::string &)id callback:(ads::LoadCallback)callback;
+- (void)loadAdsResource:(const std::string&)id
+                version:(const int)version
+               callback:(ads::LoadCallback)callback;
+- (void)getBrowsingHistory:(const int)max_count
+                   forDays:(const int)days_ago
+                  callback:(ads::GetBrowsingHistoryCallback)callback;
 - (void)load:(const std::string &)name callback:(ads::LoadCallback)callback;
 - (std::string)loadResourceForId:(const std::string &)id;
 - (void)log:(const char *)file line:(const int)line verboseLevel:(const int)verbose_level message:(const std::string &) message;
@@ -25,6 +31,11 @@
 - (void)setIdleThreshold:(const int)threshold;
 - (void)showNotification:(const ads::AdNotificationInfo &)info;
 - (void)closeNotification:(const std::string&)id;
+- (void)recordAdEvent:(const std::string&)ad_type
+     confirmationType:(const std::string&)confirmation_type
+            timestamp:(const uint64_t)timestamp;
+- (std::vector<uint64_t>)getAdEvents:(const std::string&)ad_type
+                    confirmationType:(const std::string&)confirmation_type;
 - (void)UrlRequest:(ads::UrlRequestPtr)url_request callback:(ads::UrlRequestCallback)callback;
 - (bool)shouldAllowAdsSubdivisionTargeting;
 - (void)setAllowAdsSubdivisionTargeting:(const bool)should_allow;

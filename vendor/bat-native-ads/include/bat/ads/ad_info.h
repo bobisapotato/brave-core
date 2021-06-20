@@ -18,6 +18,10 @@ struct ADS_EXPORT AdInfo {
   AdInfo(const AdInfo& info);
   ~AdInfo();
 
+  bool operator==(const AdInfo& rhs) const;
+
+  bool operator!=(const AdInfo& rhs) const;
+
   bool IsValid() const;
 
   AdType type = AdType::kUndefined;
@@ -25,6 +29,7 @@ struct ADS_EXPORT AdInfo {
   std::string creative_instance_id;
   std::string creative_set_id;
   std::string campaign_id;
+  std::string advertiser_id;
   std::string segment;
   std::string target_url;
 };

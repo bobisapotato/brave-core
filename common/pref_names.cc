@@ -25,10 +25,6 @@ const char kThresholdCheckMade[] = "brave.stats.threshold_check_made";
 // threshold ping was sent.
 const char kThresholdQuery[] = "brave.stats.threshold_query";
 const char kWeekOfInstallation[] = "brave.stats.week_of_installation";
-const char kAdBlockCheckedDefaultRegion[] =
-    "brave.ad_block.checked_default_region";
-const char kAdBlockCustomFilters[] = "brave.ad_block.custom_filters";
-const char kAdBlockRegionalFilters[] = "brave.ad_block.regional_filters";
 const char kWidevineOptedIn[] = "brave.widevine_opted_in";
 const char kAskWidevineInstall[] = "brave.ask_widevine_install";
 const char kUseAlternativeSearchEngineProvider[] =
@@ -52,9 +48,6 @@ const char kShieldsStatsBadgeVisible[] =
     "brave.shields.stats_badge_visible";
 const char kAdControlType[] = "brave.ad_default";
 const char kGoogleLoginControlType[] = "brave.google_login_default";
-const char kFBEmbedControlType[] = "brave.fb_embed_default";
-const char kTwitterEmbedControlType[] = "brave.twitter_embed_default";
-const char kLinkedInEmbedControlType[] = "brave.linkedin_embed_default";
 const char kWebTorrentEnabled[] = "brave.webtorrent_enabled";
 const char kHangoutsEnabled[] = "brave.hangouts_enabled";
 const char kIPFSCompanionEnabled[] = "brave.ipfs_companion_enabled";
@@ -66,9 +59,11 @@ const char kNewTabPageShowRewards[] = "brave.new_tab_page.show_rewards";
 const char kNewTabPageShowBinance[] = "brave.new_tab_page.show_binance";
 const char kNewTabPageShowGemini[] = "brave.new_tab_page.show_gemini";
 const char kNewTabPageShowTogether[] = "brave.new_tab_page.show_together";
+const char kNewTabPageHideAllWidgets[] = "brave.new_tab_page.hide_all_widgets";
 const char kNewTabPageShowsOptions[] = "brave.new_tab_page.shows_options";
 const char kBraveTodaySources[] = "brave.today.sources";
 const char kBraveTodayIntroDismissed[] = "brave.today.intro_dismissed";
+const char kBraveTodayOptedIn[] = "brave.today.opted_in";
 const char kBraveTodayWeeklySessionCount[] =
     "brave.today.p3a_weekly_session_count";
 const char kBraveTodayWeeklyCardViewsCount[] =
@@ -87,6 +82,8 @@ const char kBraveSuggestedSiteSuggestionsEnabled[] =
 const char kBraveDarkMode[] = "brave.dark_mode";
 const char kOtherBookmarksMigrated[] = "brave.other_bookmarks_migrated";
 const char kBraveShieldsSettingsVersion[] = "brave.shields_settings_version";
+const char kDefaultBrowserPromptEnabled[] =
+    "brave.default_browser_prompt_enabled";
 #if !BUILDFLAG(USE_GCM_FROM_PLATFORM)
 const char kBraveGCMChannelStatus[] = "brave.gcm.channel_status";
 #endif

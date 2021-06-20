@@ -235,6 +235,18 @@
     "message": "Sila sandarkan dompet Brave anda.",
     "description": "Description for backup wallet notification"
   },
+  "deviceLimitReachedLearnMore": {
+    "message": "Ketahui Lebih Lanjut",
+    "description": "Notification button text to learn more about device limit"
+  },
+  "deviceLimitReachedTitle": {
+    "message": "Had Peranti Dicapai",
+    "description": "Title for device limit reached notification"
+  },
+  "deviceLimitReachedNotification": {
+    "message": "Dompet anda tidak dapat disahkan kerana anda telah mencapai had maksimum peranti yang disahkan.",
+    "description": "Description for device limit reached notification"
+  },
   "insufficientFundsNotification": {
     "message": "Akaun Brave Rewards anda sedang menunggu deposit.",
     "description": "Description for new insufficient funds notification"
@@ -515,9 +527,15 @@
     "message": "Dompet Disahkan",
     "description": "Displayed in wallet that tells users that he is verified"
   },
-  "walletGoToUphold":  {
-    "message": "Pergi ke akaun Uphold saya",
-    "description": "CTA to open uphold account"
+  "walletGoToProvider":  {
+    "message": "Pergi ke akaun $provider$ saya",
+    "description": "CTA to open an external wallet account",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Uphold"
+      }
+    }
   },
   "walletDisconnect":  {
     "message": "Putuskan daripada Brave Rewards",
@@ -612,8 +630,14 @@
     "description": "Text for login button"
   },
   "loginMessageText":  {
-    "message": "Anda perlu mempunyai minima 25 BAT untuk mencipta akaun Uphold. Sila cuba lagi kemudian. \nJika anda telah mempunyai akaun Uphold yang telah disahkan, terus ke log masuk. ",
-    "description": "Text for login button"
+    "message": "Anda perlu mempunyai minimum $amount$ BAT untuk mencipta akaun Uphold. Jika anda telah mempunyai akaun Uphold yang telah disahkan, terus ke log masuk.",
+    "description": "Text for login button",
+    "placeholders": {
+      "amount": {
+        "content": "$1",
+        "example": "15"
+      }
+    }
   },
   "walletConnected":  {
     "message": "Disambungkan",
@@ -624,8 +648,14 @@
     "description": "Status button that tells user that he is currently pending"
   },
   "walletVerificationNote3":  {
-    "message": "Nota: Transaksi anda akan tertera di Uphold sebaik sahaja anda beri keizinan; contohnya, mereka boleh melihat penerima dan jumlah tip anda.",
-    "description": "Displayed in login modal for uphold"
+    "message": "Perhatian: Urus niaga anda akan dapat dilihat oleh $provider$ selepas anda memberi kebenaran, sebagai contoh, mereka boleh melihat penerima dan jumlah tip yang anda berikan.",
+    "description": "Displayed in login modal for external wallet providers",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Uphold"
+      }
+    }
   },
   "onboardingEarnHeader": {
     "message": "Dapatkan Token & Beri Balik",
@@ -718,7 +748,7 @@
     "description": ""
   },
   "onboardingPanelScheduleHeader": {
-    "message": "BIla anda menerima ganjaran",
+    "message": "BIlakah anda menerima ganjaran?",
     "description": ""
   },
   "onboardingPanelScheduleText": {
@@ -764,6 +794,42 @@
   "onboardingPanelCompleteText": {
     "message": "Dengan menggunakan Ganjaran Brave anda membantu menjadikan web ini tempat yang lebih baik buat semua orang. Dan itu memang hebat!",
     "description": ""
+  },
+  "onboardingPanelVerifyHeader": {
+    "message": "Sahkan dompet anda",
+    "description": ""
+  },
+  "onboardingPanelVerifySubtext": {
+    "message": "Untuk mengeluarkan token yang anda peroleh kerana menonton iklan, anda akan perlu mengesahkan dompet anda.",
+    "description": ""
+  },
+  "onboardingPanelVerifyLater": {
+    "message": "Lakukannya kemudian",
+    "description": ""
+  },
+  "onboardingPanelVerifyNow": {
+    "message": "Sahkan dompet saya",
+    "description": ""
+  },
+  "onboardingPanelBitflyerNote": {
+    "message": "Dompet bitFlyer adalah perkhidmatan yang diuruskan oleh bitFlyer, Inc.",
+    "description": ""
+  },
+  "onboardingPanelBitflyerText": {
+    "message": "Dengan mengesahkan dompet anda dan memautkannya ke akaun bitFlyer, anda akan dapat menyimpan dan menguruskan token yang anda peroleh melalui Brave Rewards dengan lebih mudah",
+    "description": ""
+  },
+  "onboardingPanelBitflyerLearnMore": {
+    "message": "$link_begin$Ketahui lebih lanjut$link_end$ mengenai cara memautkan pelayar Brave anda dengan akaun bitFlyer anda.",
+    "description": "",
+    "placeholders": {
+      "link_begin": {
+        "content": "$1"
+      },
+      "link_end": {
+        "content": "$2"
+      }
+    }
   },
   "bapDeprecationHeader": {
     "message": "Ganjaran Brave di Jepun beralih ke sistem baharu!",

@@ -5,7 +5,7 @@
 <translation id="7942180974165298215">Bloqueur de publicité Brave</translation>
 <translation id="4615489450165434530">Signaler une panne du site</translation>
 <translation id="6406506848690869874">Synchroniser</translation>
-<translation id="5655621391922317800">Portefeuilles de cryptomonnaies</translation>
+<translation id="1544192797660353713">Portefeuille</translation>
 <translation id="2445484935443597917">Créer un profil</translation>
 <translation id="2666990579225592931">Ouvrir une fenêtre de navigation en tant qu'invité</translation>
 <translation id="8275068909952022340">Plus…</translation>
@@ -59,13 +59,29 @@ En installant cette extension, vous acceptez les conditions d'utilisation de Goo
 <translation id="1970435562892104727">Fenêtre de navigation privée avec Tor</translation>
 <translation id="1037341607922068025">Ouvrir une Fenêtre de Navigation Privée avec Tor</translation>
 <translation id="1725356094208762656">Ouvrir dans Tor</translation>
+<translation id="7643538479215207633">Ouvrir avec IPFS</translation>
+<translation id="3094628781200061820">Publier et récupérer des fichiers depuis IPFS</translation>
 <translation id="1672270084584211506">Onion disponible</translation>
+<translation id="4901618511712685702">Importer sur IPFS</translation>
+<translation id="6794469945030154569">Cette page</translation>
+<translation id="5037852323412456577">Image sélectionnée</translation>
+<translation id="2715839724138372481">Vidéo sélectionnée</translation>
+<translation id="4227945450504703638">Contenu audio sélectionné</translation>
+<translation id="7895302206188277628">Contenu du lien</translation>
+<translation id="4322612543319315652">Importer le texte sélectionné sur IPFS</translation>
+<translation id="8883166554766780543">Importer et copier le lien vers un instantané IPFS</translation>
+<translation id="3654831858282189202">Publier avec la clé IPNS</translation>
+<translation id="7691598647605453992">IPFS</translation>
 <translation id="1434416574322382019">Nouvelle Fenêtre Privée avec Tor</translation>
 <translation id="4703780849509456860">Ouvrir le Lien dans une Fenêtre Privée avec Tor</translation>
 <translation id="3488584642074079080">Ouvrir le Lien dans une Fenêtre Privée Brave avec Tor</translation>
+<translation id="7475547933708221517">Partager le fichier local via IPFS</translation>
+<translation id="2286177249736199435">Partagez un fichier local avec IPFS</translation>
+<translation id="784573715436258741">Partager le fichier local via IPFS</translation>
 <translation id="6313675821927505581">Nouvelle fenêtre privée avec Tor</translation>
 <translation id="2638041073279639246">Ouvrir le lien dans une fenêtre privée avec Tor</translation>
 <translation id="3425600262621021599">Ouvrir le lien dans une fenêtre privée Brave avec Tor</translation>
+<translation id="575838692088926391">Partager un fichier local utilisant IPFS</translation>
 <translation id="5410152065859052603">Tor</translation>
 <translation id="2515126961943087659">Service de publicités BAT</translation>
 <translation id="7924918279836988121">Service Bat Ledger</translation>
@@ -145,7 +161,7 @@ En installant cette extension, vous acceptez les conditions d'utilisation de Goo
 <translation id="4112587618563511470">Code de synchronisation invalide, veuillez le vérifier et réessayer.</translation>
 <translation id="2339730291919608488">Quitter la chaîne de synchronisation</translation>
 <translation id="115699408012835975">Si vous réinitialisez Sync, vous devrez saisir à nouveau un code de synchronisation provenant d'un autre appareil afin de vous synchroniser avec celui-ci. Êtes-vous sûr(e) de vouloir continuer ?</translation>
-<translation id="339086854515247923">Êtes-vous sûr(e) de vouloir supprimer l'appareil sélectionné de la chaîne de synchronisation ?</translation>
+<translation id="6092564993102418148">Êtes-vous sûr de vouloir supprimer l'appareil sélectionné de la chaîne de synchronisation?</translation>
 <translation id="3396347744975515056">Brave Sync a été mis à jour et doit être configuré</translation>
 <translation id="7473245612074035141">Commencer la configuration</translation>
 <translation id="3411013544209536575">Conseils d'aide</translation>
@@ -156,24 +172,49 @@ En installant cette extension, vous acceptez les conditions d'utilisation de Goo
 <translation id="1336940801687497203">Identique à Windows</translation>
 <translation id="8721331068159819483">Identique à macOS</translation>
 <translation id="2896916411183256228">Utilise WebTorrent pour afficher les torrents directement dans le navigateur. Compatible avec les fichiers torrent et les liens magnétiques.</translation>
+<translation id="8488282162676695335">Portefeuille Brave</translation>
 <translation id="2356070529366658676">Demander</translation>
 <translation id="7701040980221191251">Aucun</translation>
+<translation id="5655621391922317800">Portefeuilles de cryptomonnaies</translation>
+<translation id="1696548911367097044">Extension Crypto Wallets obsolète</translation>
 <translation id="1085027414516521238">MetaMask</translation>
 <translation id="7090046810227878892">Fournisseur d'Ethereum pour l'utilisation de Dapps</translation>
 <translation id="5913089932885076110">Charger les portefeuilles de crypto-monnaies au démarrage</translation>
+<translation id="757886143331967039">Charger l'extension Crypto Wallets obsolète au démarrage</translation>
+<translation id="1834467296210148203">Afficher l'icône Portefeuille Brave dans la barre d'outils</translation>
 <translation id="6864914031231797928">Autoriser la connexion Google pour les extensions</translation>
+<translation id="5927916530277631319">Méthode de résolution des domaines Unstoppable Domains</translation>
+<translation id="8412057160793088103"><ph name="BEGIN_LINK"/>En savoir plus<ph name="END_LINK"/> sur les considérations relatives au DNS via HTTPS et à Ethereum.</translation>
+<translation id="5248318250177143470">Méthode de résolution des domaines Ethereum Name Service (ENS)</translation>
+<translation id="7024553202001112871">Mettez en place votre clé IPNS</translation>
+<translation id="951216659045543447">Signez le contenu avec la clé privée correspondante et publiez le dans IPNS</translation>
+<translation id="7611728475758612204">Clés prêtes à être publiées</translation>
+<translation id="911363100236037920">Entrez un nom pour une nouvelle clé</translation>
+<translation id="6358469157239228181">Ce nom ne peut pas être utilisé</translation>
+<translation id="8996633027318264334">Êtes-vous vraiment sûr de vouloir supprimer <ph name="KEY_NAME"/>?</translation>
+<translation id="910215077892371264">Le nœud n'est pas lancé</translation>
+<translation id="616058968889448209">Erreur du lancement du service IPFS, plus d'informations sont disponibles sur <ph name="BEGIN_LINK"/>diagnostic page<ph name="END_LINK"/></translation>
+<translation id="6912148685459054619">Échec lors de l'importation de la clé « <ph name="KEY_NAME"/> »</translation>
+<translation id="8275038454117074363">Importer</translation>
+<translation id="3654980960391973513">Générer</translation>
+<translation id="5531501313997312487">Nœud de départ</translation>
 <translation id="9170907049676078643">Méthode de résolution des ressources IPFS</translation>
 <translation id="1327977588028644528">Passerelle</translation>
 <translation id="80225669816651290">Nœud local</translation>
 <translation id="4927734062756955434">Adresse de la passerelle réseau IPFS publique</translation>
+<translation id="3399481770463167943"><ph name="BEGIN_LINK_MPL"/>En savoir plus<ph name="END_LINK_MPL"/> sur les considérations relatives à la vie privée pour le nœud local et la passerelle IPFS.</translation>
 <translation id="8425213833346101688">Modifier</translation>
 <translation id="557281710253742286">Configurer la passerelle réseau IPFS</translation>
 <translation id="8571837315037233299">Adresse de la passerelle réseau</translation>
+<translation id="1251574393468476924">Taille maximum du cache IPFS (Go)</translation>
+<translation id="2503497578400410320">Appliquer une limite souple à la taille des données du dépôt IPFS.</translation>
 <translation id="7703184801853248830">Adresse de passerelle réseau invalide</translation>
 <translation id="585868419599255817">Redirection sur la passerelle publique IPFS</translation>
 <translation id="207763736230883589">Avoir recours automatiquement à la passerelle réseau IPFS publique si votre nœud local ne peut pas être atteint.</translation>
 <translation id="4107552920076294723">Rediriger les ressources IPFS vers la passerelle réseau IPFS configurée</translation>
 <translation id="6494857428933042381">Utilise automatiquement la passerelle réseau configurée pour les résolutions IPFS lorsqu'une ressource de passerelle réseau IPFS est rencontrée.</translation>
+<translation id="8655170717758778983">Rediriger automatiquement vers la page IPFS via DNSLink lorsque cela est possible</translation>
+<translation id="2233724520223030977">Utiliser automatiquement DNSLink pour accéder à la version IPFS d'un site lorsque cela est possible</translation>
 <translation id="6554397389149987360">Utilise le composant Hangouts pour activer le partage d'écran et d'autres fonctionnalités dans le navigateur.</translation>
 <translation id="1765684547504191670">Utilise le routeur média pour activer Chromecast dans le navigateur.</translation>
 <translation id="9156965752763025780">Vos modifications seront prises en compte au prochain redémarrage de Brave.</translation>
@@ -233,12 +274,13 @@ En installant cette extension, vous acceptez les conditions d'utilisation de Goo
 <translation id="1959966725083452288">Avatar Bonbon Royal</translation>
 <translation id="2039034364578911089">Avatar Bonbon Ninja</translation>
 <translation id="239760341987199724">Définir Brave comme navigateur par défaut</translation>
-<translation id="9185422039067880535">Le navigateur Brave n'est pas actuellement défini comme votre navigateur par défaut.
-Définissez Brave comme votre navigateur par défaut pour continuer à naviguer sur le web plus rapidement;
-jusqu'à 6x plus rapidement sur les principaux sites d'information.</translation>
+<translation id="1391855377994926460">Continuez à naviguer sur le Web encore plus rapidement. Les principaux sites d'actualité chargent jusqu'à 6 fois plus vite.</translation>
 <translation id="9218430445555521422">Définir comme navigateur par défaut</translation>
 <translation id="3479552764303398839">Pas maintenant</translation>
+<translation id="6040143037577758943">Fermer</translation>
+<translation id="5600566490506283344">Notification de Pub Brave</translation>
 <translation id="4877147287319222750">Ajouter à la barre latérale</translation>
+<translation id="4233010476457917696">Afficher la barre latérale</translation>
 <translation id="5404213409401164238">Afficher la barre latérale</translation>
 <translation id="7561196759112975576">Toujours</translation>
 <translation id="7060352228894039151">Au passage de la souris</translation>
@@ -254,11 +296,9 @@ jusqu'à 6x plus rapidement sur les principaux sites d'information.</translation
 <translation id="7090566321964540749">Ces informations anonymes permettent seulement à Brave d'estimer l'utilisation globale de certaines fonctionnalités.</translation>
 <translation id="1947672064022327074">Souhaitez-vous ouvrir des porte-monnaie Crypto pour soutenir Ethereum ?</translation>
 <translation id="7583735190612229830">Configurez les portefeuilles de crypto-monnaies pour interagir avec cette application et d'autres applications similaires.</translation>
-<translation id="4823406846571523661">Configurer les portefeuilles de crypto-monnaies</translation>
+<translation id="8731422418734770661">Configurer Crypto Wallets</translation>
 <translation id="8199661191594897555">Démarrer les portefeuilles de crypto-monnaies et recharger</translation>
 <translation id="8428213095426709021">Paramètres</translation>
-<translation id="1664718502100303670">Paramètres de portefeuille</translation>
-<translation id="965566669123544695">Paramètres IPFS</translation>
 <translation id="72868071984333667">En savoir plus au sujet de l'IPFS et de la confidentialité</translation>
 <translation id="4552520379838695057">Désolé, cette page est manquante.</translation>
 <translation id="2609895996619941644">Voulez-vous vérifier si une version enregistrée est disponible sur la Wayback Machine ?</translation>

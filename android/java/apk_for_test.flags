@@ -4,7 +4,7 @@
 
 # Contains flags that should be applied only to brave_public_apk_for_test.
 
-# Do not obfuscate class names, methods and fields that are 
+# Do not obfuscate class names, methods and fields that are
 # needed for checking of existence for bytecode manipulation
 -keepnames class org.chromium.chrome.browser.settings.MainSettings
 
@@ -37,6 +37,8 @@
 -keep class org.chromium.chrome.browser.ntp.NewTabPageLayout {
     *** insertSiteSectionView(...);
     *** mSiteSectionView;
+    *** mTileGroup;
+    *** updateTileGridPlaceholderVisibility(...);
 }
 
 -keep class org.chromium.chrome.browser.feed.FeedSurfaceCoordinator {
@@ -66,6 +68,11 @@
     *** getPermissionsLinkMessage(...);
     *** getSearchEngineSourceType(...);
     *** sortAndFilterUnnecessaryTemplateUrl(...);
+}
+
+-keep class org.chromium.chrome.browser.search_engines.settings.SearchEngineSettings {
+    *** mSearchEngineAdapter;
+    *** createAdapterIfNecessary(...);
 }
 
 -keep class org.chromium.base.CommandLineInitUtil {
@@ -172,6 +179,9 @@
 
 -keep class org.chromium.chrome.browser.toolbar.bottom.BottomControlsMediator {
     public <init>(...);
+    *** mBottomControlsHeight;
+    *** mModel;
+    *** mBrowserControlsSizer;
 }
 
 -keep class org.chromium.chrome.browser.toolbar.bottom.BraveBottomControlsMediator {
@@ -204,4 +214,81 @@
 
 -keep class org.chromium.chrome.browser.customtabs.CustomTabAppMenuPropertiesDelegate {
     public <init>(...);
+}
+
+-keep class org.chromium.chrome.browser.settings.SettingsLauncherImpl {
+    public <init>(...);
+}
+
+-keep class org.chromium.chrome.browser.settings.BraveSettingsLauncherImpl {
+    public <init>(...);
+}
+
+-keep class org.chromium.chrome.browser.toolbar.IncognitoToggleTabLayout {
+    *** mIncognitoButtonIcon;
+}
+
+-keep class org.chromium.chrome.browser.tasks.tab_management.TabGroupUiCoordinator {
+    public <init>(...);
+    *** mToolbarView;
+}
+
+-keep class org.chromium.chrome.browser.tasks.tab_management.BraveTabGroupUiCoordinator {
+    public <init>(...);
+}
+
+-keep class org.chromium.chrome.browser.site_settings.BraveSiteSettingsDelegate {
+    public <init>(...);
+}
+
+-keep class org.chromium.chrome.browser.site_settings.BraveSingleCategorySettings {
+    public <init>(...);
+}
+
+-keep class org.chromium.components.browser_ui.site_settings.SingleCategorySettings {
+    public <init>(...);
+}
+
+-keep class org.chromium.chrome.browser.site_settings.ChromeSiteSettingsDelegate {
+    public <init>(...);
+}
+
+-keep class org.chromium.chrome.browser.settings.BraveMainPreferencesBase
+
+-keep class org.chromium.chrome.browser.search_engines.settings.BraveBaseSearchEngineAdapter
+
+-keep class org.chromium.chrome.browser.ChromeTabbedActivity
+
+-keep class org.chromium.chrome.browser.app.BraveActivity
+
+-keep class org.chromium.chrome.browser.suggestions.tile.SuggestionsTileView
+
+-keep class org.chromium.chrome.browser.suggestions.tile.BraveTileView
+
+-keep class org.chromium.chrome.browser.customtabs.features.toolbar.CustomTabToolbar
+
+-keep class org.chromium.chrome.browser.toolbar.top.BraveToolbarLayout
+
+-keep class org.chromium.chrome.browser.toolbar.top.ToolbarPhone
+
+-keep class org.chromium.components.permissions.BravePermissionDialogModel {
+    *** getModel(...);
+}
+
+-keep class org.chromium.components.permissions.PermissionDialogModel {
+    *** getModel(...);
+}
+
+-keep class org.chromium.chrome.browser.compositor.layouts.LayoutManagerChromePhone
+
+-keep class org.chromium.chrome.browser.compositor.layouts.BraveLayoutManagerChrome
+
+-keep class org.chromium.chrome.browser.tasks.tab_management.TabUiFeatureUtilities {
+    *** isGridTabSwitcherEnabled(...);
+    *** isTabGroupsAndroidEnabled(...);
+}
+
+-keep class org.chromium.chrome.browser.tasks.tab_management.BraveTabUiFeatureUtilities {
+    *** isGridTabSwitcherEnabled(...);
+    *** isTabGroupsAndroidEnabled(...);
 }

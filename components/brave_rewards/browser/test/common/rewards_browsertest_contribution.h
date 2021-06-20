@@ -14,6 +14,7 @@
 #include "bat/ledger/mojom_structs.h"
 #include "brave/components/brave_rewards/browser/rewards_service_impl.h"
 #include "brave/components/brave_rewards/browser/rewards_service_observer.h"
+#include "brave/components/brave_rewards/browser/test/common/rewards_browsertest_context_helper.h"
 #include "brave/components/brave_rewards/browser/test/common/rewards_browsertest_util.h"
 #include "chrome/browser/ui/browser.h"
 
@@ -36,11 +37,11 @@ class RewardsBrowserTestContribution
       const int32_t number_of_contributions = 0,
       const bool recurring = false);
 
-  void TipPublisher(
-      const GURL& url,
-      rewards_browsertest_util::TipAction tip_action,
-      const int32_t number_of_contributions = 0,
-      const int32_t selection = 0);
+  void TipPublisher(const GURL& url,
+                    rewards_browsertest_util::TipAction tip_action,
+                    const int32_t number_of_contributions = 0,
+                    const int32_t selection = 0,
+                    double custom_amount = 0.0);
 
   void VerifyTip(
       const double amount,

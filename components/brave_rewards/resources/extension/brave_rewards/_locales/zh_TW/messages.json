@@ -235,6 +235,18 @@
     "message": "請備份您的 Brave 電子錢包。",
     "description": "Description for backup wallet notification"
   },
+  "deviceLimitReachedLearnMore": {
+    "message": "更多資訊",
+    "description": "Notification button text to learn more about device limit"
+  },
+  "deviceLimitReachedTitle": {
+    "message": "已達到裝置限制",
+    "description": "Title for device limit reached notification"
+  },
+  "deviceLimitReachedNotification": {
+    "message": "無法驗證您的錢包，因為您的驗證裝置數已達上限。",
+    "description": "Description for device limit reached notification"
+  },
   "insufficientFundsNotification": {
     "message": "您的 Brave Rewards 帳號正在等待存款。",
     "description": "Description for new insufficient funds notification"
@@ -515,9 +527,15 @@
     "message": "電子錢包已驗證",
     "description": "Displayed in wallet that tells users that he is verified"
   },
-  "walletGoToUphold":  {
-    "message": "到我的 Uphold 帳號",
-    "description": "CTA to open uphold account"
+  "walletGoToProvider":  {
+    "message": "到我的 $provider$ 帳戶",
+    "description": "CTA to open an external wallet account",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Uphold"
+      }
+    }
   },
   "walletDisconnect":  {
     "message": "從 Brave Rewards 取消連結",
@@ -612,8 +630,14 @@
     "description": "Text for login button"
   },
   "loginMessageText":  {
-    "message": "您至少需有 25 BAT 才能建立 Uphold 帳戶。請稍後再試。\n如果您已有經驗證的 Uphold 帳戶，請繼續登入。",
-    "description": "Text for login button"
+    "message": "您至少需有 $amount$ BAT 才能建立 Uphold 帳號。如果您已有經驗證的 Uphold 帳戶，請繼續登入。",
+    "description": "Text for login button",
+    "placeholders": {
+      "amount": {
+        "content": "$1",
+        "example": "15"
+      }
+    }
   },
   "walletConnected":  {
     "message": "已連線",
@@ -624,8 +648,14 @@
     "description": "Status button that tells user that he is currently pending"
   },
   "walletVerificationNote3":  {
-    "message": "注意：在您授權後，您的交易將對 Uphold 可見；舉例來說，他們可以看見您小費的收受人與金額。",
-    "description": "Displayed in login modal for uphold"
+    "message": "注意：授權後 $provider$ 將能看到您的交易；舉例來說，他們能看見收款方與您給的小費金額。",
+    "description": "Displayed in login modal for external wallet providers",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Uphold"
+      }
+    }
   },
   "onboardingEarnHeader": {
     "message": "賺取代幣與回饋",
@@ -718,7 +748,7 @@
     "description": ""
   },
   "onboardingPanelScheduleHeader": {
-    "message": "您何時獲得獎勵",
+    "message": "您何時獲得獎勵？",
     "description": ""
   },
   "onboardingPanelScheduleText": {
@@ -764,6 +794,42 @@
   "onboardingPanelCompleteText": {
     "message": "透過使用 Brave 獎勵，您正在協助使網際網路成為適合所有人的更美好的地方。真是太棒了！",
     "description": ""
+  },
+  "onboardingPanelVerifyHeader": {
+    "message": "驗證您的錢包",
+    "description": ""
+  },
+  "onboardingPanelVerifySubtext": {
+    "message": "若要提領觀看廣告所賺取的代幣，您必須驗證您的錢包。",
+    "description": ""
+  },
+  "onboardingPanelVerifyLater": {
+    "message": "稍後再執行",
+    "description": ""
+  },
+  "onboardingPanelVerifyNow": {
+    "message": "驗證我的錢包",
+    "description": ""
+  },
+  "onboardingPanelBitflyerNote": {
+    "message": "bitFlyer 錢包是由 bitFlyer, Inc. 管理的服務",
+    "description": ""
+  },
+  "onboardingPanelBitflyerText": {
+    "message": "驗證您的錢包並將其連結至 bitFlyer 帳戶，您將能更輕鬆地儲存並管理透過 Brave Rewards 賺取的代幣",
+    "description": ""
+  },
+  "onboardingPanelBitflyerLearnMore": {
+    "message": "$link_begin$了解更多$link_end$關於如何將您的 Brave 瀏覽器連結到您的 bitFlyer 帳號。",
+    "description": "",
+    "placeholders": {
+      "link_begin": {
+        "content": "$1"
+      },
+      "link_end": {
+        "content": "$2"
+      }
+    }
   },
   "bapDeprecationHeader": {
     "message": "日本的 Brave Rewards 正在切換到新系統！",

@@ -34,7 +34,7 @@ function generateTopSites (topSites: typeof defaultTopSitesData) {
   return staticTopSites
 }
 
-function shouldShowBrandedWallpaperData (shouldShow: boolean) {
+function shouldShowBrandedWallpaperData (shouldShow: boolean): NewTab.BrandedWallpaper {
   if (shouldShow === false) {
     return {
       wallpaperImageUrl: '',
@@ -50,9 +50,9 @@ function shouldShowBrandedWallpaperData (shouldShow: boolean) {
 function getWidgetStackOrder (firstWidget: string): NewTab.StackWidget[] {
   switch (firstWidget) {
     case 'together':
-      return ['rewards', 'binance', 'together']
+      return ['rewards', 'binance', 'together', 'ftx']
     default:
-      return ['together', 'binance', 'rewards']
+      return ['together', 'binance', 'rewards', 'ftx']
   }
 }
 
@@ -78,8 +78,11 @@ export const getNewTabData = (state: NewTab.State = defaultState): NewTab.State 
   togetherPromptDismissed: !boolean('Together prompt?', false),
   geminiSupported: boolean('Gemini Supported?', true),
   cryptoDotComSupported: boolean('Crypto.com supported?', true),
+  ftxSupported: boolean('FTX supported?', true),
+  showFTX: boolean('Show FTX?', true),
   showBinance: boolean('Show Binance?', true),
-  isBraveTodayIntroDismissed: boolean('Brave Today intro dismissed?', false),
+  hideAllWidgets: boolean('Hide all widgets?', false),
+  isBraveTodayOptedIn: boolean('Brave Today opted-in?', false),
   textDirection: select('Text direction', { ltr: 'ltr', rtl: 'rtl' } , 'ltr'),
   stats: {
     ...state.stats,

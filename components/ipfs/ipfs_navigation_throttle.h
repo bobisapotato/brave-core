@@ -30,6 +30,7 @@ class IpfsNavigationThrottle : public content::NavigationThrottle {
  public:
   explicit IpfsNavigationThrottle(content::NavigationHandle* navigation_handle,
                                   IpfsService* ipfs_service,
+                                  PrefService* pref_service,
                                   const std::string& locale);
   ~IpfsNavigationThrottle() override;
 
@@ -39,6 +40,7 @@ class IpfsNavigationThrottle : public content::NavigationThrottle {
   static std::unique_ptr<IpfsNavigationThrottle> MaybeCreateThrottleFor(
       content::NavigationHandle* navigation_handle,
       IpfsService* ipfs_service,
+      PrefService* pref_service,
       const std::string& locale);
 
   // content::NavigationThrottle implementation:
@@ -50,10 +52,14 @@ class IpfsNavigationThrottle : public content::NavigationThrottle {
                            DeferUntilIpfsProcessLaunched);
   FRIEND_TEST_ALL_PREFIXES(IpfsNavigationThrottleUnitTest,
                            DeferUntilPeersFetched);
+  FRIEND_TEST_ALL_PREFIXES(IpfsNavigationThrottleUnitTest, SequentialRequests);
+  FRIEND_TEST_ALL_PREFIXES(IpfsNavigationThrottleUnitTest,
+                           DeferMultipleUntilIpfsProcessLaunched);
 
   void ShowInterstitial();
   content::NavigationThrottle::ThrottleCheckResult
   ShowIPFSOnboardingInterstitial();
+
   void LoadPublicGatewayURL();
   void GetConnectedPeers();
   void OnGetConnectedPeers(bool success, const std::vector<std::string>& peers);

@@ -16,9 +16,9 @@ const rewardsReducer: Reducer<NewTab.State | undefined> = (state: NewTab.State, 
       state.rewardsState.enabledAds = payload.enabled
       break
 
-    case types.ON_ADS_ESTIMATED_EARNINGS:
+    case types.ON_ADS_ACCOUNT_STATEMENT:
       state = { ...state }
-      state.rewardsState.adsEstimatedEarnings = payload.amount
+      state.rewardsState.adsAccountStatement = payload.adsAccountStatement
       break
 
     case types.ON_BALANCE_REPORT:
@@ -115,8 +115,7 @@ const rewardsReducer: Reducer<NewTab.State | undefined> = (state: NewTab.State, 
         rewardsState: {
           ...state.rewardsState,
           enabledAds: preInitialRewardsDataPayload.enabledAds,
-          adsSupported: preInitialRewardsDataPayload.adsSupported,
-          onlyAnonWallet: preInitialRewardsDataPayload.onlyAnonWallet
+          adsSupported: preInitialRewardsDataPayload.adsSupported
         }
       }
       break
@@ -126,8 +125,11 @@ const rewardsReducer: Reducer<NewTab.State | undefined> = (state: NewTab.State, 
       const newRewardsState = {
         balance: initialRewardsDataPayload.balance,
         totalContribution: getTotalContributions(initialRewardsDataPayload.report),
-        adsEstimatedEarnings: initialRewardsDataPayload.adsEstimatedEarnings,
         parameters: initialRewardsDataPayload.parameters
+      } as any
+
+      if (payload.adsAccountStatement) {
+        newRewardsState.adsAccountStatement = payload.adsAccountStatement
       }
 
       state = {
@@ -135,17 +137,6 @@ const rewardsReducer: Reducer<NewTab.State | undefined> = (state: NewTab.State, 
         rewardsState: {
           ...state.rewardsState,
           ...newRewardsState
-        }
-      }
-      break
-
-    case types.SET_ONLY_ANON_WALLET:
-      state = { ...state }
-      state = {
-        ...state,
-        rewardsState: {
-          ...state.rewardsState,
-          onlyAnonWallet: payload.onlyAnonWallet
         }
       }
       break

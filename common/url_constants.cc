@@ -11,6 +11,7 @@ const char kBraveUIScheme[] = "brave";
 const char kMagnetScheme[] = "magnet";
 const char kBinanceScheme[] = "com.brave.binance";
 const char kGeminiScheme[] = "com.brave.gemini";
+const char kFTXScheme[] = "com.brave.ftx";
 const char kWidevineMoreInfoURL[] = "https://www.eff.org/issues/drm";
 const char kWidevineTOS[] = "https://policies.google.com/terms";
 const char kRewardsUpholdSupport[] = "https://uphold.com/en/brave/support";
@@ -22,3 +23,4 @@ const char kCryptoWalletsLearnMoreURL[] =
     "https://support.brave.com/hc/en-us/articles/360034535452";
 const char kPermissionPromptLearnMoreUrl[] =
     "https://github.com/brave/brave-browser/wiki/Web-API-Permissions";
+const char kSpeedreaderLearnMoreUrl[] = "https://brave.com/speed-reader/";

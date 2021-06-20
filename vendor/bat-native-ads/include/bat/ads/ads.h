@@ -6,9 +6,7 @@
 #ifndef BRAVE_VENDOR_BAT_NATIVE_ADS_INCLUDE_BAT_ADS_ADS_H_
 #define BRAVE_VENDOR_BAT_NATIVE_ADS_INCLUDE_BAT_ADS_ADS_H_
 
-#include <stdint.h>
-
-#include <memory>
+#include <cstdint>
 #include <string>
 #include <vector>
 
@@ -18,6 +16,7 @@
 #include "bat/ads/ads_history_info.h"
 #include "bat/ads/category_content_info.h"
 #include "bat/ads/export.h"
+#include "bat/ads/inline_content_ad_info.h"
 #include "bat/ads/mojom.h"
 #include "bat/ads/promoted_content_ad_info.h"
 #include "bat/ads/result.h"
@@ -30,7 +29,10 @@ using ShutdownCallback = std::function<void(const Result)>;
 
 using RemoveAllHistoryCallback = std::function<void(const Result)>;
 
-using GetStatementCallback =
+using GetInlineContentAdCallback = std::function<
+    void(const bool, const std::string&, const InlineContentAdInfo&)>;
+
+using GetAccountStatementCallback =
     std::function<void(const bool, const StatementInfo&)>;
 
 // |g_environment| indicates that URL requests should use production, staging or
@@ -82,26 +84,28 @@ class ADS_EXPORT Ads {
   // <ISO-639-1>-<ISO-3166-1> or <ISO-639-1>_<ISO-3166-1> format
   virtual void ChangeLocale(const std::string& locale) = 0;
 
-  // Should be called when the ads subdivision targeting code has changed
-  virtual void OnAdsSubdivisionTargetingCodeHasChanged() = 0;
+  // Should be called when a pref changes. |path| contains the pref path
+  virtual void OnPrefChanged(const std::string& path) = 0;
 
   // Should be called when a page has loaded and the content is available for
-  // analysis. |page_transition_type| contains the page transition type between
-  // pages, otherwise should be set to |-1|. |has_user_gesture| returns true if
-  // the navigation was initiated by a user gesture, otherwise should be set to
-  // false. |redirect_chain| contains the chain of redirects, including
-  // client-side redirect and the current URL. |text| will contain the HTML
-  // page content
-  virtual void OnTextLoaded(const int32_t tab_id,
-                            const int32_t page_transition_type,
-                            const bool has_user_gesture,
-                            const std::vector<std::string>& redirect_chain,
-                            const std::string& text) = 0;
-
-  // Similar to |OnTextLoaded| but instead of inner text it keeps the html
+  // analysis. |redirect_chain| contains the chain of redirects, including
+  // client-side redirect and the current URL. |html| will contain the page
+  // content as HTML
   virtual void OnHtmlLoaded(const int32_t tab_id,
                             const std::vector<std::string>& redirect_chain,
                             const std::string& html) = 0;
+
+  // Should be called when a page has loaded and the content is available for
+  // analysis. |redirect_chain| contains the chain of redirects, including
+  // client-side redirect and the current URL. |text| will contain the page
+  // content as text
+  virtual void OnTextLoaded(const int32_t tab_id,
+                            const std::vector<std::string>& redirect_chain,
+                            const std::string& text) = 0;
+
+  // Should be called when the navigation was initiated by a user gesture.
+  // |page_transition_type| contains the page transition type
+  virtual void OnUserGesture(const int32_t page_transition_type) = 0;
 
   // Should be called when a user is no longer idle. |idle_time| returns the
   // idle time in seconds. |was_locked| returns true if the screen is locked,
@@ -144,9 +148,9 @@ class ADS_EXPORT Ads {
   virtual void OnWalletUpdated(const std::string& payment_id,
                                const std::string& seed) = 0;
 
-  // Should be called when the user model has been updated by
-  // |BraveUserModelInstaller| component
-  virtual void OnUserModelUpdated(const std::string& id) = 0;
+  // Should be called when a resource component has been updated by
+  // |brave_ads::ResourceComponent|
+  virtual void OnResourceComponentUpdated(const std::string& id) = 0;
 
   // Should be called to get the ad notification specified by |uuid|. Returns
   // true if the ad notification exists otherwise returns false.
@@ -171,6 +175,17 @@ class ADS_EXPORT Ads {
       const std::string& creative_instance_id,
       const PromotedContentAdEventType event_type) = 0;
 
+  // Should be called to get an eligible inline content ad for the specified
+  // size
+  virtual void GetInlineContentAd(const std::string& dimensions,
+                                  GetInlineContentAdCallback callback) = 0;
+
+  // Should be called when a user views or clicks an inline content ad
+  virtual void OnInlineContentAdEvent(
+      const std::string& uuid,
+      const std::string& creative_instance_id,
+      const InlineContentAdEventType event_type) = 0;
+
   // Should be called to remove all cached history. The callback takes one
   // argument - |Result| should be set to |SUCCESS| if successful otherwise
   // should be set to |FAILED|
@@ -192,7 +207,7 @@ class ADS_EXPORT Ads {
   // argument - |StatementInfo| which contains estimated pending rewards, next
   // payment date, ads received this month, pending rewards, cleared
   // transactions and uncleared transactions
-  virtual void GetStatement(GetStatementCallback callback) = 0;
+  virtual void GetAccountStatement(GetAccountStatementCallback callback) = 0;
 
   // Should be called to indicate interest in the specified ad. This is a
   // toggle, so calling it again returns the setting to the neutral state

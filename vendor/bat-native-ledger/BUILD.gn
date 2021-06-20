@@ -5,6 +5,8 @@
 
 import("//third_party/protobuf/proto_library.gni")
 
+import("//brave/vendor/bat-native-ledger/config.gni")
+
 if (is_android) {
   import("//build/config/android/rules.gni")
 }
@@ -25,6 +27,17 @@ config("internal_config") {
     "//brave/components/brave_rewards/test:*",
     "//brave/test:*",
     "//brave/vendor/bat-native-ledger/test:*",
+  ]
+  defines = [
+    "BITFLYER_CLIENT_ID=\"$bitflyer_client_id\"",
+    "BITFLYER_CLIENT_SECRET=\"$bitflyer_client_secret\"",
+    "BITFLYER_STAGING_CLIENT_ID=\"$bitflyer_staging_client_id\"",
+    "BITFLYER_STAGING_CLIENT_SECRET=\"$bitflyer_staging_client_secret\"",
+    "BITFLYER_STAGING_URL=\"$bitflyer_staging_url\"",
+    "UPHOLD_CLIENT_ID=\"$uphold_client_id\"",
+    "UPHOLD_CLIENT_SECRET=\"$uphold_client_secret\"",
+    "UPHOLD_STAGING_CLIENT_ID=\"$uphold_staging_client_id\"",
+    "UPHOLD_STAGING_CLIENT_SECRET=\"$uphold_staging_client_secret\"",
   ]
   include_dirs = [
     "src",
@@ -54,7 +67,7 @@ static_library("bat-native-ledger-standalone") {
 source_set("headers") {
   visibility = [
     ":*",
-    "//brave/browser:browser_process",
+    "//chrome/browser:browser",
 
     # add this only when ads is in the same process
     # rebase_path("bat-native-ads", dep_base),
@@ -108,8 +121,20 @@ source_set("ledger") {
     "src/bat/ledger/internal/attestation/attestation_impl.h",
     "src/bat/ledger/internal/attestation/attestation_iosx.cc",
     "src/bat/ledger/internal/attestation/attestation_iosx.h",
+    "src/bat/ledger/internal/bitflyer/bitflyer.cc",
+    "src/bat/ledger/internal/bitflyer/bitflyer.h",
+    "src/bat/ledger/internal/bitflyer/bitflyer_authorization.cc",
+    "src/bat/ledger/internal/bitflyer/bitflyer_authorization.h",
+    "src/bat/ledger/internal/bitflyer/bitflyer_transfer.cc",
+    "src/bat/ledger/internal/bitflyer/bitflyer_transfer.h",
+    "src/bat/ledger/internal/bitflyer/bitflyer_util.cc",
+    "src/bat/ledger/internal/bitflyer/bitflyer_util.h",
+    "src/bat/ledger/internal/bitflyer/bitflyer_wallet.cc",
+    "src/bat/ledger/internal/bitflyer/bitflyer_wallet.h",
     "src/bat/ledger/internal/common/brotli_util.cc",
     "src/bat/ledger/internal/common/brotli_util.h",
+    "src/bat/ledger/internal/common/random_util.cc",
+    "src/bat/ledger/internal/common/random_util.h",
     "src/bat/ledger/internal/common/request_util.cc",
     "src/bat/ledger/internal/common/request_util.h",
     "src/bat/ledger/internal/common/security_util.cc",
@@ -239,6 +264,9 @@ source_set("ledger") {
     "src/bat/ledger/internal/database/migration/migration_v28.h",
     "src/bat/ledger/internal/database/migration/migration_v29.h",
     "src/bat/ledger/internal/database/migration/migration_v3.h",
+    "src/bat/ledger/internal/database/migration/migration_v30.h",
+    "src/bat/ledger/internal/database/migration/migration_v31.h",
+    "src/bat/ledger/internal/database/migration/migration_v32.h",
     "src/bat/ledger/internal/database/migration/migration_v4.h",
     "src/bat/ledger/internal/database/migration/migration_v5.h",
     "src/bat/ledger/internal/database/migration/migration_v6.h",
@@ -251,6 +279,16 @@ source_set("ledger") {
     "src/bat/ledger/internal/endpoint/api/api_util.h",
     "src/bat/ledger/internal/endpoint/api/get_parameters/get_parameters.cc",
     "src/bat/ledger/internal/endpoint/api/get_parameters/get_parameters.h",
+    "src/bat/ledger/internal/endpoint/bitflyer/bitflyer_server.cc",
+    "src/bat/ledger/internal/endpoint/bitflyer/bitflyer_server.h",
+    "src/bat/ledger/internal/endpoint/bitflyer/bitflyer_utils.cc",
+    "src/bat/ledger/internal/endpoint/bitflyer/bitflyer_utils.h",
+    "src/bat/ledger/internal/endpoint/bitflyer/get_balance/get_balance_bitflyer.cc",
+    "src/bat/ledger/internal/endpoint/bitflyer/get_balance/get_balance_bitflyer.h",
+    "src/bat/ledger/internal/endpoint/bitflyer/post_oauth/post_oauth_bitflyer.cc",
+    "src/bat/ledger/internal/endpoint/bitflyer/post_oauth/post_oauth_bitflyer.h",
+    "src/bat/ledger/internal/endpoint/bitflyer/post_transaction/post_transaction_bitflyer.cc",
+    "src/bat/ledger/internal/endpoint/bitflyer/post_transaction/post_transaction_bitflyer.h",
     "src/bat/ledger/internal/endpoint/payment/get_credentials/get_credentials.cc",
     "src/bat/ledger/internal/endpoint/payment/get_credentials/get_credentials.h",
     "src/bat/ledger/internal/endpoint/payment/payment_server.cc",
@@ -273,10 +311,14 @@ source_set("ledger") {
     "src/bat/ledger/internal/endpoint/private_cdn/private_cdn_server.h",
     "src/bat/ledger/internal/endpoint/private_cdn/private_cdn_util.cc",
     "src/bat/ledger/internal/endpoint/private_cdn/private_cdn_util.h",
+    "src/bat/ledger/internal/endpoint/promotion/delete_claim/delete_claim.cc",
+    "src/bat/ledger/internal/endpoint/promotion/delete_claim/delete_claim.h",
     "src/bat/ledger/internal/endpoint/promotion/get_available/get_available.cc",
     "src/bat/ledger/internal/endpoint/promotion/get_available/get_available.h",
     "src/bat/ledger/internal/endpoint/promotion/get_captcha/get_captcha.cc",
     "src/bat/ledger/internal/endpoint/promotion/get_captcha/get_captcha.h",
+    "src/bat/ledger/internal/endpoint/promotion/get_drain/get_drain.cc",
+    "src/bat/ledger/internal/endpoint/promotion/get_drain/get_drain.h",
     "src/bat/ledger/internal/endpoint/promotion/get_recover_wallet/get_recover_wallet.cc",
     "src/bat/ledger/internal/endpoint/promotion/get_recover_wallet/get_recover_wallet.h",
     "src/bat/ledger/internal/endpoint/promotion/get_signed_creds/get_signed_creds.cc",
@@ -287,6 +329,8 @@ source_set("ledger") {
     "src/bat/ledger/internal/endpoint/promotion/post_bat_loss/post_bat_loss.h",
     "src/bat/ledger/internal/endpoint/promotion/post_captcha/post_captcha.cc",
     "src/bat/ledger/internal/endpoint/promotion/post_captcha/post_captcha.h",
+    "src/bat/ledger/internal/endpoint/promotion/post_claim_bitflyer/post_claim_bitflyer.cc",
+    "src/bat/ledger/internal/endpoint/promotion/post_claim_bitflyer/post_claim_bitflyer.h",
     "src/bat/ledger/internal/endpoint/promotion/post_claim_brave/post_claim_brave.cc",
     "src/bat/ledger/internal/endpoint/promotion/post_claim_brave/post_claim_brave.h",
     "src/bat/ledger/internal/endpoint/promotion/post_claim_uphold/post_claim_uphold.cc",
@@ -391,10 +435,6 @@ source_set("ledger") {
     "src/bat/ledger/internal/logging/logging.h",
     "src/bat/ledger/internal/logging/logging_util.cc",
     "src/bat/ledger/internal/logging/logging_util.h",
-    "src/bat/ledger/internal/promotion/bap_reporter.cc",
-    "src/bat/ledger/internal/promotion/bap_reporter.h",
-    "src/bat/ledger/internal/promotion/bap_reporter_endpoint.cc",
-    "src/bat/ledger/internal/promotion/bap_reporter_endpoint.h",
     "src/bat/ledger/internal/promotion/promotion.cc",
     "src/bat/ledger/internal/promotion/promotion.h",
     "src/bat/ledger/internal/promotion/promotion_transfer.cc",
@@ -455,6 +495,8 @@ source_set("ledger") {
     "src/bat/ledger/internal/state/state_migration_v7.h",
     "src/bat/ledger/internal/state/state_migration_v8.cc",
     "src/bat/ledger/internal/state/state_migration_v8.h",
+    "src/bat/ledger/internal/state/state_migration_v9.cc",
+    "src/bat/ledger/internal/state/state_migration_v9.h",
     "src/bat/ledger/internal/uphold/uphold.cc",
     "src/bat/ledger/internal/uphold/uphold.h",
     "src/bat/ledger/internal/uphold/uphold_authorization.cc",

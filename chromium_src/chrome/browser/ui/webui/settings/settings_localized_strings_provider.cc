@@ -6,11 +6,13 @@
 #include "chrome/browser/ui/webui/settings/settings_localized_strings_provider.h"
 
 #include "base/stl_util.h"
-#include "base/strings/string16.h"
 #include "base/strings/utf_string_conversions.h"
 #include "brave/browser/ui/webui/settings/brave_privacy_handler.h"
-#include "brave/browser/version_info.h"
+#include "brave/common/url_constants.h"
+#include "brave/components/ipfs/ipfs_constants.h"
+#include "brave/components/ipfs/pref_names.h"
 #include "brave/components/sidebar/buildflags/buildflags.h"
+#include "brave/components/version_info/version_info.h"
 #include "chrome/browser/ui/webui/webui_util.h"
 #include "chrome/common/pref_names.h"
 #include "components/grit/brave_components_strings.h"
@@ -26,10 +28,11 @@ void BraveAddLocalizedStrings(content::WebUIDataSource*, Profile*);
 #include "chrome/grit/generated_resources.h"
 #include "extensions/common/extension_urls.h"
 
-#undef IDS_SETTINGS_EDIT_PERSON
-#define IDS_SETTINGS_EDIT_PERSON IDS_SETTINGS_BRAVE_EDIT_PROFILE
-#undef IDS_SETTINGS_PROFILE_NAME_AND_PICTURE
-#define IDS_SETTINGS_PROFILE_NAME_AND_PICTURE IDS_SETTINGS_BRAVE_EDIT_PROFILE
+#undef IDS_SETTINGS_CUSTOMIZE_PROFILE
+#define IDS_SETTINGS_CUSTOMIZE_PROFILE IDS_SETTINGS_BRAVE_EDIT_PROFILE
+#undef IDS_SETTINGS_CUSTOMIZE_YOUR_CHROME_PROFILE
+#define IDS_SETTINGS_CUSTOMIZE_YOUR_CHROME_PROFILE \
+  IDS_SETTINGS_BRAVE_EDIT_PROFILE
 #undef IDS_SETTINGS_SAFEBROWSING_STANDARD_BULLET_TWO
 #define IDS_SETTINGS_SAFEBROWSING_STANDARD_BULLET_TWO \
   IDS_SETTINGS_BRAVE_SAFEBROWSING_STANDARD_BULLET_TWO
@@ -56,6 +59,10 @@ const char kBraveReleaseTagPrefix[] =
 const char kGoogleLoginLearnMoreURL[] =
     "https://github.com/brave/brave-browser/wiki/"
     "Allow-Google-login---Third-Parties-and-Extensions";
+const char kDNSLinkLearnMoreURL[] = "https://docs.ipfs.io/concepts/dnslink/";
+const char kUnstoppableDomainsLearnMoreURL[] =
+    "https://github.com/brave/brave-browser/wiki/"
+    "Resolve-Methods-for-Unstoppable-Domains";
 
 void BraveAddCommonStrings(content::WebUIDataSource* html_source,
                            Profile* profile) {
@@ -97,6 +104,8 @@ void BraveAddCommonStrings(content::WebUIDataSource* html_source,
      IDS_SETTINGS_APPEARANCE_SETTINGS_SIDEBAR_DISABLED_DESC},
 #endif
     {"mruCyclingSettingLabel", IDS_SETTINGS_BRAVE_MRU_CYCLING_LABEL},
+    {"speedreaderSettingLabel", IDS_SETTINGS_SPEEDREADER_LABEL},
+    {"speedreaderSettingSubLabel", IDS_SETTINGS_SPEEDREADER_SUB_LABEL},
     {"braveShieldsTitle", IDS_SETTINGS_BRAVE_SHIELDS_TITLE},
     {"braveShieldsDefaultsSectionTitle",
      IDS_SETTINGS_BRAVE_SHIELDS_DEFAULTS_TITLE},
@@ -217,6 +226,10 @@ void BraveAddCommonStrings(content::WebUIDataSource* html_source,
     {"braveWeb3ProviderDesc", IDS_SETTINGS_BRAVE_WEB3_PROVIDER_DESC},
     {"loadCryptoWalletsOnStartupDesc",
      IDS_SETTINGS_LOAD_CRYPTO_WALLETS_ON_STARTUP},
+    {"loadCryptoWalletsOnStartupDescDeprecated",
+     IDS_SETTINGS_LOAD_CRYPTO_WALLETS_ON_STARTUP_DEPRECATED},
+    {"showBravewalletIconOnToolbar",
+     IDS_SETTINGS_SHOW_BRAVE_WALLET_ICON_ON_TOOLBAR},
     {"googleLoginForExtensionsDesc", IDS_SETTINGS_GOOGLE_LOGIN_FOR_EXTENSIONS},
     {"hangoutsEnabledDesc", IDS_SETTINGS_HANGOUTS_ENABLED_DESC},
     {"resolveUnstoppableDomainsDesc",
@@ -230,6 +243,8 @@ void BraveAddCommonStrings(content::WebUIDataSource* html_source,
      IDS_SETTINGS_CHANGE_IPFS_GATEWAY_DIALOG_TITLE},
     {"changeIpfsGatewayDialogLabel",
      IDS_SETTINGS_CHANGE_IPFS_GATEWAY_DIALOG_LABEL},
+    {"changeIpfsStorageMaxLabel", IDS_SETTINGS_CHANGE_IPFS_STORAGE_MAX_LABEL},
+    {"changeIpfsStorageMaxDesc", IDS_SETTINGS_CHANGE_IPFS_STORAGE_MAX_DESC},
     {"ipfsErrorInvalidAddress", IDS_SETTINGS_IPFS_ERROR_INVALID_ADDRESS},
     {"ipfsAutoFallbackToGatewayLabel",
      IDS_SETTINGS_IPFS_AUTO_FALLBACK_TO_GATEWAY_LABEL},
@@ -239,6 +254,10 @@ void BraveAddCommonStrings(content::WebUIDataSource* html_source,
      IDS_SETTINGS_IPFS_AUTO_REDIRECT_GATEWAY_LABEL},
     {"ipfsAutoRedirectGatewayDesc",
      IDS_SETTINGS_IPFS_AUTO_REDIRECT_GATEWAY_DESC},
+    {"ipfsAutoRedirectDNSLinkLabel",
+     IDS_SETTINGS_IPFS_AUTO_REDIRECT_DNSLINK_RESOURCES_LABEL},
+    {"ipfsAutoRedirectDNSLinkDesc",
+     IDS_SETTINGS_IPFS_AUTO_REDIRECT_DNSLINK_RESOURCES_DESC},
     {"ipfsCompanionEnabledDesc", IDS_SETTINGS_IPFS_COMPANION_ENABLED_DESC},
     {"mediaRouterEnabledDesc", IDS_SETTINGS_MEDIA_ROUTER_ENABLED_DESC},
     {"torEnabledLabel", IDS_SETTINGS_ENABLE_TOR_TITLE},
@@ -257,12 +276,36 @@ void BraveAddCommonStrings(content::WebUIDataSource* html_source,
     {"siteSettings", IDS_SETTINGS_SITE_AND_SHIELDS_SETTINGS},
     {"resetRewardsData", IDS_SETTINGS_RESET_REWARDS_DATA},
     {"showFullUrls", IDS_CONTEXT_MENU_SHOW_FULL_URLS},
+    {"ipfsIpnsKeysLinkTitle", IDS_SETTINGS_IPNS_KEYS_EDITOR_LINK},
+    {"ipfsIpnsKeysLinkTitleDesc", IDS_SETTINGS_IPNS_KEYS_EDITOR_LINK_DESC},
+    {"ipfsKeysListTitle", IDS_SETTINGS_IPNS_KEYS_LIST_TITLE},
+    {"ipfsAddKeyDialogTitle", IDS_SETTINGS_IPNS_ADD_KEY_DIALOG_TITLE},
+    {"ipfsAddKeyDialogError", IDS_SETTINGS_IPNS_ADD_KEY_DIALOG_ERROR},
+    {"ipfsDeleteKeyConfirmation", IDS_SETTINGS_IPNS_DELETE_KEY_CONFIRMATION},
+    {"ipfsNodeNotLaunched", IDS_SETTINGS_IPFS_NODE_NOT_LAUNCHED},
+    {"ipfsStartNode", IDS_SETTINGS_IPFS_START_NODE},
+    {"ipfsNodeLaunchError", IDS_SETTINGS_IPFS_START_NODE_ERROR},
+    {"ipfsKeyImport", IDS_SETTINGS_IPNS_KEYS_IMPORT_BUTTON_TITLE},
+    {"ipfsKeyGenerate", IDS_SETTINGS_IPNS_KEYS_GENERATE_BUTTON_TITLE},
+    {"ipfsImporKeysError", IDS_SETTINGS_IPNS_KEYS_IMPORT_ERROR},
+    {"ipfsPeersLinkTitle", IDS_SETTINGS_IPFS_PEERS_LINK_TITLE},
+    {"ipfsPeersLinkTitleDesc", IDS_SETTINGS_IPFS_PEERS_LINK_TITLE_DESC},
+    {"ipfsDeletePeerConfirmation", IDS_SETTINGS_IPFS_DELETE_PEER_CONFIRMATION},
+    {"ipfsAddPeerDialogTitle", IDS_SETTINGS_IPNS_ADD_PEER_DIALOG_TITLE},
+    {"ipfsAddPeerDialogError", IDS_SETTINGS_IPNS_ADD_PEER_DIALOG_ERROR},
+    {"ipfsAddPeerDialogPlacehodler", IDS_SETTINGS_ADD_PEER_DIALOG_PLACEHOLDER},
+    {"ipfsPeersNodeRestartText", IDS_SETTINGS_IPFS_PEER_NODE_RESTART},
+    {"ipfsPeersNodeRestartButton", IDS_SETTINGS_IPFS_PEER_NODE_RESTART_BUTTON},
   };
-  AddLocalizedStringsBulk(html_source, localized_strings);
+  html_source->AddLocalizedStrings(localized_strings);
   html_source->AddString("webRTCLearnMoreURL",
                          base::ASCIIToUTF16(kWebRTCLearnMoreURL));
   html_source->AddString("googleLoginLearnMoreURL",
                          base::ASCIIToUTF16(kGoogleLoginLearnMoreURL));
+  html_source->AddString("ipfsDNSLinkLearnMoreURL",
+                         base::UTF8ToUTF16(kDNSLinkLearnMoreURL));
+  html_source->AddString("speedreaderLearnMoreURL",
+                         base::UTF8ToUTF16(kSpeedreaderLearnMoreUrl));
   html_source->AddString(
       "getMoreExtensionsUrl",
       base::ASCIIToUTF16(
@@ -270,6 +313,20 @@ void BraveAddCommonStrings(content::WebUIDataSource* html_source,
               GURL(extension_urls::GetWebstoreExtensionsCategoryURL()),
               g_browser_process->GetApplicationLocale())
               .spec()));
+  html_source->AddString(
+      "ipfsStorageMaxValue",
+      std::to_string(profile->GetPrefs()->GetInteger(kIpfsStorageMax)));
+
+  std::u16string ipfs_method_desc = l10n_util::GetStringFUTF16(
+      IDS_SETTINGS_IPFS_METHOD_DESC,
+      base::ASCIIToUTF16(ipfs::kIPFSLearnMorePrivacyURL));
+  html_source->AddString("ipfsMethodDesc", ipfs_method_desc);
+
+  html_source->AddString(
+      "resolveUnstoppableDomainsSubDesc",
+      l10n_util::GetStringFUTF16(
+          IDS_SETTINGS_RESOLVE_UNSTOPPABLE_DOMAINS_SUB_DESC,
+          base::ASCIIToUTF16(kUnstoppableDomainsLearnMoreURL)));
 }
 
 void BraveAddResources(content::WebUIDataSource* html_source,
@@ -279,7 +336,7 @@ void BraveAddResources(content::WebUIDataSource* html_source,
 
 void BraveAddAboutStrings(content::WebUIDataSource* html_source,
                           Profile* profile) {
-  base::string16 license = l10n_util::GetStringFUTF16(
+  std::u16string license = l10n_util::GetStringFUTF16(
       IDS_BRAVE_VERSION_UI_LICENSE, base::ASCIIToUTF16(kBraveLicenseUrl),
       base::ASCIIToUTF16(chrome::kChromeUICreditsURL),
       base::ASCIIToUTF16(kBraveBuildInstructionsUrl),

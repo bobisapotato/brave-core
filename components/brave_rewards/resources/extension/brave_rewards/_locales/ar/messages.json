@@ -235,6 +235,18 @@
     "message": "يرجى عمل نسخة احتياطية عن محفظة Brave الخاصة بك.",
     "description": "Description for backup wallet notification"
   },
+  "deviceLimitReachedLearnMore": {
+    "message": "مزيد من المعلومات",
+    "description": "Notification button text to learn more about device limit"
+  },
+  "deviceLimitReachedTitle": {
+    "message": "تم بلوغ الحد الأقصى المخصص للجهاز الواحد",
+    "description": "Title for device limit reached notification"
+  },
+  "deviceLimitReachedNotification": {
+    "message": "لا يمكن التحقق من محفظتك لأنك بلغت الحد الأقصى المسموح به لعمليات التحقق للجهاز الواحد.",
+    "description": "Description for device limit reached notification"
+  },
   "insufficientFundsNotification": {
     "message": "ينتظر حساب Brave Rewards الخاص بك إيداعًا.",
     "description": "Description for new insufficient funds notification"
@@ -515,9 +527,15 @@
     "message": "تمَّ التحقق من المحفظة",
     "description": "Displayed in wallet that tells users that he is verified"
   },
-  "walletGoToUphold":  {
-    "message": "الانتقال إلى حساب Uphold الخاص بي",
-    "description": "CTA to open uphold account"
+  "walletGoToProvider":  {
+    "message": "انتقل إلى حساب $provider$ الخاص بي",
+    "description": "CTA to open an external wallet account",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Uphold"
+      }
+    }
   },
   "walletDisconnect":  {
     "message": "قطع الاتصال بـ Brave Rewards",
@@ -612,8 +630,14 @@
     "description": "Text for login button"
   },
   "loginMessageText":  {
-    "message": "يجب أن يكون لديك عدد 25 عملة BAT كحد أدنى لإنشاء حساب Uphold. يُرجى المحاولة مرة أخرى في وقت لاحق.\n  إذا كان لديك بالفعل حساب Uphold قد تم التحقق منه، فتابع تسجيل الدخول.",
-    "description": "Text for login button"
+    "message": "يجب أن يكون لديك $amount$من البات على الأقل لإنشاء حساب Uphold. إذا قمت بالفعل بمصادقة حساب Uphold؛ فتابع لتسجيل الدخول.",
+    "description": "Text for login button",
+    "placeholders": {
+      "amount": {
+        "content": "$1",
+        "example": "15"
+      }
+    }
   },
   "walletConnected":  {
     "message": "متصل",
@@ -624,8 +648,14 @@
     "description": "Status button that tells user that he is currently pending"
   },
   "walletVerificationNote3":  {
-    "message": "ملاحظة: ستكون معاملاتك مرئية لـ Uphold بمجرد منح الإذن؛ على سبيل المثال، سيتمكنون من رؤية المرسل إليه ومبالغ الإكراميات التي تدفعها.",
-    "description": "Displayed in login modal for uphold"
+    "message": "ملاحظة: ستكون معاملاتك ظاهرة لـ $provider$ بمجرد أن تقوم بالتفويض؛ على سبيل المثال، سيتمكنون من معرفة المستلم وقيمة عمولاتك.",
+    "description": "Displayed in login modal for external wallet providers",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Uphold"
+      }
+    }
   },
   "onboardingEarnHeader": {
     "message": "اكسب العملات الرمزية وأعطها مرة أخرى",
@@ -718,7 +748,7 @@
     "description": ""
   },
   "onboardingPanelScheduleHeader": {
-    "message": "متى تحصل على المكافآت",
+    "message": "متى تحصل على المكافآت؟",
     "description": ""
   },
   "onboardingPanelScheduleText": {
@@ -764,6 +794,42 @@
   "onboardingPanelCompleteText": {
     "message": "باستخدام Brave Rewards، فأنت تساعد في جعل الويب مكاناً أفضل للجميع. وهذا رائع!",
     "description": ""
+  },
+  "onboardingPanelVerifyHeader": {
+    "message": "تحقق من محفظتك",
+    "description": ""
+  },
+  "onboardingPanelVerifySubtext": {
+    "message": "من أجل سحب الرموز المميزة التي تربحها مقابل عرض الإعلانات، ستحتاج إلى التحقق من محفظتك.",
+    "description": ""
+  },
+  "onboardingPanelVerifyLater": {
+    "message": "القيام بذلك لاحقًا",
+    "description": ""
+  },
+  "onboardingPanelVerifyNow": {
+    "message": "التحقق من محفظتي",
+    "description": ""
+  },
+  "onboardingPanelBitflyerNote": {
+    "message": "محفظة bitFlyer هي خدمة تديرها شركة bitFlyer، Inc",
+    "description": ""
+  },
+  "onboardingPanelBitflyerText": {
+    "message": "من خلال التحقق من محفظتك وربطها بحساب bitFlyer، ستتمكن من تخزين الرموز المميزة التي اكتسبتها من خلال مكآفات Brave وإدارتها بسهولة أكبر",
+    "description": ""
+  },
+  "onboardingPanelBitflyerLearnMore": {
+    "message": "$link_begin$اعرف المزيد$link_end$ عن كيفية الربط بين متصفح Brave الخاص بك وحسابك على bitFlyer.",
+    "description": "",
+    "placeholders": {
+      "link_begin": {
+        "content": "$1"
+      },
+      "link_end": {
+        "content": "$2"
+      }
+    }
   },
   "bapDeprecationHeader": {
     "message": "برنامج Brave Rewards في اليابان يتحول إلى نظام جديد!",

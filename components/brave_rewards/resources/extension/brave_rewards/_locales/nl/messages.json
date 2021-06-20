@@ -235,6 +235,18 @@
     "message": "Maak een back-up van je Brave-wallet.",
     "description": "Description for backup wallet notification"
   },
+  "deviceLimitReachedLearnMore": {
+    "message": "Meer informatie",
+    "description": "Notification button text to learn more about device limit"
+  },
+  "deviceLimitReachedTitle": {
+    "message": "Apparaat limiet bereikt",
+    "description": "Title for device limit reached notification"
+  },
+  "deviceLimitReachedNotification": {
+    "message": "Uw wallet kan niet worden geverifieerd omdat u de maximale limiet aan geverifieerde apparaten heeft bereikt.",
+    "description": "Description for device limit reached notification"
+  },
   "insufficientFundsNotification": {
     "message": "Je Brave Rewards-account wacht op een storting.",
     "description": "Description for new insufficient funds notification"
@@ -515,9 +527,15 @@
     "message": "Wallet geverifieerd",
     "description": "Displayed in wallet that tells users that he is verified"
   },
-  "walletGoToUphold":  {
-    "message": "Ga naar mijn Uphold-account",
-    "description": "CTA to open uphold account"
+  "walletGoToProvider":  {
+    "message": "Ga naar mijn $provider$ account",
+    "description": "CTA to open an external wallet account",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Uphold"
+      }
+    }
   },
   "walletDisconnect":  {
     "message": "Verbreek de verbinding met Brave Rewards",
@@ -612,8 +630,14 @@
     "description": "Text for login button"
   },
   "loginMessageText":  {
-    "message": "U moet minimaal 25 BAT hebben om een Uphold-account aan te maken. Probeer het alstublieft later nogmaals. Als u reeds een geverifieerd Uphold-account heeft, ga dan door naar het inloggen. ",
-    "description": "Text for login button"
+    "message": "Je hebt minimaal $amount$ BAT nodig om een Uphold-account te maken. Als je al een Uphold-account hebt, kun je doorgaan met aanmelden.",
+    "description": "Text for login button",
+    "placeholders": {
+      "amount": {
+        "content": "$1",
+        "example": "15"
+      }
+    }
   },
   "walletConnected":  {
     "message": "Verbonden",
@@ -624,8 +648,14 @@
     "description": "Status button that tells user that he is currently pending"
   },
   "walletVerificationNote3":  {
-    "message": "Let op: Uw transacties zullen zichtbaar zijn voor Uphold zodra u toestemming geeft, ze zullen bijvoorbeeld de ontvanger en het bedrag van uw tips zien.",
-    "description": "Displayed in login modal for uphold"
+    "message": "Opmerking: uw transacties zijn zichtbaar voor $provider$ zodra u toestemming geeft; Ze kunnen bijvoorbeeld de ontvanger en de hoeveelheid fooi zien.",
+    "description": "Displayed in login modal for external wallet providers",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Uphold"
+      }
+    }
   },
   "onboardingEarnHeader": {
     "message": "Tokens verdienen en ze weer terugschenken",
@@ -718,7 +748,7 @@
     "description": ""
   },
   "onboardingPanelScheduleHeader": {
-    "message": "Wanneer ontvangt u beloningen",
+    "message": "Wanneer ontvang je beloningen?",
     "description": ""
   },
   "onboardingPanelScheduleText": {
@@ -764,6 +794,42 @@
   "onboardingPanelCompleteText": {
     "message": "Door Brave Rewards te gebruiken helpt u het internet een betere plek te maken voor iedereen. En dat is geweldig!",
     "description": ""
+  },
+  "onboardingPanelVerifyHeader": {
+    "message": "Je wallet verifiëren",
+    "description": ""
+  },
+  "onboardingPanelVerifySubtext": {
+    "message": "Om de tokens die je verdient voor het bekijken van advertenties op te nemen, moet je je wallet verifiëren.",
+    "description": ""
+  },
+  "onboardingPanelVerifyLater": {
+    "message": "Ik doe het later",
+    "description": ""
+  },
+  "onboardingPanelVerifyNow": {
+    "message": "Mijn wallet verifiëren",
+    "description": ""
+  },
+  "onboardingPanelBitflyerNote": {
+    "message": "De bitFlyer-wallet is een service die wordt beheerd door fitFlyer, Inc.",
+    "description": ""
+  },
+  "onboardingPanelBitflyerText": {
+    "message": "Door je wallet te verifiëren en deze te koppelen aan een bitFlyer-account, kun je de tokens die je hebt verdiend via Brave Rewards eenvoudig opslaan en beheren",
+    "description": ""
+  },
+  "onboardingPanelBitflyerLearnMore": {
+    "message": "$link_begin$Meer informatie$link_end$ over hoe u uw Brave-browser kunt koppelen aan uw bitFlyer-account.",
+    "description": "",
+    "placeholders": {
+      "link_begin": {
+        "content": "$1"
+      },
+      "link_end": {
+        "content": "$2"
+      }
+    }
   },
   "bapDeprecationHeader": {
     "message": "Brave Rewards in Japan gaat over op een nieuw systeem!",

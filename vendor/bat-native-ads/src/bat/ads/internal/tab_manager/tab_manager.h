@@ -6,8 +6,7 @@
 #ifndef BRAVE_VENDOR_BAT_NATIVE_ADS_SRC_BAT_ADS_INTERNAL_TAB_MANAGER_TAB_MANAGER_H_
 #define BRAVE_VENDOR_BAT_NATIVE_ADS_SRC_BAT_ADS_INTERNAL_TAB_MANAGER_TAB_MANAGER_H_
 
-#include <stdint.h>
-
+#include <cstdint>
 #include <map>
 #include <string>
 
@@ -30,10 +29,6 @@ class TabManager {
 
   static bool HasInstance();
 
-  bool IsForegrounded() const;
-  void OnForegrounded();
-  void OnBackgrounded();
-
   bool IsVisible(const int32_t id) const;
 
   void OnUpdated(const int32_t id,
@@ -55,8 +50,6 @@ class TabManager {
   base::Optional<TabInfo> GetForId(const int32_t id) const;
 
  private:
-  bool is_foregrounded_ = false;
-
   int32_t visible_tab_id_ = 0;
   int32_t last_visible_tab_id_ = 0;
 

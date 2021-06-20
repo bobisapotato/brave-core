@@ -235,6 +235,18 @@
     "message": "Per favore, effettua il backup del tuo portafoglio Brave.",
     "description": "Description for backup wallet notification"
   },
+  "deviceLimitReachedLearnMore": {
+    "message": "Ulteriori informazioni",
+    "description": "Notification button text to learn more about device limit"
+  },
+  "deviceLimitReachedTitle": {
+    "message": "Limite di dispositivi raggiunto",
+    "description": "Title for device limit reached notification"
+  },
+  "deviceLimitReachedNotification": {
+    "message": "Il tuo portafoglio non può essere verificato perché hai raggiunto il limite massimo di dispositivi verificati.",
+    "description": "Description for device limit reached notification"
+  },
   "insufficientFundsNotification": {
     "message": "Il tuo account Brave Rewards è in attesa di un deposito.",
     "description": "Description for new insufficient funds notification"
@@ -515,9 +527,15 @@
     "message": "Portafoglio verificato",
     "description": "Displayed in wallet that tells users that he is verified"
   },
-  "walletGoToUphold":  {
-    "message": "Vai al mio account Uphold",
-    "description": "CTA to open uphold account"
+  "walletGoToProvider":  {
+    "message": "Vai al mio account su $provider$",
+    "description": "CTA to open an external wallet account",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Uphold"
+      }
+    }
   },
   "walletDisconnect":  {
     "message": "Scollegati da Brave Rewards",
@@ -612,8 +630,14 @@
     "description": "Text for login button"
   },
   "loginMessageText":  {
-    "message": "Devi avere minimo 25 BAT per creare un account Uphold. Ti preghiamo di riprovare più tardi. \n Se hai già un account verificato Uphold, procedi con l'accesso.",
-    "description": "Text for login button"
+    "message": "Ti servono almeno $amount$ BAT per creare un portafoglio Uphold. Se hai già un account Uphold verificato, continua per eseguire il login.",
+    "description": "Text for login button",
+    "placeholders": {
+      "amount": {
+        "content": "$1",
+        "example": "15"
+      }
+    }
   },
   "walletConnected":  {
     "message": "Connessa",
@@ -624,8 +648,14 @@
     "description": "Status button that tells user that he is currently pending"
   },
   "walletVerificationNote3":  {
-    "message": "Nota: le tue transazioni saranno visibili ad Uphold dopo la tua autorizzazione; ad esempio, potranno vedere il destinatario e l'importo della tua donazione.",
-    "description": "Displayed in login modal for uphold"
+    "message": "Nota: le tue transazioni saranno visibili a $provider$ una volta autorizzato. Ad esempio, potrà vedere il destinatario e l'ammontare delle tue donazioni.",
+    "description": "Displayed in login modal for external wallet providers",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Uphold"
+      }
+    }
   },
   "onboardingEarnHeader": {
     "message": "Guadagna Gettoni e dai indietro",
@@ -718,7 +748,7 @@
     "description": ""
   },
   "onboardingPanelScheduleHeader": {
-    "message": "Quando ricevi premi",
+    "message": "Quando ricevi le ricompense?",
     "description": ""
   },
   "onboardingPanelScheduleText": {
@@ -764,6 +794,42 @@
   "onboardingPanelCompleteText": {
     "message": "Utilizzando Brave Rewards contribuisci a rendere il web un posto migliore per tutti. Fantastico!",
     "description": ""
+  },
+  "onboardingPanelVerifyHeader": {
+    "message": "Verifica il tuo portafoglio",
+    "description": ""
+  },
+  "onboardingPanelVerifySubtext": {
+    "message": "Per incassare i token guadagnati visualizzando gli annunci pubblicitari, devi verificare il tuo portafoglio.",
+    "description": ""
+  },
+  "onboardingPanelVerifyLater": {
+    "message": "In seguito",
+    "description": ""
+  },
+  "onboardingPanelVerifyNow": {
+    "message": "Verifica il mio portafoglio",
+    "description": ""
+  },
+  "onboardingPanelBitflyerNote": {
+    "message": "Il portafoglio bitFlyer è un servizio gestito da bitFlyer, Inc.",
+    "description": ""
+  },
+  "onboardingPanelBitflyerText": {
+    "message": "Verificando il portafoglio e collegandolo a un account bitFlyer, è più facile conservare e gestire i token guadagnati con Brave Rewards",
+    "description": ""
+  },
+  "onboardingPanelBitflyerLearnMore": {
+    "message": "$link_begin$Scopri di più$link_end$ su come collegare il browser Brave all’account bitFlyer.",
+    "description": "",
+    "placeholders": {
+      "link_begin": {
+        "content": "$1"
+      },
+      "link_end": {
+        "content": "$2"
+      }
+    }
   },
   "bapDeprecationHeader": {
     "message": "Brave Rewards in Giappone sta passando a un nuovo sistema!",

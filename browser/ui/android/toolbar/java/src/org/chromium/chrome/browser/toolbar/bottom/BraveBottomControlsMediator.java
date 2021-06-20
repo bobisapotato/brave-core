@@ -6,13 +6,25 @@
 package org.chromium.chrome.browser.toolbar.bottom;
 
 import org.chromium.base.supplier.ObservableSupplier;
+import org.chromium.base.supplier.ObservableSupplierImpl;
 import org.chromium.chrome.browser.browser_controls.BrowserControlsSizer;
 import org.chromium.chrome.browser.fullscreen.FullscreenManager;
 import org.chromium.ui.base.WindowAndroid;
 import org.chromium.ui.modelutil.PropertyModel;
 
 class BraveBottomControlsMediator extends BottomControlsMediator {
-    private final PropertyModel mModel;
+    // To delete in bytecode, members from parent class will be used instead.
+    private int mBottomControlsHeight;
+    private PropertyModel mModel;
+    private BrowserControlsSizer mBrowserControlsSizer;
+
+    // Own members.
+    private ObservableSupplierImpl<Boolean> mTabGroupUiVisibleSupplier =
+            new ObservableSupplierImpl<>();
+    private ObservableSupplierImpl<Boolean> mBottomToolbarVisibleSupplier =
+            new ObservableSupplierImpl<>();
+    private int mBottomControlsHeightSingle;
+    private int mBottomControlsHeightDouble;
 
     BraveBottomControlsMediator(WindowAndroid windowAndroid, PropertyModel model,
             BrowserControlsSizer controlsSizer, FullscreenManager fullscreenManager,
@@ -20,10 +32,49 @@ class BraveBottomControlsMediator extends BottomControlsMediator {
         super(windowAndroid, model, controlsSizer, fullscreenManager, bottomControlsHeight,
                 overlayPanelVisibilitySupplier);
 
-        mModel = model;
+        mTabGroupUiVisibleSupplier.set(false);
+        mBottomToolbarVisibleSupplier.set(false);
+        mBottomControlsHeightSingle = bottomControlsHeight;
+        mBottomControlsHeightDouble = bottomControlsHeight * 2;
     }
 
-    public void setCompositedViewVisibile(boolean visible) {
-        mModel.set(BottomControlsProperties.COMPOSITED_VIEW_VISIBLE, visible);
+    @Override
+    public void setBottomControlsVisible(boolean visible) {
+        updateBottomControlsHeight(mBottomToolbarVisibleSupplier.get() && visible);
+        // We should keep it visible if bottom toolbar is visible.
+        super.setBottomControlsVisible(mBottomToolbarVisibleSupplier.get() || visible);
+        mTabGroupUiVisibleSupplier.set(visible);
+        updateYOffset();
+    }
+
+    public void setBottomToolbarVisible(boolean visible) {
+        updateBottomControlsHeight(mTabGroupUiVisibleSupplier.get() && visible);
+        // We should keep it visible if tag group UI is visible.
+        super.setBottomControlsVisible(mTabGroupUiVisibleSupplier.get() || visible);
+        mBottomToolbarVisibleSupplier.set(visible);
+        updateYOffset();
+    }
+
+    public ObservableSupplierImpl<Boolean> getBottomToolbarVisibleSupplier() {
+        return mBottomToolbarVisibleSupplier;
+    }
+
+    public ObservableSupplierImpl<Boolean> getTabGroupUiVisibleSupplier() {
+        return mTabGroupUiVisibleSupplier;
+    }
+
+    private void updateBottomControlsHeight(boolean bothBottomControlsVisible) {
+        // Double the height if both bottom controls are visible
+        mBottomControlsHeight = bothBottomControlsVisible ? mBottomControlsHeightDouble
+                                                          : mBottomControlsHeightSingle;
+    }
+
+    private void updateYOffset() {
+        // This indicates that both controls are visible, but bottom toolbar has already been
+        // scrolled down, so we move scroll further for tab groups control.
+        if (mBottomControlsHeight == mBottomControlsHeightDouble
+                && mBrowserControlsSizer.getBottomControlOffset() == mBottomControlsHeightSingle) {
+            mModel.set(BottomControlsProperties.Y_OFFSET, mBottomControlsHeightDouble);
+        }
     }
 }

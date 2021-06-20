@@ -235,6 +235,18 @@
     "message": "Zálohujte, prosím, svoji Brave peněženku.",
     "description": "Description for backup wallet notification"
   },
+  "deviceLimitReachedLearnMore": {
+    "message": "Zjistit více",
+    "description": "Notification button text to learn more about device limit"
+  },
+  "deviceLimitReachedTitle": {
+    "message": "Bylo dosaženo limitu zařízení",
+    "description": "Title for device limit reached notification"
+  },
+  "deviceLimitReachedNotification": {
+    "message": "Vaši peněženku nelze ověřit, protože jste dosáhli maximálního počtu ověřených zařízení.",
+    "description": "Description for device limit reached notification"
+  },
   "insufficientFundsNotification": {
     "message": "Váš účet Brave Rewards čeká na převod prostředků.",
     "description": "Description for new insufficient funds notification"
@@ -515,9 +527,15 @@
     "message": "Ověřená peněženka",
     "description": "Displayed in wallet that tells users that he is verified"
   },
-  "walletGoToUphold":  {
-    "message": "Přejít na můj Uphold účet",
-    "description": "CTA to open uphold account"
+  "walletGoToProvider":  {
+    "message": "Přejít na můj účet $provider$",
+    "description": "CTA to open an external wallet account",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Uphold"
+      }
+    }
   },
   "walletDisconnect":  {
     "message": "Odpojit od Brave Rewards",
@@ -612,8 +630,14 @@
     "description": "Text for login button"
   },
   "loginMessageText":  {
-    "message": "Abyste mohli vytvořit účet Uphold, musíte mít minimálně 25 BAT. Zkuste to prosím později.\nPokud již máte ověřený účet Uphold, pokračujte v přihlašování.",
-    "description": "Text for login button"
+    "message": "Abyste mohli vytvořit účet Uphold, musíte mít minimálně $amount$ BAT. Pokud již máte ověřený účet Uphold, pokračujte v přihlašování. ",
+    "description": "Text for login button",
+    "placeholders": {
+      "amount": {
+        "content": "$1",
+        "example": "15"
+      }
+    }
   },
   "walletConnected":  {
     "message": "Připojeno",
@@ -624,8 +648,14 @@
     "description": "Status button that tells user that he is currently pending"
   },
   "walletVerificationNote3":  {
-    "message": "Poznámka: Jakmile provedete ověření, transakce budou pro Uphold viditelné; například uvidí příjemce a částky vašich příspěvků.",
-    "description": "Displayed in login modal for uphold"
+    "message": "Poznámka: Po provedení autorizace budou vaše transakce viditelné pro službu $provider$; uvidí například příjemce a částku spropitného.",
+    "description": "Displayed in login modal for external wallet providers",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Uphold"
+      }
+    }
   },
   "onboardingEarnHeader": {
     "message": "Vydělejte tokeny a odvděčte se",
@@ -718,7 +748,7 @@
     "description": ""
   },
   "onboardingPanelScheduleHeader": {
-    "message": "Kdy dostanete odměny",
+    "message": "Kdy obdržíte odměnu?",
     "description": ""
   },
   "onboardingPanelScheduleText": {
@@ -764,6 +794,42 @@
   "onboardingPanelCompleteText": {
     "message": "Používáním služby Brave Rewards pomáháte vytvářet z webu lepší místo pro všechny. A to je úžasné!",
     "description": ""
+  },
+  "onboardingPanelVerifyHeader": {
+    "message": "Ověřit peněženku",
+    "description": ""
+  },
+  "onboardingPanelVerifySubtext": {
+    "message": "Abyste mohli vybrat tokeny, které získáte za prohlížení reklam, je potřeba ověřit vaši peněženku.",
+    "description": ""
+  },
+  "onboardingPanelVerifyLater": {
+    "message": "Později",
+    "description": ""
+  },
+  "onboardingPanelVerifyNow": {
+    "message": "Ověřit peněženku",
+    "description": ""
+  },
+  "onboardingPanelBitflyerNote": {
+    "message": "Peněženka bitFlyer je služba spravovaná společností bitFlyer, Inc.",
+    "description": ""
+  },
+  "onboardingPanelBitflyerText": {
+    "message": "Ověření peněženky a její propojení s účtem bitFlyer vám umožní snáze ukládat a spravovat tokeny, které jste získali prostřednictvím Brave Rewards",
+    "description": ""
+  },
+  "onboardingPanelBitflyerLearnMore": {
+    "message": "$link_begin$Zjistěte více$link_end$ o tom, jak propojit váš prohlížeč Brave s vaším účtem bitFlyer.",
+    "description": "",
+    "placeholders": {
+      "link_begin": {
+        "content": "$1"
+      },
+      "link_end": {
+        "content": "$2"
+      }
+    }
   },
   "bapDeprecationHeader": {
     "message": "Brave Rewards v Japonsku přechází na nový systém!",

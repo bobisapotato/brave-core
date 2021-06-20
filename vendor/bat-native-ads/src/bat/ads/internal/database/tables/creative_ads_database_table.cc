@@ -59,8 +59,8 @@ void CreativeAds::Migrate(DBTransaction* transaction, const int to_version) {
   DCHECK(transaction);
 
   switch (to_version) {
-    case 10: {
-      MigrateToV10(transaction);
+    case 15: {
+      MigrateToV15(transaction);
       break;
     }
 
@@ -83,7 +83,10 @@ int CreativeAds::BindParameters(DBCommand* command,
     BindString(command, index++, creative_ad.creative_instance_id);
     BindBool(command, index++, creative_ad.conversion);
     BindInt(command, index++, creative_ad.per_day);
+    BindInt(command, index++, creative_ad.per_week);
+    BindInt(command, index++, creative_ad.per_month);
     BindInt(command, index++, creative_ad.total_max);
+    BindString(command, index++, creative_ad.split_test_group);
     BindString(command, index++, creative_ad.target_url);
 
     count++;
@@ -102,13 +105,16 @@ std::string CreativeAds::BuildInsertOrUpdateQuery(
       "(creative_instance_id, "
       "conversion, "
       "per_day, "
+      "per_week, "
+      "per_month, "
       "total_max, "
+      "split_test_group, "
       "target_url) VALUES %s",
       get_table_name().c_str(),
-      BuildBindingParameterPlaceholders(5, count).c_str());
+      BuildBindingParameterPlaceholders(8, count).c_str());
 }
 
-void CreativeAds::CreateTableV10(DBTransaction* transaction) {
+void CreativeAds::CreateTableV15(DBTransaction* transaction) {
   DCHECK(transaction);
 
   const std::string query = base::StringPrintf(
@@ -117,7 +123,10 @@ void CreativeAds::CreateTableV10(DBTransaction* transaction) {
       "ON CONFLICT REPLACE, "
       "conversion INTEGER NOT NULL DEFAULT 0, "
       "per_day INTEGER NOT NULL DEFAULT 0, "
+      "per_week INTEGER NOT NULL DEFAULT 0, "
+      "per_month INTEGER NOT NULL DEFAULT 0, "
       "total_max INTEGER NOT NULL DEFAULT 0, "
+      "split_test_group TEXT, "
       "target_url TEXT NOT NULL)",
       get_table_name().c_str());
 
@@ -128,12 +137,12 @@ void CreativeAds::CreateTableV10(DBTransaction* transaction) {
   transaction->commands.push_back(std::move(command));
 }
 
-void CreativeAds::MigrateToV10(DBTransaction* transaction) {
+void CreativeAds::MigrateToV15(DBTransaction* transaction) {
   DCHECK(transaction);
 
   util::Drop(transaction, get_table_name());
 
-  CreateTableV10(transaction);
+  CreateTableV15(transaction);
 }
 
 }  // namespace table

@@ -14,15 +14,15 @@
 #include "base/strings/string_number_conversions.h"
 #include "base/strings/string_util.h"
 #include "base/task/post_task.h"
-#include "base/task/task_traits.h"
+#include "base/task/thread_pool.h"
 #include "base/time/time.h"
 
 namespace tor {
 
 namespace {
 
-constexpr base::TaskTraits kWatchTaskTraits = {
-    base::ThreadPool(), base::MayBlock(), base::TaskPriority::BEST_EFFORT};
+constexpr base::TaskTraits kWatchTaskTraits = {base::MayBlock(),
+                                               base::TaskPriority::BEST_EFFORT};
 
 #if defined(OS_WIN)
 constexpr char kControlPortMinTmpl[] = "PORT=1.1.1.1:1\r\n";
@@ -238,20 +238,24 @@ bool TorFileWatcher::EatControlPort(int& port, base::Time& mtime) {
   }
 
   // Read up to 27/28 octets, the maximum we will ever need.
-  const size_t kBufSiz = strlen(kControlPortMaxTmpl);
+  const size_t kBufSiz = sizeof(kControlPortMaxTmpl);
   char buf[kBufSiz];
   int nread = portfile.ReadAtCurrentPos(buf, sizeof buf);
   if (nread < 0) {
     VLOG(0) << "tor: failed to read control port";
     return false;
+  } else if (static_cast<size_t>(nread) >= sizeof buf) {
+    VLOG(0) << "tor: control port too long";
+    return false;
   }
+
   if (static_cast<size_t>(nread) < strlen(kControlPortMinTmpl)) {
     VLOG(0) << "tor: control port truncated";
     return false;
   }
-  DCHECK(static_cast<size_t>(nread) <= sizeof buf);
 
-  std::string text(buf, 0, nread);
+  buf[nread] = '\0';
+  std::string text(buf);
 
   // Sanity-check the content.
   if (!base::StartsWith(text, "PORT=", base::CompareCase::SENSITIVE) ||

@@ -28,6 +28,8 @@ constexpr char kSonyentertainmentnetwork[] =
 constexpr char kSony[] = "https://[*.]sony.com/*";
 constexpr char kGoogle[] = "https://[*.]google.com/*";
 constexpr char kGoogleusercontent[] = "https://[*.]googleusercontent.com/*";
+constexpr char kFacebook[] = "https://[*.]facebook.com/*";
+constexpr char kInstagram[] = "https://[*.]instagram.com/*";
 
 bool BraveIsAllowedThirdParty(const GURL& url,
                               const GURL& first_party_url,
@@ -44,6 +46,10 @@ bool BraveIsAllowedThirdParty(const GURL& url,
             ContentSettingsPattern::FromString(kGoogleusercontent)},
            {ContentSettingsPattern::FromString(kGoogleusercontent),
             ContentSettingsPattern::FromString(kGoogle)},
+           {ContentSettingsPattern::FromString(kInstagram),
+            ContentSettingsPattern::FromString(kFacebook)},
+           {ContentSettingsPattern::FromString(kFacebook),
+            ContentSettingsPattern::FromString(kInstagram)},
            {ContentSettingsPattern::FromString(kPlaystation),
             ContentSettingsPattern::FromString(kSonyentertainmentnetwork)},
            {ContentSettingsPattern::FromString(kSonyentertainmentnetwork),
@@ -75,9 +81,8 @@ GURL GetFirstPartyURL(const GURL& site_for_cookies,
 bool IsFirstPartyAccessAllowed(
     const GURL& first_party_url,
     const CookieSettingsBase* const cookie_settings) {
-  ContentSetting setting;
-  cookie_settings->GetCookieSetting(first_party_url, first_party_url, nullptr,
-                                    &setting);
+  ContentSetting setting = cookie_settings->GetCookieSetting(
+      first_party_url, first_party_url, nullptr);
   return cookie_settings->IsAllowed(setting);
 }
 

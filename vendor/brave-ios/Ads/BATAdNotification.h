@@ -6,18 +6,6 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-typedef NS_ENUM(NSInteger, BATAdsConfirmationType) {
-  BATAdsConfirmationTypeUndefined,  // = ads::ConfirmationType::kUndefined
-  BATAdsConfirmationTypeClicked,    // = ads::ConfirmationType::kClicked
-  BATAdsConfirmationTypeDismissed,  // = ads::ConfirmationType::kDismissed
-  BATAdsConfirmationTypeViewed,     // = ads::ConfirmationType::kViewed
-  BATAdsConfirmationTypeLanded,     // = ads::ConfirmationType::kLanded
-  BATAdsConfirmationTypeFlagged,    // = ads::ConfirmationType::kFlagged
-  BATAdsConfirmationTypeUpvoted,    // = ads::ConfirmationType::kUpvoted
-  BATAdsConfirmationTypeDownvoted,  // = ads::ConfirmationType::kDownvoted
-  BATAdsConfirmationTypeConversion  // = ads::ConfirmationType::kConversion
-} NS_SWIFT_NAME(ConfirmationType);
-
 OBJC_EXPORT
 NS_SWIFT_NAME(AdsNotification)
 @interface BATAdNotification : NSObject
@@ -25,6 +13,7 @@ NS_SWIFT_NAME(AdsNotification)
 @property (nonatomic, readonly, copy) NSString *creativeInstanceID;
 @property (nonatomic, readonly, copy) NSString *creativeSetID;
 @property (nonatomic, readonly, copy) NSString *campaignID;
+@property (nonatomic, readonly, copy) NSString *advertiserID;
 @property (nonatomic, readonly, copy) NSString *segment;
 @property (nonatomic, readonly, copy) NSString *title;
 @property (nonatomic, readonly, copy) NSString *body;

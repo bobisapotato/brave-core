@@ -5,7 +5,7 @@
 
 #include "bat/ads/internal/security/conversions/conversions_util.h"
 
-#include <stdint.h>
+#include <cstdint>
 #include <vector>
 
 #include "bat/ads/internal/base64_util.h"
@@ -132,7 +132,7 @@ TEST(BatAdsSecurityConversionsUtilsTest, EnvelopeSealWithInvalidPublicKey) {
 
 TEST(BatAdsSecurityConversionsUtilsTest, EnvelopeSeal) {
   // Arrange
-  const std::string message = "smartbrownfoxes42";
+  const std::string message = "smartbrownfoxes-42";
   const std::string advertiser_public_key =
       "ofIveUY/bM7qlL9eIkAv/xbjDItFs1xRTTYKRZZsPHI=";
   const std::string advertiser_secret_key =

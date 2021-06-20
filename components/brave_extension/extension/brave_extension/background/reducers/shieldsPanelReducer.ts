@@ -38,14 +38,12 @@ import {
 import { reloadTab } from '../api/tabsAPI'
 import {
   injectClassIdStylesheet,
-  applyAdblockCosmeticFilters,
-  applyCSSCosmeticFilters
+  applyAdblockCosmeticFilters
 } from '../api/cosmeticFilterAPI'
 
 // Helpers
 import { getAllowedScriptsOrigins } from '../../helpers/noScriptUtils'
 import { areObjectsEqual } from '../../helpers/objectUtils'
-import { getHostname } from '../../helpers/urlUtils'
 
 export default function shieldsPanelReducer (
   state: State = {
@@ -66,7 +64,6 @@ export default function shieldsPanelReducer (
         state = shieldsPanelState.resetBlockingResources(state, action.tabId)
         state = noScriptState.resetNoScriptInfo(state, action.tabId, new window.URL(action.url).origin)
       }
-      applyCSSCosmeticFilters(action.tabId, getHostname(action.url))
       break
     }
     case windowTypes.WINDOW_REMOVED: {
@@ -275,11 +272,13 @@ export default function shieldsPanelReducer (
               }
             )
             chrome.tabs.executeScript(tabData.id, {
-              code: 'try { window.sessionStorage.clear(); } catch(e) {}'})
+              code: 'try { window.sessionStorage.clear(); } catch(e) {}'
+            })
             // clearing localStorage may fail with SecurityError if third-
             // party cookies are already blocked, but that's okay
             chrome.tabs.executeScript(tabData.id, {
-              code: 'try { window.localStorage.clear(); } catch(e) {}'})
+              code: 'try { window.localStorage.clear(); } catch(e) {}'
+            })
           }
           requestShieldPanelData(shieldsPanelState.getActiveTabId(state))
           reloadTab(tabData.id, true).catch(() => {

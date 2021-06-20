@@ -12,12 +12,11 @@
 #include "base/strings/string_util.h"
 #include "base/task/post_task.h"
 #include "base/values.h"
-#include "brave/browser/brave_browser_process_impl.h"
-#include "brave/common/pref_names.h"
+#include "brave/components/adblock_rust_ffi/src/wrapper.h"
 #include "brave/components/brave_shields/browser/ad_block_regional_service.h"
 #include "brave/components/brave_shields/browser/ad_block_service.h"
 #include "brave/components/brave_shields/browser/ad_block_service_helper.h"
-#include "brave/vendor/adblock_rust_ffi/src/wrapper.h"
+#include "brave/components/brave_shields/common/pref_names.h"
 #include "components/prefs/pref_service.h"
 #include "components/prefs/scoped_user_pref_update.h"
 #include "content/public/browser/browser_task_traits.h"
@@ -36,18 +35,9 @@ AdBlockRegionalServiceManager::AdBlockRegionalServiceManager(
 AdBlockRegionalServiceManager::~AdBlockRegionalServiceManager() {
 }
 
-bool AdBlockRegionalServiceManager::Init() {
-  DCHECK(!initialized_);
-  base::PostTask(
-      FROM_HERE, {content::BrowserThread::UI},
-      base::BindOnce(&AdBlockRegionalServiceManager::StartRegionalServices,
-                     base::Unretained(this)));
-  return true;
-}
-
 void AdBlockRegionalServiceManager::StartRegionalServices() {
   DCHECK_CURRENTLY_ON(content::BrowserThread::UI);
-  PrefService* local_state = g_browser_process->local_state();
+  PrefService* local_state = delegate_->local_state();
   if (!local_state)
     return;
 
@@ -58,11 +48,11 @@ void AdBlockRegionalServiceManager::StartRegionalServices() {
   // Enable the default regional list, but only do this once so that
   // user can override this setting in the future
   bool checked_default_region =
-      local_state->GetBoolean(kAdBlockCheckedDefaultRegion);
+      local_state->GetBoolean(prefs::kAdBlockCheckedDefaultRegion);
   if (!checked_default_region) {
-    local_state->SetBoolean(kAdBlockCheckedDefaultRegion, true);
-    auto it = brave_shields::FindAdBlockFilterListByLocale(
-        regional_catalog_, g_brave_browser_process->GetApplicationLocale());
+    local_state->SetBoolean(prefs::kAdBlockCheckedDefaultRegion, true);
+    auto it = brave_shields::FindAdBlockFilterListByLocale(regional_catalog_,
+                                                           delegate_->locale());
     if (it == regional_catalog_.end())
       return;
     EnableFilterList(it->uuid, true);
@@ -71,7 +61,7 @@ void AdBlockRegionalServiceManager::StartRegionalServices() {
   // Start all regional services associated with enabled filter lists
   base::AutoLock lock(regional_services_lock_);
   const base::DictionaryValue* regional_filters_dict =
-      local_state->GetDictionary(kAdBlockRegionalFilters);
+      local_state->GetDictionary(prefs::kAdBlockRegionalFilters);
   for (base::DictionaryValue::Iterator it(*regional_filters_dict);
        !it.IsAtEnd(); it.Advance()) {
     const std::string uuid = it.key();
@@ -85,7 +75,9 @@ void AdBlockRegionalServiceManager::StartRegionalServices() {
           regional_catalog_, uuid);
       if (catalog_entry != regional_catalog_.end()) {
         auto regional_service = AdBlockRegionalServiceFactory(
-            *catalog_entry, delegate_);
+            *catalog_entry, delegate_,
+            base::BindRepeating(&AdBlockRegionalServiceManager::AddResources,
+                                base::Unretained(this)));
         regional_service->Start();
         regional_services_.insert(
             std::make_pair(uuid, std::move(regional_service)));
@@ -100,10 +92,10 @@ void AdBlockRegionalServiceManager::UpdateFilterListPrefs(
     const std::string& uuid,
     bool enabled) {
   DCHECK_CURRENTLY_ON(content::BrowserThread::UI);
-  PrefService* local_state = g_browser_process->local_state();
+  PrefService* local_state = delegate_->local_state();
   if (!local_state)
     return;
-  DictionaryPrefUpdate update(local_state, kAdBlockRegionalFilters);
+  DictionaryPrefUpdate update(local_state, prefs::kAdBlockRegionalFilters);
   base::DictionaryValue* regional_filters_dict = update.Get();
   auto regional_filter_dict = std::make_unique<base::DictionaryValue>();
   regional_filter_dict->SetBoolean("enabled", enabled);
@@ -143,6 +135,21 @@ void AdBlockRegionalServiceManager::ShouldStartRequest(
   }
 }
 
+base::Optional<std::string> AdBlockRegionalServiceManager::GetCspDirectives(
+    const GURL& url,
+    blink::mojom::ResourceType resource_type,
+    const std::string& tab_host) {
+  base::Optional<std::string> csp_directives = base::nullopt;
+
+  for (const auto& regional_service : regional_services_) {
+    const auto directive =
+        regional_service.second->GetCspDirectives(url, resource_type, tab_host);
+    MergeCspDirectiveInto(directive, &csp_directives);
+  }
+
+  return csp_directives;
+}
+
 void AdBlockRegionalServiceManager::EnableTag(const std::string& tag,
                                               bool enabled) {
   base::AutoLock lock(regional_services_lock_);
@@ -173,7 +180,9 @@ void AdBlockRegionalServiceManager::EnableFilterList(
     if (enabled) {
       DCHECK(it == regional_services_.end());
       auto regional_service = AdBlockRegionalServiceFactory(
-          *catalog_entry, delegate_);
+          *catalog_entry, delegate_,
+          base::BindRepeating(&AdBlockRegionalServiceManager::AddResources,
+                              base::Unretained(this)));
       regional_service->Start();
       regional_services_.insert(
           std::make_pair(uuid, std::move(regional_service)));
@@ -273,11 +282,11 @@ AdBlockRegionalServiceManager::GetRegionalCatalog() {
 std::unique_ptr<base::ListValue>
 AdBlockRegionalServiceManager::GetRegionalLists() {
   DCHECK_CURRENTLY_ON(content::BrowserThread::UI);
-  PrefService* local_state = g_browser_process->local_state();
+  PrefService* local_state = delegate_->local_state();
   if (!local_state)
     return nullptr;
   const base::DictionaryValue* regional_filters_dict =
-      local_state->GetDictionary(kAdBlockRegionalFilters);
+      local_state->GetDictionary(prefs::kAdBlockRegionalFilters);
 
   auto list_value = std::make_unique<base::ListValue>();
   for (const auto& region_list : regional_catalog_) {

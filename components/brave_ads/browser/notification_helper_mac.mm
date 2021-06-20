@@ -13,11 +13,9 @@
 #include "base/feature_list.h"
 #include "base/logging.h"
 #include "base/mac/mac_util.h"
-#include "brave/common/brave_channel_info.h"
-#include "chrome/common/chrome_features.h"
-
+#include "brave/components/brave_ads/browser/features.h"
 #include "brave/components/brave_ads/browser/notification_helper_mac.h"
-#include "chrome/browser/fullscreen.h"
+#include "chrome/common/chrome_features.h"
 
 namespace brave_ads {
 
@@ -26,12 +24,7 @@ NotificationHelperMac::NotificationHelperMac() = default;
 NotificationHelperMac::~NotificationHelperMac() = default;
 
 bool NotificationHelperMac::ShouldShowNotifications() {
-  if (IsFullScreenMode()) {
-    LOG(WARNING) << "Notification not made: Full screen mode";
-    return false;
-  }
-
-  if (brave::IsNightlyOrDeveloperBuild()) {
+  if (features::ShouldShowCustomAdNotifications()) {
     return true;
   }
 
@@ -41,7 +34,7 @@ bool NotificationHelperMac::ShouldShowNotifications() {
     return true;
   }
 
-  if (!base::FeatureList::IsEnabled(features::kNativeNotifications)) {
+  if (!base::FeatureList::IsEnabled(::features::kNativeNotifications)) {
     LOG(WARNING) << "Native notification feature is disabled so falling back to"
                     " Message Center";
     return true;

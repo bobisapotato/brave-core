@@ -5,6 +5,7 @@
 
 #include "bat/ads/internal/user_activity/user_activity.h"
 
+#include <cstdint>
 #include <string>
 
 #include "base/strings/string_number_conversions.h"
@@ -78,10 +79,6 @@ void UserActivity::RecordEvent(const UserActivityEventType event_type) {
 }
 
 void UserActivity::RecordEventForPageTransition(const PageTransitionType type) {
-  if (type == -1) {
-    return;
-  }
-
   if (IsNewNavigation(type)) {
     RecordEvent(UserActivityEventType::kNewNavigation);
   }
@@ -104,9 +101,18 @@ void UserActivity::RecordEventForPageTransition(const PageTransitionType type) {
 
   const base::Optional<UserActivityEventType> event_type =
       ToUserActivityEventType(type);
-  if (event_type) {
-    RecordEvent(event_type.value());
+  if (!event_type) {
+    return;
   }
+
+  RecordEvent(event_type.value());
+}
+
+void UserActivity::RecordEventForPageTransitionFromInt(const int32_t type) {
+  const PageTransitionType page_transition_type =
+      static_cast<PageTransitionType>(type);
+
+  RecordEventForPageTransition(page_transition_type);
 }
 
 UserActivityEvents UserActivity::GetHistoryForTimeWindow(

@@ -6,7 +6,7 @@
 #ifndef BRAVE_VENDOR_BAT_NATIVE_ADS_SRC_BAT_ADS_INTERNAL_USER_ACTIVITY_USER_ACTIVITY_EVENT_TYPES_H_
 #define BRAVE_VENDOR_BAT_NATIVE_ADS_SRC_BAT_ADS_INTERNAL_USER_ACTIVITY_USER_ACTIVITY_EVENT_TYPES_H_
 
-#include <stdint.h>
+#include <cstdint>
 
 namespace ads {
 
@@ -15,8 +15,8 @@ namespace ads {
 
 enum class UserActivityEventType : int8_t {
   /* 00 */ kInitializedAds = 0,
-  /* 01 */ kBrowserWindowDidBecomeActive,
-  /* 02 */ kBrowserWindowDidEnterBackground,
+  /* 01 */ kBrowserDidBecomeActive,
+  /* 02 */ kBrowserDidEnterBackground,
   /* 03 */ kClickedBackOrForwardNavigationButtons,
   /* 04 */ kClickedBookmark,
   /* 05 */ kClickedHomePageButton,
@@ -35,7 +35,9 @@ enum class UserActivityEventType : int8_t {
   /* 12 */ kTypedAndSelectedNonUrl,
   /* 13 */ kTypedKeywordOtherThanDefaultSearchProvider,
   /* 14 */ kTypedUrl,
-  /* 15 */ kUsedAddressBar
+  /* 15 */ kUsedAddressBar,
+  /* 16 */ kBrowserWindowIsActive,
+  /* 17 */ kBrowserWindowIsInactive
 };
 
 }  // namespace ads

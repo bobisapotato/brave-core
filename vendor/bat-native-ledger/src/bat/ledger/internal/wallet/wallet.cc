@@ -14,6 +14,8 @@
 #include "base/json/json_writer.h"
 #include "base/values.h"
 #include "bat/ledger/global_constants.h"
+#include "bat/ledger/internal/bitflyer/bitflyer.h"
+#include "bat/ledger/internal/bitflyer/bitflyer_util.h"
 #include "bat/ledger/internal/ledger_impl.h"
 #include "bat/ledger/internal/logging/event_log_keys.h"
 #include "bat/ledger/internal/state/state_keys.h"
@@ -115,6 +117,11 @@ void Wallet::AuthorizeWallet(
     return;
   }
 
+  if (wallet_type == constant::kWalletBitflyer) {
+    ledger_->bitflyer()->WalletAuthorization(args, callback);
+    return;
+  }
+
   NOTREACHED();
   callback(type::Result::LEDGER_ERROR, {});
 }
@@ -123,8 +130,30 @@ void Wallet::DisconnectWallet(
       const std::string& wallet_type,
       ledger::ResultCallback callback) {
   if (wallet_type == constant::kWalletUphold) {
-    ledger_->uphold()->DisconnectWallet(true);
-    callback(type::Result::LEDGER_OK);
+    promotion_server_->delete_claim()->Request(
+        constant::kWalletUphold, [this, callback](const type::Result result) {
+          if (result != type::Result::LEDGER_OK) {
+            BLOG(0, "Wallet unlinking failed");
+            callback(result);
+            return;
+          }
+          ledger_->uphold()->DisconnectWallet(true);
+          callback(type::Result::LEDGER_OK);
+        });
+    return;
+  }
+
+  if (wallet_type == constant::kWalletBitflyer) {
+    promotion_server_->delete_claim()->Request(
+        constant::kWalletBitflyer, [this, callback](const type::Result result) {
+          if (result != type::Result::LEDGER_OK) {
+            BLOG(0, "Wallet unlinking failed");
+            callback(result);
+            return;
+          }
+          ledger_->bitflyer()->DisconnectWallet(true);
+          callback(type::Result::LEDGER_OK);
+        });
     return;
   }
 
@@ -144,7 +173,7 @@ void Wallet::ClaimFunds(ledger::ResultCallback callback) {
 
     // tokens claim
     ledger_->promotion()->TransferTokens(
-        [callback](const type::Result result) {
+        [callback](const type::Result result, std::string drain_id) {
           if (result != type::Result::LEDGER_OK) {
             BLOG(0, "Claiming tokens failed");
             callback(type::Result::CONTINUE);
@@ -183,6 +212,7 @@ void Wallet::GetAnonWalletStatus(ledger::ResultCallback callback) {
 
 void Wallet::DisconnectAllWallets(ledger::ResultCallback callback) {
   DisconnectWallet(constant::kWalletUphold, [](const type::Result result) {});
+  DisconnectWallet(constant::kWalletBitflyer, [](const type::Result result) {});
   callback(type::Result::LEDGER_OK);
 }
 
@@ -241,8 +271,8 @@ bool Wallet::SetWallet(type::BraveWalletPtr wallet) {
   const std::string seed_string = base::Base64Encode(wallet->recovery_seed);
   std::string event_string;
   if (wallet->recovery_seed.size() > 1) {
-    event_string = std::to_string(
-        wallet->recovery_seed[0] + wallet->recovery_seed[1]);
+    event_string =
+        std::to_string(wallet->recovery_seed[0] + wallet->recovery_seed[1]);
   }
 
   base::Value new_wallet(base::Value::Type::DICTIONARY);
@@ -264,15 +294,13 @@ bool Wallet::SetWallet(type::BraveWalletPtr wallet) {
   return success;
 }
 
-void Wallet::LinkBraveWallet(
-    const std::string& destination_payment_id,
-    ledger::ResultCallback callback) {
+void Wallet::LinkBraveWallet(const std::string& destination_payment_id,
+                             ledger::PostSuggestionsClaimCallback callback) {
   promotion_server_->post_claim_brave()->Request(
-      destination_payment_id,
-      [this, callback](const type::Result result) {
+      destination_payment_id, [this, callback](const type::Result result) {
         if (result != type::Result::LEDGER_OK &&
             result != type::Result::ALREADY_EXISTS) {
-          callback(result);
+          callback(result, "");
           return;
         }
 

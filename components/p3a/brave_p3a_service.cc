@@ -7,6 +7,7 @@
 
 #include <memory>
 #include <string>
+#include <utility>
 
 #include "base/command_line.h"
 #include "base/i18n/timezone.h"
@@ -20,18 +21,16 @@
 #include "base/strings/string_number_conversions.h"
 #include "base/task/post_task.h"
 #include "base/trace_event/trace_event.h"
-#include "brave/components/brave_stats/browser/brave_stats_updater_util.h"
-#include "brave/browser/version_info.h"
-#include "brave/common/brave_channel_info.h"
-#include "brave/common/pref_names.h"
 #include "brave/components/brave_prochlo/prochlo_message.pb.h"
 #include "brave/components/brave_referrals/common/pref_names.h"
+#include "brave/components/brave_stats/browser/brave_stats_updater_util.h"
 #include "brave/components/p3a/brave_p2a_protocols.h"
 #include "brave/components/p3a/brave_p3a_log_store.h"
 #include "brave/components/p3a/brave_p3a_scheduler.h"
 #include "brave/components/p3a/brave_p3a_switches.h"
 #include "brave/components/p3a/brave_p3a_uploader.h"
 #include "brave/components/p3a/pref_names.h"
+#include "brave/components/version_info/version_info.h"
 #include "brave/vendor/brave_base/random.h"
 #include "components/prefs/pref_registry_simple.h"
 #include "components/prefs/pref_service.h"
@@ -59,6 +58,7 @@ constexpr uint64_t kDefaultUploadIntervalSeconds = 60;  // 1 minute.
 // TODO(iefremov): Provide moar histograms!
 // Whitelist for histograms that we collect. Will be replaced with something
 // updating on the fly.
+// clang-format off
 constexpr const char* kCollectedHistograms[] = {
     "Brave.Core.BookmarksCountOnProfileLoad.2",
     "Brave.Core.CrashReportsEnabled",
@@ -79,6 +79,7 @@ constexpr const char* kCollectedHistograms[] = {
     "Brave.Rewards.AutoContributionsState.2",
     "Brave.Rewards.TipsState.2",
     "Brave.Rewards.WalletBalance.2",
+    "Brave.Rewards.WalletState",
     "Brave.Savings.BandwidthSavingsMB",
     "Brave.Search.DefaultEngine.4",
     "Brave.Shields.UsageStatus",
@@ -89,6 +90,7 @@ constexpr const char* kCollectedHistograms[] = {
     "Brave.Today.WeeklyMaxCardViewsCount",
     "Brave.Today.WeeklyMaxCardVisitsCount",
     "Brave.Sync.Status",
+    "Brave.Sync.ProgressTokenEverReset",
     "Brave.Uptime.BrowserOpenMinutes",
     "Brave.Welcome.InteractionStatus",
 
@@ -162,6 +164,7 @@ constexpr const char* kCollectedHistograms[] = {
     "Brave.P2A.AdImpressionsPerSegment.weather",
     "Brave.P2A.AdImpressionsPerSegment.untargeted"
 };
+// clang-format on
 
 bool IsSuspendedMetric(base::StringPiece metric_name,
                        uint64_t value_or_bucket) {
@@ -193,8 +196,12 @@ base::TimeDelta TimeDeltaTillMonday(base::Time time) {
 
 }  // namespace
 
-BraveP3AService::BraveP3AService(PrefService* local_state)
-    : local_state_(local_state) {}
+BraveP3AService::BraveP3AService(PrefService* local_state,
+                                 std::string channel,
+                                 std::string week_of_install)
+    : local_state_(std::move(local_state)),
+      channel_(std::move(channel)),
+      week_of_install_(week_of_install) {}
 
 BraveP3AService::~BraveP3AService() = default;
 
@@ -261,10 +268,10 @@ void BraveP3AService::Init(
   // Init other components.
   uploader_.reset(new BraveP3AUploader(
       url_loader_factory, upload_server_url_, GURL(kP2AServerUrl),
-      base::Bind(&BraveP3AService::OnLogUploadComplete, this)));
+      base::BindRepeating(&BraveP3AService::OnLogUploadComplete, this)));
 
   upload_scheduler_.reset(new BraveP3AScheduler(
-      base::Bind(&BraveP3AService::StartScheduledUpload, this),
+      base::BindRepeating(&BraveP3AService::StartScheduledUpload, this),
       (randomize_upload_interval_
            ? base::BindRepeating(GetRandomizedUploadInterval,
                                  average_upload_interval_)
@@ -342,13 +349,12 @@ void BraveP3AService::MaybeOverrideSettingsFromCommandLine() {
 
 void BraveP3AService::InitPyxisMeta() {
   pyxis_meta_.platform = brave_stats::GetPlatformIdentifier();
-  pyxis_meta_.channel = brave::GetChannelName();
+  pyxis_meta_.channel = channel_;
   pyxis_meta_.version =
       version_info::GetBraveVersionWithoutChromiumMajorVersion();
 
-  const std::string woi = local_state_->GetString(kWeekOfInstallation);
-  if (!woi.empty()) {
-    pyxis_meta_.date_of_install = brave_stats::GetYMDAsDate(woi);
+  if (!week_of_install_.empty()) {
+    pyxis_meta_.date_of_install = brave_stats::GetYMDAsDate(week_of_install_);
   } else {
     pyxis_meta_.date_of_install = base::Time::Now();
   }

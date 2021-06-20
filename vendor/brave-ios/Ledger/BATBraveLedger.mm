@@ -32,12 +32,13 @@
 #import "base/strings/sys_string_conversions.h"
 #import "components/os_crypt/os_crypt.h"
 
-#import "base/i18n/icu_util.h"
-#import "base/ios/ios_util.h"
 #import "base/base64.h"
 #import "base/command_line.h"
+#import "base/i18n/icu_util.h"
+#import "base/ios/ios_util.h"
 #include "base/sequenced_task_runner.h"
 #include "base/task/post_task.h"
+#include "base/task/thread_pool.h"
 #include "base/task_runner_util.h"
 
 #import "RewardsLogging.h"
@@ -77,8 +78,7 @@ static const auto kOneDay = base::Time::kHoursPerDay * base::Time::kSecondsPerHo
 /// Ledger Prefs, keys will be defined in `bat/ledger/option_keys.h`
 const std::map<std::string, bool> kBoolOptions = {
     {ledger::option::kClaimUGP, true},
-    {ledger::option::kContributionsDisabledForBAPMigration, false},
-    {ledger::option::kShouldReportBAPAmount, false}};
+    {ledger::option::kIsBitflyerRegion, false}};
 const std::map<std::string, int> kIntegerOptions = {};
 const std::map<std::string, double> kDoubleOptions = {};
 const std::map<std::string, std::string> kStringOptions = {};
@@ -188,9 +188,8 @@ ledger::type::DBCommandResponsePtr RunDBTransactionOnTaskRunner(
       argv[i] = args[i].UTF8String;
     }
 
-    databaseQueue = base::CreateSequencedTaskRunner(
-        {base::ThreadPool(), base::MayBlock(),
-         base::TaskPriority::USER_VISIBLE,
+    databaseQueue = base::ThreadPool::CreateSequencedTaskRunner(
+        {base::MayBlock(), base::TaskPriority::USER_VISIBLE,
          base::TaskShutdownBehavior::BLOCK_SHUTDOWN});
 
     const auto* dbPath = [self rewardsDatabasePath].UTF8String;
@@ -199,23 +198,9 @@ ledger::type::DBCommandResponsePtr RunDBTransactionOnTaskRunner(
     ledgerClient = new NativeLedgerClient(self);
     ledger = ledger::Ledger::CreateInstance(ledgerClient);
 
-    self.migrationType = BATLedgerDatabaseMigrationTypeDefault;
-    [self databaseNeedsMigration:^(BOOL needsMigration) {
-      if (needsMigration) {
-        [BATLedgerDatabase deleteCoreDataServerPublisherList:nil];
-      }
-      [self initializeLedgerService:needsMigration];
-    }];
-
     // Add notifications for standard app foreground/background
     [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(applicationDidBecomeActive) name:UIApplicationDidBecomeActiveNotification object:nil];
     [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(applicationDidBackground) name:UIApplicationDidEnterBackgroundNotification object:nil];
-
-    [self getRewardsParameters:nil];
-    [self fetchBalance:nil];
-    [self fetchUpholdWallet:nil];
-
-    [self readNotificationsFromDisk];
   }
   return self;
 }
@@ -232,7 +217,18 @@ ledger::type::DBCommandResponsePtr RunDBTransactionOnTaskRunner(
   delete ledgerClient;
 }
 
-- (void)initializeLedgerService:(BOOL)executeMigrateScript
+- (void)initializeLedgerService:(nullable void (^)())completion
+{
+  self.migrationType = BATLedgerDatabaseMigrationTypeDefault;
+  [self databaseNeedsMigration:^(BOOL needsMigration) {
+    if (needsMigration) {
+      [BATLedgerDatabase deleteCoreDataServerPublisherList:nil];
+    }
+    [self initializeLedgerService:needsMigration completion:completion];
+  }];
+}
+
+- (void)initializeLedgerService:(BOOL)executeMigrateScript completion:(nullable void (^)())completion
 {
   if (self.initialized || self.initializing) {
     return;
@@ -249,6 +245,12 @@ ledger::type::DBCommandResponsePtr RunDBTransactionOnTaskRunner(
       self.prefs[kMigrationSucceeded] = @(YES);
       [self savePrefs];
 
+      [self getRewardsParameters:nil];
+      [self fetchBalance:nil];
+      [self fetchUpholdWallet:nil];
+
+      [self readNotificationsFromDisk];
+
       [self.ads initializeIfAdsEnabled];
     } else {
       BLOG(0, @"Ledger Initialization Failed with error: %d", result);
@@ -261,7 +263,7 @@ ledger::type::DBCommandResponsePtr RunDBTransactionOnTaskRunner(
             self.migrationType = BATLedgerDatabaseMigrationTypeTokensOnly;
             [self resetRewardsDatabase];
             // attempt re-initialize without other data
-            [self initializeLedgerService:YES];
+            [self initializeLedgerService:YES completion:completion];
             return;
           case BATLedgerDatabaseMigrationTypeTokensOnly:
             BLOG(0, @"DB: BAT only migration failed. Initializing without migration.");
@@ -269,7 +271,7 @@ ledger::type::DBCommandResponsePtr RunDBTransactionOnTaskRunner(
             self.migrationType = BATLedgerDatabaseMigrationTypeNone;
             [self resetRewardsDatabase];
             // attempt initialize without migrating at all
-            [self initializeLedgerService:NO];
+            [self initializeLedgerService:NO completion:completion];
             return;
           default:
             break;
@@ -277,6 +279,9 @@ ledger::type::DBCommandResponsePtr RunDBTransactionOnTaskRunner(
       }
     }
     self.initializationResult = static_cast<BATResult>(result);
+    if (completion) {
+      completion();
+    }
     for (BATBraveLedgerObserver *observer in [self.observers copy]) {
       if (observer.walletInitalized) {
         observer.walletInitalized(self.initializationResult);
@@ -559,10 +564,18 @@ BATClassLedgerBridge(BOOL, useShortRetries, setUseShortRetries, short_retries)
   });
 }
 
-- (void)linkBraveWalletToPaymentId:(NSString *)paymentId completion:(void (^)(BATResult result))completion
+- (void)linkBraveWalletToPaymentId:(NSString *)paymentId completion:(void (^)(BATResult result, NSString *drainID))completion
 {
-  ledger->LinkBraveWallet(paymentId.UTF8String, ^(ledger::type::Result result) {
-    completion(static_cast<BATResult>(result));
+  ledger->LinkBraveWallet(paymentId.UTF8String, ^(ledger::type::Result result, std::string drain_id) {
+    completion(static_cast<BATResult>(result), [NSString stringWithUTF8String:drain_id.c_str()]);
+  });
+}
+
+- (void)drainStatusForDrainId:(NSString *)drainId completion:(void (^)(BATResult result, BATDrainStatus status))completion
+{
+  ledger->GetDrainStatus(drainId.UTF8String, ^(ledger::type::Result result, ledger::type::DrainStatus status) {
+    completion(static_cast<BATResult>(result),
+               static_cast<BATDrainStatus>(status));
   });
 }
 
@@ -1689,11 +1702,11 @@ BATLedgerBridge(BOOL,
 
 - (void)loadURL:(ledger::type::UrlRequestPtr)request callback:(ledger::client::LoadURLCallback)callback
 {
-  std::map<ledger::type::UrlMethod, std::string> methodMap {
-    {ledger::type::UrlMethod::GET, "GET"},
-    {ledger::type::UrlMethod::POST, "POST"},
-    {ledger::type::UrlMethod::PUT, "PUT"}
-  };
+  std::map<ledger::type::UrlMethod, std::string> methodMap{
+      {ledger::type::UrlMethod::GET, "GET"},
+      {ledger::type::UrlMethod::POST, "POST"},
+      {ledger::type::UrlMethod::PUT, "PUT"},
+      {ledger::type::UrlMethod::DEL, "DELETE"}};
 
   if (!request) {
     request = ledger::type::UrlRequest::New();
@@ -1855,11 +1868,9 @@ BATLedgerBridge(BOOL,
 {
   __weak BATBraveLedger* weakSelf = self;
   base::PostTaskAndReplyWithResult(
-      databaseQueue.get(),
-      FROM_HERE,
-      base::BindOnce(&RunDBTransactionOnTaskRunner,
-          base::Passed(std::move(transaction)),
-          rewardsDatabase),
+      databaseQueue.get(), FROM_HERE,
+      base::BindOnce(&RunDBTransactionOnTaskRunner, std::move(transaction),
+                     rewardsDatabase),
       base::BindOnce(^(ledger::type::DBCommandResponsePtr response) {
         if (weakSelf)
           callback(std::move(response));

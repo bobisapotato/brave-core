@@ -235,6 +235,18 @@
     "message": "Molim vas napravite rezervnu kopiju svog Brave novčanika.",
     "description": "Description for backup wallet notification"
   },
+  "deviceLimitReachedLearnMore": {
+    "message": "Više informacija",
+    "description": "Notification button text to learn more about device limit"
+  },
+  "deviceLimitReachedTitle": {
+    "message": "Dostignuto je ograničenje uređaja",
+    "description": "Title for device limit reached notification"
+  },
+  "deviceLimitReachedNotification": {
+    "message": "Vaš novčanik nije moguće verifikovati zato što ste dostigli maksimalno ograničenje za verifikaciju na vašem uređaju.",
+    "description": "Description for device limit reached notification"
+  },
   "insufficientFundsNotification": {
     "message": "Vaš Brave Rewards nalog čeka na depozit.",
     "description": "Description for new insufficient funds notification"
@@ -515,9 +527,15 @@
     "message": "Novčanik verifikovan",
     "description": "Displayed in wallet that tells users that he is verified"
   },
-  "walletGoToUphold":  {
-    "message": "Idi na moj Uphold nalog",
-    "description": "CTA to open uphold account"
+  "walletGoToProvider":  {
+    "message": "Idu u nalog mog dobavljača $provider$",
+    "description": "CTA to open an external wallet account",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Uphold"
+      }
+    }
   },
   "walletDisconnect":  {
     "message": "Prekinite vezu sa Brave Nagradama",
@@ -612,8 +630,14 @@
     "description": "Text for login button"
   },
   "loginMessageText":  {
-    "message": "Potrebno je da imate najmanje 25 BAT-a da biste kreirali nalog na Uphold-u. Pokušajte ponovo kasnije. \n Ako već imate verifikovani nalog na Uphold-u, nastavite da biste se prijavili.",
-    "description": "Text for login button"
+    "message": "Potrebno je da imate najmanje $amount$ BATA da biste kreirali nalog na Uphold-u. Pokušajte ponovo kasnije.  Ako već imate verifikovani nalog na Uphold-u, nastavite da biste se prijavili.",
+    "description": "Text for login button",
+    "placeholders": {
+      "amount": {
+        "content": "$1",
+        "example": "15"
+      }
+    }
   },
   "walletConnected":  {
     "message": "Повезан",
@@ -624,8 +648,14 @@
     "description": "Status button that tells user that he is currently pending"
   },
   "walletVerificationNote3":  {
-    "message": "Napomena: Vaše transakcije će biti vidljive Uphold-u čim budete dali ovlašćenje; na primer, moći će da se vidi primalac i iznos napojnice.",
-    "description": "Displayed in login modal for uphold"
+    "message": "Napomena: Vaša transakcija će biti vidljiva dobavljaču $provider$ čim budete dali ovlašćenje; na primer, videće se primalac i iznos vaših napojnica.",
+    "description": "Displayed in login modal for external wallet providers",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Uphold"
+      }
+    }
   },
   "onboardingEarnHeader": {
     "message": "Zaradi tokene & Uzvrati isto",
@@ -718,7 +748,7 @@
     "description": ""
   },
   "onboardingPanelScheduleHeader": {
-    "message": "Kada dobijate nagrade",
+    "message": "Kada dobijate nagrade?",
     "description": ""
   },
   "onboardingPanelScheduleText": {
@@ -764,6 +794,42 @@
   "onboardingPanelCompleteText": {
     "message": "Korišćenjem Brave nagrada pomažete da veb bude bolje mesto za sve. I to je sjajno!",
     "description": ""
+  },
+  "onboardingPanelVerifyHeader": {
+    "message": "Verifikujte svoj novčanik",
+    "description": ""
+  },
+  "onboardingPanelVerifySubtext": {
+    "message": "Da biste preuzeli tokene i zaradili gledajući oglase, moraćete da verifikujete svoj novčanik.",
+    "description": ""
+  },
+  "onboardingPanelVerifyLater": {
+    "message": "Uraditi kasnije",
+    "description": ""
+  },
+  "onboardingPanelVerifyNow": {
+    "message": "Verifikuj moj novčanik",
+    "description": ""
+  },
+  "onboardingPanelBitflyerNote": {
+    "message": "Uslugu bitFlyer wallet održava kompanija bitFlyer, Inc.",
+    "description": ""
+  },
+  "onboardingPanelBitflyerText": {
+    "message": "Verifikovanjem vašeg novčanika i njegovim povezivanjem sa bitFlyer nalogom, lakše ćete moći da čuvate i održavate tokene koje ste zaradili kroz Brave Rewards",
+    "description": ""
+  },
+  "onboardingPanelBitflyerLearnMore": {
+    "message": "$link_begin$Saznajte više$link_end$ o tome kako da povežete vaš Brave pretraživač s vašim bitFlyer nalogom.",
+    "description": "",
+    "placeholders": {
+      "link_begin": {
+        "content": "$1"
+      },
+      "link_end": {
+        "content": "$2"
+      }
+    }
   },
   "bapDeprecationHeader": {
     "message": "Brave Rewards se prebacuje na novi sistem u Japanu!",

@@ -235,6 +235,18 @@
     "message": "Tafadhali hifadhi kwa njia mbadala wallet yako ya Brave.",
     "description": "Description for backup wallet notification"
   },
+  "deviceLimitReachedLearnMore": {
+    "message": "Jifunze Zaidi",
+    "description": "Notification button text to learn more about device limit"
+  },
+  "deviceLimitReachedTitle": {
+    "message": "Kikomo ch Kifaa Kimefikishwa",
+    "description": "Title for device limit reached notification"
+  },
+  "deviceLimitReachedNotification": {
+    "message": "Pochi yako haiwezi kuthibitishwa kwa sababu umefikisha kikomo cha kifaa kilichothibitishwa cha juu zaidi.",
+    "description": "Description for device limit reached notification"
+  },
   "insufficientFundsNotification": {
     "message": "Akaunto yako ya Brave Rewards inasubiri amana.",
     "description": "Description for new insufficient funds notification"
@@ -515,9 +527,15 @@
     "message": "Pochi Imethibitishwa",
     "description": "Displayed in wallet that tells users that he is verified"
   },
-  "walletGoToUphold":  {
-    "message": "Nenda kwenye akaunti yangu ya Uphold",
-    "description": "CTA to open uphold account"
+  "walletGoToProvider":  {
+    "message": "Nenda kwenye akaunti yangu ya $provider$",
+    "description": "CTA to open an external wallet account",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Uphold"
+      }
+    }
   },
   "walletDisconnect":  {
     "message": "Ondoa kwenye Brave Rewards",
@@ -612,8 +630,14 @@
     "description": "Text for login button"
   },
   "loginMessageText":  {
-    "message": "Unahitaji 25 BAT za chini zaidi ili kufungua akaunti ya Uphold. Tafadhali jaribu tena baadaye. \n Ikiwa tayari umethibitishwa akaunti ya Uphold, ingia.",
-    "description": "Text for login button"
+    "message": "Unahitaji kiwango cha chini zaidi cha $amount$BAT ili kufungua akaunti ya Uphold. Ikiwa tayari umethibitisha akaunti ya Uphold, ingia.",
+    "description": "Text for login button",
+    "placeholders": {
+      "amount": {
+        "content": "$1",
+        "example": "15"
+      }
+    }
   },
   "walletConnected":  {
     "message": "Umeunganishwa",
@@ -624,8 +648,14 @@
     "description": "Status button that tells user that he is currently pending"
   },
   "walletVerificationNote3":  {
-    "message": "Dokezo: Miamala yako itaonekana kwa Uphold mara unapoidhinisha; kwa mfano, wataweza kuona mpokeaji na kiasi cha vidokezo vyako.",
-    "description": "Displayed in login modal for uphold"
+    "message": "Dokezo: Miamala yako itaonekana kwa $provider$ mara unapoidhinisha; kwa mfano, wataweza kuona mpokeaji na kiasi cha bahshishi yako.",
+    "description": "Displayed in login modal for external wallet providers",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Uphold"
+      }
+    }
   },
   "onboardingEarnHeader": {
     "message": "Pata Tokeni na Utoe Shukrani",
@@ -718,7 +748,7 @@
     "description": ""
   },
   "onboardingPanelScheduleHeader": {
-    "message": "Je, unazipokea zawadi lini",
+    "message": "Je, unazipokea zawadi lini?",
     "description": ""
   },
   "onboardingPanelScheduleText": {
@@ -764,6 +794,42 @@
   "onboardingPanelCompleteText": {
     "message": "Kwa kutumia Zawadi za Brave, unasaidia kufanya wavuti kuwa mahali bora pa kila mtu. Na hilo ni jambo bora!",
     "description": ""
+  },
+  "onboardingPanelVerifyHeader": {
+    "message": "Thibitisha pochi yako",
+    "description": ""
+  },
+  "onboardingPanelVerifySubtext": {
+    "message": "Ili kutoa tokeni unazopata kwa kutazama matangazo, utahitaji kuthibitisha pochi yako.",
+    "description": ""
+  },
+  "onboardingPanelVerifyLater": {
+    "message": "Ifanye baadaye",
+    "description": ""
+  },
+  "onboardingPanelVerifyNow": {
+    "message": "Thibitisha pochi yangu",
+    "description": ""
+  },
+  "onboardingPanelBitflyerNote": {
+    "message": "Pochi ya bitFlyer ni huduma inayodhibitiwa na bitFlyer, Inc.",
+    "description": ""
+  },
+  "onboardingPanelBitflyerText": {
+    "message": "Kwa kuthibitisha pochi yako na kuiunganisha kwenye akaunti ya bitFlyer, utaweza kuhifadhi na kudhibiti tokeni ulizopata kupitia Brave Rewards kwa urahisi zaidi",
+    "description": ""
+  },
+  "onboardingPanelBitflyerLearnMore": {
+    "message": "$link_begin$Pata maelezo zaidi$link_end$ kuhusu jinsi ya kuunganisha kivinjari chako cha Brave na akaunti yako ya bitFlyer.",
+    "description": "",
+    "placeholders": {
+      "link_begin": {
+        "content": "$1"
+      },
+      "link_end": {
+        "content": "$2"
+      }
+    }
   },
   "bapDeprecationHeader": {
     "message": "Brave Rewards nchini Japan inabadilisha hadi mfumo mpya!",

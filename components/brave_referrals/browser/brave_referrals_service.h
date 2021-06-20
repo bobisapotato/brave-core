@@ -15,14 +15,17 @@
 #include "base/sequenced_task_runner.h"
 #include "base/timer/timer.h"
 #include "base/values.h"
+#include "chrome/browser/profiles/profile_manager_observer.h"
 #include "url/gurl.h"
 
 #if defined(OS_ANDROID)
+#include "brave/components/brave_referrals/browser/android_brave_referrer.h"
 #include "brave/components/safetynet/safetynet_check.h"
 #endif
 
 class PrefRegistrySimple;
 class PrefService;
+class Profile;
 
 namespace network {
 class SimpleURLLoader;
@@ -32,12 +35,12 @@ namespace brave {
 
 std::string GetAPIKey();
 
-class BraveReferralsService {
+class BraveReferralsService : public ProfileManagerObserver {
  public:
   explicit BraveReferralsService(PrefService* pref_service,
                                  const std::string& platform,
                                  const std::string& api_key);
-  ~BraveReferralsService();
+  ~BraveReferralsService() override;
 
   void Start();
   void Stop();
@@ -45,8 +48,10 @@ class BraveReferralsService {
   using ReferralInitializedCallback =
       base::RepeatingCallback<void(const std::string& download_id)>;
 
-  void SetReferralInitializedCallbackForTest(
-                  ReferralInitializedCallback referral_initialized_callback);
+  static void SetReferralInitializedCallbackForTesting(
+      ReferralInitializedCallback* referral_initialized_callback);
+
+  static void SetPromoFilePathForTesting(const base::FilePath& path);
 
   static bool GetMatchingReferralHeaders(
       const base::ListValue& referral_headers_list,
@@ -56,12 +61,13 @@ class BraveReferralsService {
   static bool IsDefaultReferralCode(const std::string& code);
 
  private:
+  // ProfileManagerObserver
+  void OnProfileAdded(Profile* profile) override;
+
   void GetFirstRunTime();
-  void GetFirstRunTimeDesktop();
+  void SetFirstRunTime(const base::Time& first_run_timestamp);
   void PerformFinalizationChecks();
   base::FilePath GetPromoCodeFileName() const;
-  void ReadPromoCode();
-  void DeletePromoCodeFile() const;
   void MaybeCheckForReferralFinalization();
   void MaybeDeletePromoCodePref() const;
   void InitReferral();
@@ -94,13 +100,17 @@ class BraveReferralsService {
       std::unique_ptr<std::string> response_body);
 
   // Invoked after reading contents of promo code file.
-  void OnReadPromoCodeComplete();
+  void OnReadPromoCodeComplete(const std::string& promo_code);
 
 #if defined(OS_ANDROID)
   void GetSafetynetStatusResult(const bool token_received,
                                 const std::string& result_string,
                                 const bool attestation_passed);
   safetynet_check::SafetyNetCheckRunner safetynet_check_runner_;
+
+  void InitAndroidReferrer();
+  void OnAndroidBraveReferrerReady();
+  android_brave_referrer::BraveReferrer android_brave_referrer_;
 #endif
 
   bool initialized_;

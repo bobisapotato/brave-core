@@ -5,6 +5,8 @@
     <message name="IDS_IPFS_ADDRESSES_CONFIG_TITLE" desc="Title of addresses config section">Addresses</message>
     <message name="IDS_IPFS_REPO_STATS_TITLE" desc="Title of repo stats section">Repo Stats</message>
     <message name="IDS_IPFS_NODE_INFO_TITLE" desc="Title of node info section">Node info</message>
+    <message name="IDS_IPFS_NODE_LAUNCH_ERROR" desc="Text of node launch error">An error occurred, please try to launch again</message>
+    <message name="IDS_IPFS_NODE_INSTALLATION_ERROR" desc="Text of node installation error">An error occurred, please try to install the node again</message>
     <message name="IDS_IPFS_DAEMON_STATUS_TITLE" desc="Title of daemon status section">IPFS node status</message>
     <message name="IDS_IPFS_API" desc="Title of the API config">API</message>
     <message name="IDS_IPFS_GATEWAY" desc="Title of the gateway config">Gateway</message>
@@ -27,6 +29,7 @@
     <message name="IDS_IPFS_GC_ERROR" desc="Text of garbage collection error">Garbage collection error</message>
     <message name="IDS_UTILITY_PROCESS_IPFS_NAME" desc="The utility process which manages IPFS daemon">IPFS Service</message>
     <message name="IDS_IPFS_OPEN_WEBUI" desc="Title of brave://ipfs webui button">My Node</message>
+    <message name="IDS_IPFS_BADGE_TITLE" desc="Title of page info badge in location bar">IPFS</message>
     <message name="IDS_IPFS_PEERS_DETAILS_LINK" desc="Link to open details about peers on brave://ipfs.">
       (details)
     </message>
@@ -97,7 +100,7 @@
       Installing...
     </message>
     <message name="IDS_IPFS_ONBOARDING_WAITING_PEERS_STATUS" desc="Title of button for IPFS interstitial page.">
-      Waiting for peers...
+      Looking for peers...
     </message>
     <message name="IDS_IPFS_ONBOARDING_TRY_AGAIN" desc="Retry button text for IPFS interstitial page.">
       Try again
@@ -110,6 +113,33 @@
     </message>
     <message name="IDS_IPFS_ONBOARDING_INSTALLATION_ERROR" desc="Error message about installation error for IPFS interstitial page.">
       Error ocurred during an update.
+    </message>
+    <message name="IDS_PAGE_INFO_IPFS_BUBBLE_TITTLE" desc="The title for ips page info bubble.">
+      This content was loaded over the IPFS protocol
+    </message>
+    <message name="IDS_PAGE_INFO_IPFS_BUBBLE_TEXT" desc="The text for ips page info bubble.">
+      InterPlanetary File System (IPFS) is a public network for peer-to-peer data storage and delivery. You can learn more about Brave's integration or configure your IPFS settings at any time.
+    </message>
+    <message name="IDS_IPFS_IMPORT_NOTIFICATION_TITLE" desc="The title for ips import error notification.">
+      IPFS import completed
+    </message>
+    <message name="IDS_IPFS_IMPORT_PARTLY_COMPLETED_NOTIFICATION_TITLE" desc="The title for ips import error notification.">
+      IPFS import partially completed
+    </message>
+    <message name="IDS_IPFS_IMPORT_ERROR_NOTIFICATION_TITLE" desc="The title for ips import error notification.">
+      IPFS import failed
+    </message>
+    <message name="IDS_IPFS_IMPORT_NOTIFICATION_BODY" desc="The title for ips import error notification.">
+      Shareable link copied: <ph name="SHAREABLE_LINK">$1<ex>https://domain.com/link</ex></ph>
+    </message>
+    <message name="IDS_IPFS_IMPORT_ERROR_NO_REQUEST_BODY" desc="The title for ips import error notification.">
+      Failed to fetch data for import
+    </message>
+    <message name="IDS_IPFS_IMPORT_ERROR_ADD_FAILED_BODY" desc="The title for ips import error notification.">
+      IPFS node internal error
+    </message>
+    <message name="IDS_IPFS_IMPORT_PARTLY_COMPLETED_NOTIFICATION_BODY" desc="The title for ips import error notification.">
+      The data was successfully uploaded but not moved to the brave-import directory. You can do this manually on the import settings page.
     </message>
   </if>
 </grit-part>

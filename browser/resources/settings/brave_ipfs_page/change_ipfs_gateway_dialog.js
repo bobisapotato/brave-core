@@ -11,11 +11,11 @@
 import 'chrome://resources/cr_elements/cr_button/cr_button.m.js';
 import 'chrome://resources/cr_elements/cr_dialog/cr_dialog.m.js';
 import 'chrome://resources/cr_elements/cr_input/cr_input.m.js';
-import '../settings_shared_css.m.js';
+import '../settings_shared_css.js';
 
 import {Polymer, html} from 'chrome://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
 import {I18nBehavior} from 'chrome://resources/js/i18n_behavior.m.js';
-import {PrefsBehavior} from '../prefs/prefs_behavior.m.js';
+import {PrefsBehavior} from '../prefs/prefs_behavior.js';
 
 Polymer({
   is: 'change-ipfs-gateway-dialog',
@@ -34,15 +34,6 @@ Polymer({
       notify: true,
     },
 
-    /**
-     * IPFS public gateway address input by the user.
-     * @private
-     */
-    url_: {
-      type: String,
-      observer: 'urlChanged_'
-    },
-
     isUrlValid_: Boolean,
     isSumitButtonEnabled_: Boolean,
 
@@ -55,9 +46,10 @@ Polymer({
 
   /** @private */
   urlChanged_: function() {
+    const url_ = this.$.url.value
     // Disable the submit button if input url is empty but don't show the URL
     // invalid error message.
-    if (this.url_.trim() == '') {
+    if (url_.trim() == '') {
       this.isUrlValid_ = true;
       this.isSubmitButtonEnabled_ = false;
       return;
@@ -65,7 +57,7 @@ Polymer({
 
     let url;
     try {
-      url = new URL(this.url_.trim());
+      url = new URL(url_.trim());
     } catch (e) {
       this.isUrlValid_ = false;
       this.isSubmitButtonEnabled_ = false;

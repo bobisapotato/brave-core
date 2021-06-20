@@ -16,34 +16,23 @@ Polymer({
     WebUIListenerBehavior,
   ],
 
+  /**
+   * Keep it the same as Provider in
+   * brave/componentsdecentralized_dns/constants.h.
+   */
+  Provider: {
+    UNSTOPPABLE_DOMAINS: 0,
+    ENS: 1
+  },
+
   properties: {
     showRestartToast_: Boolean,
     torEnabled_: Boolean,
     widevineEnabled_: Boolean,
     disableTorOption_: Boolean,
     decentralizedDnsEnabled_: Boolean,
-    unstoppableDomainsResolveMethod_: {
-      readOnly: true,
-      type: Array,
-      value() {
-        return [
-          {value:0, name: "Ask"},
-          {value:1, name: "Disabled"},
-          {value:2, name: "Public DNS over HTTPS server"},
-        ];
-      },
-    },
-    ensResolveMethod_: {
-      readOnly: true,
-      type: Array,
-      value() {
-        return [
-          {value:0, name: "Ask"},
-          {value:1, name: "Disabled"},
-          {value:2, name: "Public DNS over HTTPS server"},
-        ];
-      },
-    },
+    unstoppableDomainsResolveMethod_: Array,
+    ensResolveMethod_: Array,
   },
 
   /** @private {?settings.BraveDefaultExtensionsBrowserProxy} */
@@ -88,7 +77,15 @@ Polymer({
     })
     this.browserProxy_.isDecentralizedDnsEnabled().then(enabled => {
       this.decentralizedDnsEnabled_ = enabled
-    });
+    })
+    this.browserProxy_.getDecentralizedDnsResolveMethodList(
+      this.Provider.UNSTOPPABLE_DOMAINS).then(list => {
+        this.unstoppableDomainsResolveMethod_ = list
+    })
+    this.browserProxy_.getDecentralizedDnsResolveMethodList(
+      this.Provider.ENS).then(list => {
+      this.ensResolveMethod_ = list
+    })
   },
 
   onWebTorrentEnabledChange_: function() {

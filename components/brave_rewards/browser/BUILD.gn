@@ -1,4 +1,6 @@
 import("//brave/components/brave_rewards/browser/buildflags/buildflags.gni")
+import("//brave/components/ipfs/buildflags/buildflags.gni")
+import("//brave/vendor/bat-native-ledger/config.gni")
 import("//extensions/buildflags/buildflags.gni")
 
 source_set("browser") {
@@ -6,14 +8,24 @@ source_set("browser") {
   check_includes = false
   public_deps = [ "buildflags" ]
 
+  defines = [
+    "BITFLYER_CLIENT_ID=\"$bitflyer_client_id\"",
+    "BITFLYER_CLIENT_SECRET=\"$bitflyer_client_secret\"",
+    "BITFLYER_STAGING_CLIENT_ID=\"$bitflyer_staging_client_id\"",
+    "BITFLYER_STAGING_CLIENT_SECRET=\"$bitflyer_staging_client_secret\"",
+    "BITFLYER_STAGING_URL=\"$bitflyer_staging_url\"",
+    "UPHOLD_CLIENT_ID=\"$uphold_client_id\"",
+    "UPHOLD_CLIENT_SECRET=\"$uphold_client_secret\"",
+    "UPHOLD_STAGING_CLIENT_ID=\"$uphold_staging_client_id\"",
+    "UPHOLD_STAGING_CLIENT_SECRET=\"$uphold_staging_client_secret\"",
+  ]
+
   sources = [
     "android_util.cc",
     "android_util.h",
-    "file_util.cc",
-    "file_util.h",
+    "diagnostic_log.cc",
+    "diagnostic_log.h",
     "logging.h",
-    "logging_util.cc",
-    "logging_util.h",
     "rewards_notification_service.cc",
     "rewards_notification_service.h",
     "rewards_notification_service_observer.h",
@@ -74,6 +86,10 @@ source_set("browser") {
       "//url",
     ]
 
+    if (ipfs_enabled) {
+      deps += [ "//brave/components/ipfs" ]
+    }
+
     public_deps += [ "//brave/vendor/bat-native-ledger:headers" ]
 
     if (is_android) {
@@ -87,7 +103,7 @@ source_set("testutil") {
   deps = [
     ":browser",
     "//base",
-    "//brave/browser:browser_process",
+    "//brave/browser",
     "//brave/vendor/bat-native-ledger:headers",
     "//chrome/test:test_support",
     "//content/public/browser",

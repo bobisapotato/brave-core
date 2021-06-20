@@ -5,6 +5,7 @@
 
 #include "brave/browser/brave_shields/ad_block_service_browsertest.h"
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -12,17 +13,20 @@
 #include "base/path_service.h"
 #include "base/task/post_task.h"
 #include "base/test/thread_test_helper.h"
-#include "brave/browser/brave_browser_process_impl.h"
+#include "brave/browser/brave_browser_process.h"
+#include "brave/browser/net/brave_ad_block_tp_network_delegate_helper.h"
 #include "brave/common/brave_paths.h"
 #include "brave/common/pref_names.h"
+#include "brave/components/brave_component_updater/browser/local_data_files_service.h"
 #include "brave/components/brave_shields/browser/ad_block_custom_filters_service.h"
 #include "brave/components/brave_shields/browser/ad_block_regional_service.h"
 #include "brave/components/brave_shields/browser/ad_block_regional_service_manager.h"
 #include "brave/components/brave_shields/browser/ad_block_service.h"
 #include "brave/components/brave_shields/browser/brave_shields_util.h"
-#include "brave/components/brave_shields/browser/tracking_protection_service.h"
 #include "brave/components/brave_shields/common/brave_shield_constants.h"
 #include "brave/components/brave_shields/common/features.h"
+#include "brave/components/brave_shields/common/pref_names.h"
+#include "chrome/browser/browser_process.h"
 #include "chrome/browser/content_settings/host_content_settings_map_factory.h"
 #include "chrome/browser/extensions/extension_browsertest.h"
 #include "chrome/browser/ui/browser.h"
@@ -35,6 +39,7 @@
 #include "content/public/test/browser_test_utils.h"
 #include "extensions/test/extension_test_message_listener.h"
 #include "net/dns/mock_host_resolver.h"
+#include "services/network/host_resolver.h"
 
 const char kAdBlockTestPage[] = "/blocking.html";
 
@@ -45,8 +50,6 @@ const char kDefaultAdBlockComponentTestId[] =
     "naccapggpomhlhoifnlebfoocegenbol";
 const char kRegionalAdBlockComponentTestId[] =
     "dlpmaigjliompnelofkljgcmlenklieh";
-const char kTrackingProtectionComponentTestId[] =
-    "eclbkhjphkhalklhipiicaldjbnhdfkc";
 
 const char kDefaultAdBlockComponentTest64PublicKey[] =
     "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtV7Vr69kkvSvu2lhcMDh"
@@ -64,15 +67,9 @@ const char kRegionalAdBlockComponentTest64PublicKey[] =
     "G8XBq/Y8FbBt+u+7skWQy3lVyRwFjeFu6cXVF4tcc06PNx5yLsbHQtSv8R+h1bWw"
     "ieMF3JB9CZPr+qDKIap+RZUfsraV47QebRi/JA17nbDMlXOmK7mILfFU7Jhjx04F"
     "LwIDAQAB";
-const char kTrackingProtectionComponentTest64PublicKey[] =
-    "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsleoSxQ3DN+6xym2P1uX"
-    "mN6ArIWd9Oru5CSjS0SRE5upM2EnAl/C20TP8JdIlPi/3tk/SN6Y92K3xIhAby5F"
-    "0rbPDSTXEWGy72tv2qb/WySGwDdvYQu9/J5sEDneVcMrSHcC0VWgcZR0eof4BfOy"
-    "fKMEnHX98tyA3z+vW5ndHspR/Xvo78B3+6HX6tyVm/pNlCNOm8W8feyfDfPpK2Lx"
-    "qRLB7PumyhR625txxolkGC6aC8rrxtT3oymdMfDYhB4BZBrzqdriyvu1NdygoEiF"
-    "WhIYw/5zv1NyIsfUiG8wIs5+OwS419z7dlMKsg1FuB2aQcDyjoXx1habFfHQfQwL"
-    "qwIDAQAB";
 
+using brave_shields::features::kBraveAdblockCnameUncloaking;
+using brave_shields::features::kBraveAdblockCollapseBlockedElements;
 using brave_shields::features::kBraveAdblockCosmeticFiltering;
 using content::BrowserThread;
 
@@ -128,13 +125,6 @@ void AdBlockServiceTest::InitEmbeddedTestServer() {
 void AdBlockServiceTest::GetTestDataDir(base::FilePath* test_data_dir) {
   base::ScopedAllowBlockingForTesting allow_blocking;
   base::PathService::Get(brave::DIR_TEST_DATA, test_data_dir);
-}
-
-void AdBlockServiceTest::InitTrackingProtectionService() {
-  brave_component_updater::LocalDataFilesService::
-      SetComponentIdAndBase64PublicKeyForTest(
-          kTrackingProtectionComponentTestId,
-          kTrackingProtectionComponentTest64PublicKey);
 }
 
 bool AdBlockServiceTest::InstallDefaultAdBlockExtension(
@@ -209,22 +199,6 @@ bool AdBlockServiceTest::InstallRegionalAdBlockExtension(
   return true;
 }
 
-bool AdBlockServiceTest::InstallTrackingProtectionExtension() {
-  base::FilePath test_data_dir;
-  GetTestDataDir(&test_data_dir);
-  const extensions::Extension* tracking_protection_extension = InstallExtension(
-      test_data_dir.AppendASCII("tracking-protection-data"), 1);
-  if (!tracking_protection_extension)
-    return false;
-
-  g_brave_browser_process->tracking_protection_service()->OnComponentReady(
-      tracking_protection_extension->id(),
-      tracking_protection_extension->path(), "");
-  WaitForAdBlockServiceThreads();
-
-  return true;
-}
-
 bool AdBlockServiceTest::StartAdBlockRegionalServices() {
   g_brave_browser_process->ad_block_regional_service_manager()->Start();
   if (!g_brave_browser_process->ad_block_regional_service_manager()
@@ -248,6 +222,10 @@ void AdBlockServiceTest::WaitForBraveExtensionShieldsDataReady() {
   ExtensionTestMessageListener extension_listener(
       "brave-extension-shields-data-ready", false);
   ASSERT_TRUE(extension_listener.WaitUntilSatisfied());
+}
+
+void AdBlockServiceTest::ShieldsDown(const GURL& url) {
+  brave_shields::SetBraveShieldsEnabled(content_settings(), false, url);
 }
 
 // Load a page with an ad image, and make sure it is blocked.
@@ -532,6 +510,41 @@ IN_PROC_BROWSER_TEST_F(AdBlockServiceTest, SubFrame) {
   EXPECT_EQ(browser()->profile()->GetPrefs()->GetUint64(kAdsBlocked), 2ULL);
 }
 
+// Checks nothing is blocked if shields are off.
+IN_PROC_BROWSER_TEST_F(AdBlockServiceTest, SubFrameShieldsOff) {
+  ASSERT_TRUE(InstallDefaultAdBlockExtension());
+
+  EXPECT_EQ(browser()->profile()->GetPrefs()->GetUint64(kAdsBlocked), 0ULL);
+  GURL url = embedded_test_server()->GetURL("a.com", "/iframe_blocking.html");
+
+  brave_shields::SetBraveShieldsEnabled(content_settings(), false, url);
+
+  ui_test_utils::NavigateToURL(browser(), url);
+  content::WebContents* contents =
+      browser()->tab_strip_model()->GetActiveWebContents();
+
+  EXPECT_EQ(true, EvalJs(contents->GetAllFrames()[1],
+                         "setExpectations(0, 0, 1, 0);"
+                         "xhr('adbanner.js?1')"));
+  EXPECT_EQ(browser()->profile()->GetPrefs()->GetUint64(kAdsBlocked), 0ULL);
+
+  // Check also an explicit request for a script since it is a common real-world
+  // scenario.
+  EXPECT_EQ(true, EvalJs(contents->GetAllFrames()[1],
+                         R"(
+                           new Promise(function (resolve, reject) {
+                             var s = document.createElement('script');
+                             s.onload = () => resolve(true);
+                             s.onerror = reject;
+                             s.src = 'adbanner.js?2';
+                             document.head.appendChild(s);
+                           })
+                         )"));
+  content::RunAllTasksUntilIdle();
+  EXPECT_EQ(browser()->profile()->GetPrefs()->GetUint64(kAdsBlocked), 0ULL);
+  brave_shields::ResetBraveShieldsEnabled(content_settings(), url);
+}
+
 // Requests made by a service worker should be blocked as well.
 IN_PROC_BROWSER_TEST_F(AdBlockServiceTest, ServiceWorkerRequest) {
   UpdateAdBlockInstanceWithRules("adbanner.js");
@@ -607,6 +620,280 @@ IN_PROC_BROWSER_TEST_F(AdBlockServiceTest,
                                                 "addImage('%s')",
                                                 resource_url.spec().c_str())));
   EXPECT_EQ(browser()->profile()->GetPrefs()->GetUint64(kAdsBlocked), 1ULL);
+}
+
+// These tests fail intermittently on macOS; see
+// https://github.com/brave/brave-browser/issues/15912
+#if defined(OS_MAC)
+#define MAYBE_CnameCloakedRequestsGetBlocked \
+  DISABLED_CnameCloakedRequestsGetBlocked
+#define MAYBE_CnameCloakedRequestsCanBeExcepted \
+  DISABLED_CnameCloakedRequestsCanBeExcepted
+#else
+#define MAYBE_CnameCloakedRequestsGetBlocked CnameCloakedRequestsGetBlocked
+#define MAYBE_CnameCloakedRequestsCanBeExcepted \
+  CnameCloakedRequestsCanBeExcepted
+#endif
+
+// Make sure that CNAME cloaked network requests get blocked correctly and
+// issue the correct number of DNS resolutions
+IN_PROC_BROWSER_TEST_F(AdBlockServiceTest,
+                       MAYBE_CnameCloakedRequestsGetBlocked) {
+  UpdateAdBlockInstanceWithRules("||cname-cloak-endpoint.tracking.com^");
+  EXPECT_EQ(browser()->profile()->GetPrefs()->GetUint64(kAdsBlocked), 0ULL);
+  GURL tab_url = embedded_test_server()->GetURL("a.com", kAdBlockTestPage);
+  GURL direct_resource_url =
+      embedded_test_server()->GetURL("a83idbka2e.a.com", "/logo.png");
+  GURL chain_resource_url =
+      embedded_test_server()->GetURL("b94jeclb3f.a.com", "/logo.png");
+  GURL safe_resource_url = embedded_test_server()->GetURL("a.com", "/logo.png");
+  GURL bad_resource_url = embedded_test_server()->GetURL(
+      "cname-cloak-endpoint.tracking.com", "/logo.png");
+
+  auto inner_resolver = std::make_unique<net::MockHostResolver>();
+
+  const std::vector<std::string> kDnsAliasesDirect(
+      {"cname-cloak-endpoint.tracking.com"});
+  const std::vector<std::string> kDnsAliasesChain(
+      {"cname-cloak-endpoint.tracking.com",
+       "cname-cloak-endpoint.tracking.com.redirectservice.net", "cname.a.com"});
+  const std::vector<std::string> kDnsAliasesSafe({"assets.cdn.net"});
+  inner_resolver->rules()->AddIPLiteralRuleWithDnsAliases(
+      "a83idbka2e.a.com", "127.0.0.1", kDnsAliasesDirect);
+  inner_resolver->rules()->AddIPLiteralRuleWithDnsAliases(
+      "b94jeclb3f.a.com", "127.0.0.1", kDnsAliasesChain);
+  inner_resolver->rules()->AddIPLiteralRuleWithDnsAliases("a.com", "127.0.0.1",
+                                                          kDnsAliasesSafe);
+  inner_resolver->rules()->AddIPLiteralRuleWithDnsAliases(
+      "cname-cloak-endpoint.tracking.com", "127.0.0.1", {});
+
+  network::HostResolver resolver(inner_resolver.get(), net::NetLog::Get());
+
+  brave::SetAdblockCnameHostResolverForTesting(&resolver);
+
+  ui_test_utils::NavigateToURL(browser(), tab_url);
+
+  content::WebContents* contents =
+      browser()->tab_strip_model()->GetActiveWebContents();
+
+  // Image request to an unblocked first-party endpoint that is CNAME cloaked
+  // with 1 alias. The alias has a matching rule, so the request should be
+  // blocked.
+  ASSERT_EQ(true, EvalJs(contents, base::StringPrintf(
+                                       "setExpectations(0, 1, 0, 0);"
+                                       "addImage('%s')",
+                                       direct_resource_url.spec().c_str())));
+  EXPECT_EQ(browser()->profile()->GetPrefs()->GetUint64(kAdsBlocked), 1ULL);
+  // Note one resolution for the root document
+  ASSERT_EQ(2ULL, inner_resolver->num_resolve());
+
+  // XHR request to an unblocked first-party endpoint that is CNAME cloaked with
+  // multiple intermediate aliases. The canonical alias has a matching rule, so
+  // the request should be blocked.
+  ASSERT_EQ(true, EvalJs(contents, base::StringPrintf(
+                                       "setExpectations(0, 1, 0, 1);"
+                                       "xhr('%s')",
+                                       chain_resource_url.spec().c_str())));
+  EXPECT_EQ(browser()->profile()->GetPrefs()->GetUint64(kAdsBlocked), 2ULL);
+  ASSERT_EQ(3ULL, inner_resolver->num_resolve());
+
+  // XHR request to an unblocked first-party endpoint that is CNAME cloaked.
+  // The canonical alias has no matching rule, so the request should be allowed.
+  ASSERT_EQ(true, EvalJs(contents,
+                         base::StringPrintf("setExpectations(0, 1, 1, 1);"
+                                            "xhr('%s')",
+                                            safe_resource_url.spec().c_str())));
+  EXPECT_EQ(browser()->profile()->GetPrefs()->GetUint64(kAdsBlocked), 2ULL);
+  ASSERT_EQ(4ULL, inner_resolver->num_resolve());
+
+  // XHR request directly to a blocked third-party endpoint.
+  // The resolver should not be queried for this request.
+  ASSERT_EQ(true, EvalJs(contents,
+                         base::StringPrintf("setExpectations(0, 1, 1, 2);"
+                                            "xhr('%s')",
+                                            bad_resource_url.spec().c_str())));
+  EXPECT_EQ(browser()->profile()->GetPrefs()->GetUint64(kAdsBlocked), 3ULL);
+  ASSERT_EQ(4ULL, inner_resolver->num_resolve());
+
+  // Unset the host resolver so as not to interfere with later tests.
+  brave::SetAdblockCnameHostResolverForTesting(nullptr);
+}
+
+// Make sure that an exception for a URL can apply to a blocking decision made
+// to its CNAME-uncloaked equivalent.
+IN_PROC_BROWSER_TEST_F(AdBlockServiceTest,
+                       MAYBE_CnameCloakedRequestsCanBeExcepted) {
+  UpdateAdBlockInstanceWithRules(
+      "||cname-cloak-endpoint.tracking.com^\n"
+      "@@||a.com/logo-unblock.png|");
+  EXPECT_EQ(browser()->profile()->GetPrefs()->GetUint64(kAdsBlocked), 0ULL);
+  GURL tab_url = embedded_test_server()->GetURL("a.com", kAdBlockTestPage);
+  GURL direct_resource_url =
+      embedded_test_server()->GetURL("a83idbka2e.a.com", "/logo.png");
+  GURL chain_resource_url =
+      embedded_test_server()->GetURL("b94jeclb3f.a.com", "/logo.png");
+  GURL safe_resource_url = embedded_test_server()->GetURL("a.com", "/logo.png");
+  GURL bad_resource_url = embedded_test_server()->GetURL(
+      "cname-cloak-endpoint.tracking.com", "/logo.png");
+
+  auto inner_resolver = std::make_unique<net::MockHostResolver>();
+
+  const std::vector<std::string> kDnsAliasesDirect(
+      {"cname-cloak-endpoint.tracking.com"});
+  const std::vector<std::string> kDnsAliasesChain(
+      {"cname-cloak-endpoint.tracking.com",
+       "cname-cloak-endpoint.tracking.com.redirectservice.net", "cname.a.com"});
+  const std::vector<std::string> kDnsAliasesSafe({"assets.cdn.net"});
+  inner_resolver->rules()->AddIPLiteralRuleWithDnsAliases(
+      "a83idbka2e.a.com", "127.0.0.1", kDnsAliasesDirect);
+  inner_resolver->rules()->AddIPLiteralRuleWithDnsAliases(
+      "b94jeclb3f.a.com", "127.0.0.1", kDnsAliasesChain);
+  inner_resolver->rules()->AddIPLiteralRuleWithDnsAliases("a.com", "127.0.0.1",
+                                                          kDnsAliasesSafe);
+  inner_resolver->rules()->AddIPLiteralRuleWithDnsAliases(
+      "cname-cloak-endpoint.tracking.com", "127.0.0.1", {});
+
+  network::HostResolver resolver(inner_resolver.get(), net::NetLog::Get());
+
+  brave::SetAdblockCnameHostResolverForTesting(&resolver);
+
+  ui_test_utils::NavigateToURL(browser(), tab_url);
+
+  content::WebContents* contents =
+      browser()->tab_strip_model()->GetActiveWebContents();
+
+  // Image request to an unblocked first-party endpoint that is CNAME cloaked
+  // with 1 alias. The alias has a matching rule, so the request should be
+  // blocked.
+  ASSERT_EQ(true, EvalJs(contents, base::StringPrintf(
+                                       "setExpectations(0, 1, 0, 0);"
+                                       "addImage('%s')",
+                                       direct_resource_url.spec().c_str())));
+  EXPECT_EQ(browser()->profile()->GetPrefs()->GetUint64(kAdsBlocked), 1ULL);
+  // Note one resolution for the root document
+  ASSERT_EQ(2ULL, inner_resolver->num_resolve());
+
+  // XHR request to an unblocked first-party endpoint that is CNAME cloaked with
+  // multiple intermediate aliases. The canonical alias has a matching rule, so
+  // the request should be blocked.
+  ASSERT_EQ(true, EvalJs(contents, base::StringPrintf(
+                                       "setExpectations(0, 1, 0, 1);"
+                                       "xhr('%s')",
+                                       chain_resource_url.spec().c_str())));
+  EXPECT_EQ(browser()->profile()->GetPrefs()->GetUint64(kAdsBlocked), 2ULL);
+  ASSERT_EQ(3ULL, inner_resolver->num_resolve());
+
+  // XHR request to an unblocked first-party endpoint that is CNAME cloaked.
+  // The canonical alias has no matching rule, so the request should be allowed.
+  ASSERT_EQ(true, EvalJs(contents,
+                         base::StringPrintf("setExpectations(0, 1, 1, 1);"
+                                            "xhr('%s')",
+                                            safe_resource_url.spec().c_str())));
+  EXPECT_EQ(browser()->profile()->GetPrefs()->GetUint64(kAdsBlocked), 2ULL);
+  ASSERT_EQ(4ULL, inner_resolver->num_resolve());
+
+  // XHR request directly to a blocked third-party endpoint.
+  // The resolver should not be queried for this request.
+  ASSERT_EQ(true, EvalJs(contents,
+                         base::StringPrintf("setExpectations(0, 1, 1, 2);"
+                                            "xhr('%s')",
+                                            bad_resource_url.spec().c_str())));
+  EXPECT_EQ(browser()->profile()->GetPrefs()->GetUint64(kAdsBlocked), 3ULL);
+  ASSERT_EQ(4ULL, inner_resolver->num_resolve());
+
+  // Unset the host resolver so as not to interfere with later tests.
+  brave::SetAdblockCnameHostResolverForTesting(nullptr);
+}
+
+class CnameUncloakingFlagDisabledTest : public AdBlockServiceTest {
+ public:
+  CnameUncloakingFlagDisabledTest() {
+    feature_list_.InitAndDisableFeature(kBraveAdblockCnameUncloaking);
+  }
+
+ private:
+  base::test::ScopedFeatureList feature_list_;
+};
+
+// Make sure that CNAME uncloaking does not occur when the CNAME uncloaking
+// flag is disabled.
+IN_PROC_BROWSER_TEST_F(CnameUncloakingFlagDisabledTest, NoDnsQueriesIssued) {
+  UpdateAdBlockInstanceWithRules("||cname-cloak-endpoint.tracking.com^");
+  EXPECT_EQ(browser()->profile()->GetPrefs()->GetUint64(kAdsBlocked), 0ULL);
+  GURL tab_url = embedded_test_server()->GetURL("a.com", kAdBlockTestPage);
+  GURL direct_resource_url =
+      embedded_test_server()->GetURL("a83idbka2e.a.com", "/logo.png");
+  GURL chain_resource_url =
+      embedded_test_server()->GetURL("b94jeclb3f.a.com", "/logo.png");
+  GURL safe_resource_url = embedded_test_server()->GetURL("a.com", "/logo.png");
+  GURL bad_resource_url = embedded_test_server()->GetURL(
+      "cname-cloak-endpoint.tracking.com", "/logo.png");
+
+  auto inner_resolver = std::make_unique<net::MockHostResolver>();
+
+  const std::vector<std::string> kDnsAliasesDirect(
+      {"cname-cloak-endpoint.tracking.com"});
+  const std::vector<std::string> kDnsAliasesChain(
+      {"cname-cloak-endpoint.tracking.com",
+       "cname-cloak-endpoint.tracking.com.redirectservice.net", "cname.a.com"});
+  const std::vector<std::string> kDnsAliasesSafe({"assets.cdn.net"});
+  inner_resolver->rules()->AddIPLiteralRuleWithDnsAliases(
+      "a83idbka2e.a.com", "127.0.0.1", kDnsAliasesDirect);
+  inner_resolver->rules()->AddIPLiteralRuleWithDnsAliases(
+      "b94jeclb3f.a.com", "127.0.0.1", kDnsAliasesChain);
+  inner_resolver->rules()->AddIPLiteralRuleWithDnsAliases("a.com", "127.0.0.1",
+                                                          kDnsAliasesSafe);
+  inner_resolver->rules()->AddIPLiteralRuleWithDnsAliases(
+      "cname-cloak-endpoint.tracking.com", "127.0.0.1", {});
+
+  network::HostResolver resolver(inner_resolver.get(), net::NetLog::Get());
+
+  brave::SetAdblockCnameHostResolverForTesting(&resolver);
+
+  ui_test_utils::NavigateToURL(browser(), tab_url);
+
+  content::WebContents* contents =
+      browser()->tab_strip_model()->GetActiveWebContents();
+
+  // Image request to an unblocked first-party endpoint that is CNAME cloaked
+  // with 1 alias. Nothing should be blocked.
+  ASSERT_EQ(true, EvalJs(contents, base::StringPrintf(
+                                       "setExpectations(1, 0, 0, 0);"
+                                       "addImage('%s')",
+                                       direct_resource_url.spec().c_str())));
+  EXPECT_EQ(browser()->profile()->GetPrefs()->GetUint64(kAdsBlocked), 0ULL);
+  // Note one resolution for the root document
+  ASSERT_EQ(0ULL, inner_resolver->num_resolve());
+
+  // Image request to an unblocked first-party endpoint that is CNAME cloaked
+  // with multiple intermediate aliases. Nothing should be blocked.
+  ASSERT_EQ(true, EvalJs(contents, base::StringPrintf(
+                                       "setExpectations(2, 0, 0, 0);"
+                                       "addImage('%s')",
+                                       chain_resource_url.spec().c_str())));
+  EXPECT_EQ(browser()->profile()->GetPrefs()->GetUint64(kAdsBlocked), 0ULL);
+  ASSERT_EQ(0ULL, inner_resolver->num_resolve());
+
+  // XHR request to an unblocked first-party endpoint that is CNAME cloaked.
+  // Nothing should be blocked.
+  ASSERT_EQ(true, EvalJs(contents,
+                         base::StringPrintf("setExpectations(2, 0, 1, 0);"
+                                            "xhr('%s')",
+                                            safe_resource_url.spec().c_str())));
+  EXPECT_EQ(browser()->profile()->GetPrefs()->GetUint64(kAdsBlocked), 0ULL);
+  ASSERT_EQ(0ULL, inner_resolver->num_resolve());
+
+  // XHR request directly to a blocked third-party endpoint. It should be
+  // blocked, but the resolver still should not be queried.
+  ASSERT_EQ(true, EvalJs(contents,
+                         base::StringPrintf("setExpectations(2, 0, 1, 1);"
+                                            "xhr('%s')",
+                                            bad_resource_url.spec().c_str())));
+  EXPECT_EQ(browser()->profile()->GetPrefs()->GetUint64(kAdsBlocked), 1ULL);
+  ASSERT_EQ(0ULL, inner_resolver->num_resolve());
+
+  // Unset the host resolver so as not to interfere with later tests.
+  brave::SetAdblockCnameHostResolverForTesting(nullptr);
 }
 
 // Load an image from a specific subdomain, and make sure it is blocked.
@@ -712,42 +999,142 @@ IN_PROC_BROWSER_TEST_F(AdBlockServiceTest, TagPrefsControlTags) {
   AssertTagExists(brave_shields::kLinkedInEmbeds, false);
 
   // Toggling prefs once is reflected in the adblock client.
-  prefs->SetBoolean(kLinkedInEmbedControlType, true);
+  prefs->SetBoolean(brave_shields::prefs::kLinkedInEmbedControlType, true);
   WaitForAdBlockServiceThreads();
   AssertTagExists(brave_shields::kFacebookEmbeds, true);
   AssertTagExists(brave_shields::kTwitterEmbeds, true);
   AssertTagExists(brave_shields::kLinkedInEmbeds, true);
 
-  prefs->SetBoolean(kFBEmbedControlType, false);
+  prefs->SetBoolean(brave_shields::prefs::kFBEmbedControlType, false);
   WaitForAdBlockServiceThreads();
   AssertTagExists(brave_shields::kFacebookEmbeds, false);
   AssertTagExists(brave_shields::kTwitterEmbeds, true);
   AssertTagExists(brave_shields::kLinkedInEmbeds, true);
 
-  prefs->SetBoolean(kTwitterEmbedControlType, false);
+  prefs->SetBoolean(brave_shields::prefs::kTwitterEmbedControlType, false);
   WaitForAdBlockServiceThreads();
   AssertTagExists(brave_shields::kFacebookEmbeds, false);
   AssertTagExists(brave_shields::kTwitterEmbeds, false);
   AssertTagExists(brave_shields::kLinkedInEmbeds, true);
 
   // Toggling prefs back is reflected in the adblock client.
-  prefs->SetBoolean(kLinkedInEmbedControlType, false);
+  prefs->SetBoolean(brave_shields::prefs::kLinkedInEmbedControlType, false);
   WaitForAdBlockServiceThreads();
   AssertTagExists(brave_shields::kFacebookEmbeds, false);
   AssertTagExists(brave_shields::kTwitterEmbeds, false);
   AssertTagExists(brave_shields::kLinkedInEmbeds, false);
 
-  prefs->SetBoolean(kFBEmbedControlType, true);
+  prefs->SetBoolean(brave_shields::prefs::kFBEmbedControlType, true);
   WaitForAdBlockServiceThreads();
   AssertTagExists(brave_shields::kFacebookEmbeds, true);
   AssertTagExists(brave_shields::kTwitterEmbeds, false);
   AssertTagExists(brave_shields::kLinkedInEmbeds, false);
 
-  prefs->SetBoolean(kTwitterEmbedControlType, true);
+  prefs->SetBoolean(brave_shields::prefs::kTwitterEmbedControlType, true);
   WaitForAdBlockServiceThreads();
   AssertTagExists(brave_shields::kFacebookEmbeds, true);
   AssertTagExists(brave_shields::kTwitterEmbeds, true);
   AssertTagExists(brave_shields::kLinkedInEmbeds, false);
+}
+
+// Load a page with a blocked image, and make sure it is collapsed.
+IN_PROC_BROWSER_TEST_F(AdBlockServiceTest, CollapseBlockedImage) {
+  ASSERT_TRUE(InstallDefaultAdBlockExtension());
+  EXPECT_EQ(browser()->profile()->GetPrefs()->GetUint64(kAdsBlocked), 0ULL);
+
+  GURL url = embedded_test_server()->GetURL(kAdBlockTestPage);
+  ui_test_utils::NavigateToURL(browser(), url);
+  content::WebContents* contents =
+      browser()->tab_strip_model()->GetActiveWebContents();
+
+  EXPECT_EQ(true, EvalJs(contents,
+                         "setExpectations(0, 1, 0, 0);"
+                         "addImage('ad_banner.png')"));
+  EXPECT_EQ(browser()->profile()->GetPrefs()->GetUint64(kAdsBlocked), 1ULL);
+
+  // There is no way for JS to directly tell if an element has been collapsed,
+  // but the clientHeight property is zero for collapsed elements and nonzero
+  // otherwise.
+  EXPECT_EQ(true, EvalJs(contents,
+                         "let i = document.getElementsByClassName('adImage');"
+                         "i[0].clientHeight === 0"));
+}
+
+// Load a page with a blocked iframe, and make sure it is collapsed.
+IN_PROC_BROWSER_TEST_F(AdBlockServiceTest, CollapseBlockedIframe) {
+  ASSERT_TRUE(InstallDefaultAdBlockExtension());
+  EXPECT_EQ(browser()->profile()->GetPrefs()->GetUint64(kAdsBlocked), 0ULL);
+
+  GURL url = embedded_test_server()->GetURL(kAdBlockTestPage);
+  ui_test_utils::NavigateToURL(browser(), url);
+  content::WebContents* contents =
+      browser()->tab_strip_model()->GetActiveWebContents();
+
+  EXPECT_EQ(true, EvalJs(contents, "addFrame('ad_banner.png')"));
+  EXPECT_EQ(browser()->profile()->GetPrefs()->GetUint64(kAdsBlocked), 1ULL);
+
+  // There is no way for JS to directly tell if an element has been collapsed,
+  // but the clientHeight property is zero for collapsed elements and nonzero
+  // otherwise.
+  EXPECT_EQ(true, EvalJs(contents,
+                         "let i = document.getElementsByClassName('adFrame');"
+                         "i[0].clientHeight === 0"));
+}
+
+class CollapseBlockedElementsFlagDisabledTest : public AdBlockServiceTest {
+ public:
+  CollapseBlockedElementsFlagDisabledTest() {
+    feature_list_.InitAndDisableFeature(kBraveAdblockCollapseBlockedElements);
+  }
+
+ private:
+  base::test::ScopedFeatureList feature_list_;
+};
+
+// Load a page with a blocked image, and make sure it is not collapsed.
+IN_PROC_BROWSER_TEST_F(CollapseBlockedElementsFlagDisabledTest,
+                       DontCollapseBlockedImage) {
+  ASSERT_TRUE(InstallDefaultAdBlockExtension());
+  EXPECT_EQ(browser()->profile()->GetPrefs()->GetUint64(kAdsBlocked), 0ULL);
+
+  GURL url = embedded_test_server()->GetURL(kAdBlockTestPage);
+  ui_test_utils::NavigateToURL(browser(), url);
+  content::WebContents* contents =
+      browser()->tab_strip_model()->GetActiveWebContents();
+
+  EXPECT_EQ(true, EvalJs(contents,
+                         "setExpectations(0, 1, 0, 0);"
+                         "addImage('ad_banner.png')"));
+  EXPECT_EQ(browser()->profile()->GetPrefs()->GetUint64(kAdsBlocked), 1ULL);
+
+  // There is no way for JS to directly tell if an element has been collapsed,
+  // but the clientHeight property is zero for collapsed elements and nonzero
+  // otherwise.
+  EXPECT_EQ(true, EvalJs(contents,
+                         "let i = document.getElementsByClassName('adImage');"
+                         "i[0].clientHeight !== 0"));
+}
+
+// Load a page with a blocked iframe, and make sure it is not collapsed.
+IN_PROC_BROWSER_TEST_F(CollapseBlockedElementsFlagDisabledTest,
+                       DontCollapseBlockedIframe) {
+  ASSERT_TRUE(InstallDefaultAdBlockExtension());
+  EXPECT_EQ(browser()->profile()->GetPrefs()->GetUint64(kAdsBlocked), 0ULL);
+
+  GURL url = embedded_test_server()->GetURL(kAdBlockTestPage);
+  ui_test_utils::NavigateToURL(browser(), url);
+  content::WebContents* contents =
+      browser()->tab_strip_model()->GetActiveWebContents();
+
+  EXPECT_EQ(true, EvalJs(contents, "addFrame('ad_banner.png')"));
+  EXPECT_EQ(browser()->profile()->GetPrefs()->GetUint64(kAdsBlocked), 1ULL);
+
+  // There is no way for JS to directly tell if an element has been collapsed,
+  // but the clientHeight property is zero for collapsed elements and nonzero
+  // otherwise.
+  EXPECT_EQ(true, EvalJs(contents,
+                         "let i = document.getElementsByClassName('adFrame');"
+                         "i[0].clientHeight !== 0"));
 }
 
 // Load a page with a script which uses a redirect data URL.
@@ -781,6 +1168,90 @@ IN_PROC_BROWSER_TEST_F(AdBlockServiceTest, RedirectRulesAreRespected) {
                                  "xhr_expect_content('%s', '%s');",
                                  resource_url.spec().c_str(), noopjs.c_str())));
   EXPECT_EQ(browser()->profile()->GetPrefs()->GetUint64(kAdsBlocked), 1ULL);
+}
+
+// Verify that scripts violating a Content Security Policy from a `$csp` rule
+// are not loaded.
+IN_PROC_BROWSER_TEST_F(AdBlockServiceTest, CspRule) {
+  UpdateAdBlockInstanceWithRules(
+      "||example.com^$csp=script-src 'nonce-abcdef' 'unsafe-eval' 'self'");
+  EXPECT_EQ(browser()->profile()->GetPrefs()->GetUint64(kAdsBlocked), 0ULL);
+
+  const GURL url =
+      embedded_test_server()->GetURL("example.com", "/csp_rules.html");
+  ui_test_utils::NavigateToURL(browser(), url);
+  content::WebContents* contents =
+      browser()->tab_strip_model()->GetActiveWebContents();
+
+  auto res = EvalJs(contents, "await window.allLoaded");
+  EXPECT_EQ(true, EvalJs(contents, "!!window.loadedNonceScript"));
+  EXPECT_EQ(true, EvalJs(contents, "!!window.loadedEvalScript"));
+  EXPECT_EQ(true, EvalJs(contents, "!!window.loadedSamePartyScript"));
+  EXPECT_EQ(false, EvalJs(contents, "!!window.loadedThirdPartyScript"));
+  EXPECT_EQ(false, EvalJs(contents, "!!window.loadedUnsafeInlineScript"));
+  EXPECT_EQ(true, EvalJs(contents, "!!window.loadedDataImage"));
+
+  // Violations of injected CSP directives do not increment the Shields counter
+  EXPECT_EQ(browser()->profile()->GetPrefs()->GetUint64(kAdsBlocked), 0ULL);
+}
+
+// Verify that Content Security Policies from multiple `$csp` rules are
+// combined.
+//
+// The policy resulting from two of the same kind of directive will be the
+// union of both.
+IN_PROC_BROWSER_TEST_F(AdBlockServiceTest, CspRuleMerging) {
+  UpdateAdBlockInstanceWithRules(
+      "||example.com^$csp=script-src 'nonce-abcdef' 'unsafe-eval' 'self'");
+  ASSERT_TRUE(g_brave_browser_process->ad_block_custom_filters_service()
+                  ->UpdateCustomFilters(
+                      "||example.com^$csp=img-src 'none'\n"
+                      "||sub.example.com^$csp=script-src 'nonce-abcdef' "
+                      "'unsafe-eval' 'unsafe-inline'"));
+  EXPECT_EQ(browser()->profile()->GetPrefs()->GetUint64(kAdsBlocked), 0ULL);
+
+  const GURL url =
+      embedded_test_server()->GetURL("sub.example.com", "/csp_rules.html");
+  ui_test_utils::NavigateToURL(browser(), url);
+  content::WebContents* contents =
+      browser()->tab_strip_model()->GetActiveWebContents();
+
+  auto res = EvalJs(contents, "await window.allLoaded");
+  EXPECT_EQ(true, EvalJs(contents, "!!window.loadedNonceScript"));
+  EXPECT_EQ(true, EvalJs(contents, "!!window.loadedEvalScript"));
+  EXPECT_EQ(false, EvalJs(contents, "!!window.loadedSamePartyScript"));
+  EXPECT_EQ(false, EvalJs(contents, "!!window.loadedThirdPartyScript"));
+  EXPECT_EQ(false, EvalJs(contents, "!!window.loadedUnsafeInlineScript"));
+  EXPECT_EQ(false, EvalJs(contents, "!!window.loadedDataImage"));
+
+  // Violations of injected CSP directives do not increment the Shields counter
+  EXPECT_EQ(browser()->profile()->GetPrefs()->GetUint64(kAdsBlocked), 0ULL);
+}
+
+// Verify that scripts violating a Content Security Policy from a `$csp` rule
+// are not loaded.
+IN_PROC_BROWSER_TEST_F(AdBlockServiceTest, CspRuleShieldsDown) {
+  UpdateAdBlockInstanceWithRules(
+      "||example.com^$csp=script-src 'nonce-abcdef' 'unsafe-eval' 'self'");
+  EXPECT_EQ(browser()->profile()->GetPrefs()->GetUint64(kAdsBlocked), 0ULL);
+
+  const GURL url =
+      embedded_test_server()->GetURL("example.com", "/csp_rules.html");
+  ShieldsDown(url);
+
+  ui_test_utils::NavigateToURL(browser(), url);
+  content::WebContents* contents =
+      browser()->tab_strip_model()->GetActiveWebContents();
+
+  auto res = EvalJs(contents, "await window.allLoaded");
+  EXPECT_EQ(true, EvalJs(contents, "!!window.loadedNonceScript"));
+  EXPECT_EQ(true, EvalJs(contents, "!!window.loadedEvalScript"));
+  EXPECT_EQ(true, EvalJs(contents, "!!window.loadedSamePartyScript"));
+  EXPECT_EQ(true, EvalJs(contents, "!!window.loadedThirdPartyScript"));
+  EXPECT_EQ(true, EvalJs(contents, "!!window.loadedUnsafeInlineScript"));
+  EXPECT_EQ(true, EvalJs(contents, "!!window.loadedDataImage"));
+
+  EXPECT_EQ(browser()->profile()->GetPrefs()->GetUint64(kAdsBlocked), 0ULL);
 }
 
 class CosmeticFilteringFlagDisabledTest : public AdBlockServiceTest {

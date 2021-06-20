@@ -41,6 +41,25 @@ UnitTestBase::~UnitTestBase() {
       << "You have overridden TearDown but never called UnitTestBase::TearDown";
 }
 
+void UnitTestBase::InitializeAds() {
+  CHECK(integration_test_)
+      << "|InitializeAds| should only be called if "
+         "|SetUpForTesting| was initialized for integration testing";
+
+  ads_->Initialize([=](const Result result) {
+    ASSERT_EQ(Result::SUCCESS, result);
+
+    ads_->OnWalletUpdated("c387c2d8-a26d-4451-83e4-5c0c6fd942be",
+                          "5BEKM1Y7xcRSg/1q8in/+Lki2weFZQB+UMYZlRw8ql8=");
+  });
+
+  task_environment_.RunUntilIdle();
+}
+
+AdsImpl* UnitTestBase::GetAds() const {
+  return ads_.get();
+}
+
 void UnitTestBase::SetUp() {
   // Code here will be called immediately after the constructor (right before
   // each test)
@@ -120,12 +139,19 @@ void UnitTestBase::Initialize() {
 
   MockIsForeground(ads_client_mock_, true);
 
+  MockIsFullScreen(ads_client_mock_, false);
+
   MockShouldShowNotifications(ads_client_mock_, true);
   MockShowNotification(ads_client_mock_);
   MockCloseNotification(ads_client_mock_);
 
+  MockRecordAdEvent(ads_client_mock_);
+  MockGetAdEvents(ads_client_mock_);
+
+  MockGetBrowsingHistory(ads_client_mock_);
+
   MockLoad(ads_client_mock_);
-  MockLoadUserModelForId(ads_client_mock_);
+  MockLoadAdsResource(ads_client_mock_);
   MockLoadResourceForId(ads_client_mock_);
   MockSave(ads_client_mock_);
 
@@ -137,10 +163,6 @@ void UnitTestBase::Initialize() {
 
   if (integration_test_) {
     ads_ = std::make_unique<AdsImpl>(ads_client_mock_.get());
-
-    ads_->OnWalletUpdated("c387c2d8-a26d-4451-83e4-5c0c6fd942be",
-                          "5BEKM1Y7xcRSg/1q8in/+Lki2weFZQB+UMYZlRw8ql8=");
-
     return;
   }
 
@@ -164,6 +186,8 @@ void UnitTestBase::Initialize() {
   database_initialize_->CreateOrOpen(
       [](const Result result) { ASSERT_EQ(Result::SUCCESS, result); });
 
+  browser_manager_ = std::make_unique<BrowserManager>();
+
   tab_manager_ = std::make_unique<TabManager>();
 
   user_activity_ = std::make_unique<UserActivity>();
@@ -171,17 +195,6 @@ void UnitTestBase::Initialize() {
   // Fast forward until no tasks remain to ensure "EnsureSqliteInitialized"
   // tasks have fired before running tests
   task_environment_.FastForwardUntilNoTasksRemain();
-}
-
-void UnitTestBase::InitializeAds() {
-  CHECK(integration_test_)
-      << "|InitializeAds| should only be called if "
-         "|SetUpForTesting| was initialized for integration testing";
-
-  ads_->Initialize(
-      [](const Result result) { ASSERT_EQ(Result::SUCCESS, result); });
-
-  task_environment_.RunUntilIdle();
 }
 
 }  // namespace ads

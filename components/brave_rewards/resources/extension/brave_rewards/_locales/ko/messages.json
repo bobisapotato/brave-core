@@ -235,6 +235,18 @@
     "message": "귀하의 브레이브 지갑을 백업해 주세요.",
     "description": "Description for backup wallet notification"
   },
+  "deviceLimitReachedLearnMore": {
+    "message": "자세히 알아보기",
+    "description": "Notification button text to learn more about device limit"
+  },
+  "deviceLimitReachedTitle": {
+    "message": "기기 한도 도달",
+    "description": "Title for device limit reached notification"
+  },
+  "deviceLimitReachedNotification": {
+    "message": "승인 기기 최대한도에 도달하였으므로, 귀하의 월렛은 승인될 수 없습니다.",
+    "description": "Description for device limit reached notification"
+  },
   "insufficientFundsNotification": {
     "message": "귀하의 Brave Rewards 계정이 입금을 기다리고 있습니다.",
     "description": "Description for new insufficient funds notification"
@@ -515,9 +527,15 @@
     "message": "지갑 인증됨",
     "description": "Displayed in wallet that tells users that he is verified"
   },
-  "walletGoToUphold":  {
-    "message": "내 Uphold 계정으로 이동",
-    "description": "CTA to open uphold account"
+  "walletGoToProvider":  {
+    "message": "내 $provider$ 계정으로 가기",
+    "description": "CTA to open an external wallet account",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Uphold"
+      }
+    }
   },
   "walletDisconnect":  {
     "message": "Brave Rewards에서 접속 해제됨.",
@@ -612,8 +630,14 @@
     "description": "Text for login button"
   },
   "loginMessageText":  {
-    "message": "Uphold 계정을 만들려면 최소 25 BAT가 있어야 합니다. 나중에 다시 시도하세요. 인증된 Uphold 계정이 이미 있는 경우 계속해서 로그인하세요.",
-    "description": "Text for login button"
+    "message": "Uphold 지갑을 만들려면 최소 $amount$BAT가 필요합니다. 인증된 Uphold 계정이 이미 있는 경우, 로그인하세요.",
+    "description": "Text for login button",
+    "placeholders": {
+      "amount": {
+        "content": "$1",
+        "example": "15"
+      }
+    }
   },
   "walletConnected":  {
     "message": "연결됨",
@@ -624,8 +648,14 @@
     "description": "Status button that tells user that he is currently pending"
   },
   "walletVerificationNote3":  {
-    "message": "참고: 사용자가 승인하면 거래 내용이 Uphold에 표시됩니다. 예를 들어, 수취인과 팁의 액수를 볼 수 있습니다.",
-    "description": "Displayed in login modal for uphold"
+    "message": "주의: 한 번 승인하면 $provider$ 측에서 귀하의 거래를 볼 수 있게 됩니다. 예를 들어, 수취인과 팁의 금액을 볼 수 있습니다.",
+    "description": "Displayed in login modal for external wallet providers",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Uphold"
+      }
+    }
   },
   "onboardingEarnHeader": {
     "message": "토큰 획득 및 돌려주기",
@@ -718,7 +748,7 @@
     "description": ""
   },
   "onboardingPanelScheduleHeader": {
-    "message": "언제 보상을 받습니까",
+    "message": "Rewards가 적립되는 시점",
     "description": ""
   },
   "onboardingPanelScheduleText": {
@@ -764,6 +794,42 @@
   "onboardingPanelCompleteText": {
     "message": "Brave Rewards를 사용함에 따라 여러분은 웹을 모두를 위한 더 나은 장소로 만드는 데 한 몫을 거들고 있습니다. 대단한 일이지요!",
     "description": ""
+  },
+  "onboardingPanelVerifyHeader": {
+    "message": "월렛 검증하기",
+    "description": ""
+  },
+  "onboardingPanelVerifySubtext": {
+    "message": "광고를 보고 적립된 토큰을 인출하려면 월렛을 검증해야 합니다.",
+    "description": ""
+  },
+  "onboardingPanelVerifyLater": {
+    "message": "나중에",
+    "description": ""
+  },
+  "onboardingPanelVerifyNow": {
+    "message": "내 월렛 검증하기",
+    "description": ""
+  },
+  "onboardingPanelBitflyerNote": {
+    "message": "bitFlyer wallet은 bitFlyer, Inc.에서 관리하는 서비스입니다.",
+    "description": ""
+  },
+  "onboardingPanelBitflyerText": {
+    "message": "월렛을 검증하여 bitFlyer 계정에 연결하면 Brave Rewards를 통해 적립된 토큰을 더욱 쉽게 저장하고 관리할 수 있습니다.",
+    "description": ""
+  },
+  "onboardingPanelBitflyerLearnMore": {
+    "message": "Brave 브라우저를 bitFlyer 계정에 연결하는 방법을 $link_begin$자세히 알아보세요$link_end$.",
+    "description": "",
+    "placeholders": {
+      "link_begin": {
+        "content": "$1"
+      },
+      "link_end": {
+        "content": "$2"
+      }
+    }
   },
   "bapDeprecationHeader": {
     "message": "일본의 Brave 리워드가 새로운 시스템으로 전환 중입니다!",

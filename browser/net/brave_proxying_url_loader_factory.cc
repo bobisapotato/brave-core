@@ -14,12 +14,12 @@
 #include "base/task/post_task.h"
 #include "brave/browser/net/brave_request_handler.h"
 #include "brave/components/brave_shields/browser/adblock_stub_response.h"
+#include "brave/components/brave_shields/common/features.h"
 #include "content/public/browser/browser_context.h"
 #include "content/public/browser/browser_task_traits.h"
 #include "content/public/browser/browser_thread.h"
 #include "content/public/browser/render_frame_host.h"
 #include "content/public/common/url_utils.h"
-#include "mojo/public/cpp/bindings/binding.h"
 #include "mojo/public/cpp/system/data_pipe_producer.h"
 #include "mojo/public/cpp/system/string_data_source.h"
 #include "net/base/completion_repeating_callback.h"
@@ -29,6 +29,7 @@
 #include "net/url_request/redirect_util.h"
 #include "net/url_request/url_request.h"
 #include "services/network/public/cpp/features.h"
+#include "services/network/public/cpp/parsed_headers.h"
 #include "url/origin.h"
 
 namespace {
@@ -89,7 +90,6 @@ BraveProxyingURLLoaderFactory::InProgressRequest::InProgressRequest(
     BraveProxyingURLLoaderFactory* factory,
     uint64_t request_id,
     int32_t network_service_request_id,
-    int32_t routing_id,
     int render_process_id,
     int frame_tree_node_id,
     uint32_t options,
@@ -104,7 +104,6 @@ BraveProxyingURLLoaderFactory::InProgressRequest::InProgressRequest(
       network_service_request_id_(network_service_request_id),
       render_process_id_(render_process_id),
       frame_tree_node_id_(frame_tree_node_id),
-      routing_id_(routing_id),
       options_(options),
       browser_context_(browser_context),
       traffic_annotation_(traffic_annotation),
@@ -217,6 +216,9 @@ void BraveProxyingURLLoaderFactory::InProgressRequest::
   if (target_loader_.is_bound())
     target_loader_->ResumeReadingBodyFromNet();
 }
+
+void BraveProxyingURLLoaderFactory::InProgressRequest::OnReceiveEarlyHints(
+    network::mojom::EarlyHintsPtr early_hints) {}
 
 void BraveProxyingURLLoaderFactory::InProgressRequest::OnReceiveResponse(
     network::mojom::URLResponseHeadPtr head) {
@@ -364,7 +366,7 @@ void BraveProxyingURLLoaderFactory::InProgressRequest::
     // Create a data pipe for transmitting the response.
     mojo::ScopedDataPipeProducerHandle producer;
     mojo::ScopedDataPipeConsumerHandle consumer;
-    if (CreateDataPipe(nullptr, &producer, &consumer) != MOJO_RESULT_OK) {
+    if (CreateDataPipe(nullptr, producer, consumer) != MOJO_RESULT_OK) {
       OnRequestError(
           network::URLLoaderCompletionStatus(net::ERR_INSUFFICIENT_RESOURCES));
       return;
@@ -436,7 +438,7 @@ void BraveProxyingURLLoaderFactory::InProgressRequest::ContinueToStartRequest(
     // initiate the real network request.
     uint32_t options = options_;
     factory_->target_factory_->CreateLoaderAndStart(
-        target_loader_.BindNewPipeAndPassReceiver(), routing_id_,
+        target_loader_.BindNewPipeAndPassReceiver(),
         network_service_request_id_, options, request_,
         proxied_client_receiver_.BindNewPipeAndPassRemote(),
         traffic_annotation_);
@@ -493,8 +495,14 @@ void BraveProxyingURLLoaderFactory::InProgressRequest::
     return;
   }
 
-  if (override_headers_)
+  if (override_headers_) {
     current_response_->headers = override_headers_;
+    // Since we overrode headers we should reparse them:
+    // NavigationRequest::ComputePoliciesToCommit uses parsed headers to set
+    // CSP, so if we don't reparse our CSP header changes won't work.
+    current_response_->parsed_headers = network::PopulateParsedHeaders(
+        current_response_->headers.get(), request_.url);
+  }
 
   std::string redirect_location;
   if (override_headers_ && override_headers_->IsRedirect(&redirect_location)) {
@@ -603,7 +611,17 @@ void BraveProxyingURLLoaderFactory::InProgressRequest::
 void BraveProxyingURLLoaderFactory::InProgressRequest::OnRequestError(
     const network::URLLoaderCompletionStatus& status) {
   if (!request_completed_) {
-    target_client_->OnComplete(status);
+    // Make a non-const copy of status so that |should_collapse_initiator| can
+    // be modified
+    network::URLLoaderCompletionStatus collapse_status(status);
+
+    if (base::FeatureList::IsEnabled(
+            ::brave_shields::features::kBraveAdblockCollapseBlockedElements) &&
+        ctx_->blocked_by == brave::kAdBlocked) {
+      collapse_status.should_collapse_initiator = true;
+    }
+
+    target_client_->OnComplete(collapse_status);
   }
 
   // Deletes |this|.
@@ -663,7 +681,6 @@ bool BraveProxyingURLLoaderFactory::MaybeProxyRequest(
 
 void BraveProxyingURLLoaderFactory::CreateLoaderAndStart(
     mojo::PendingReceiver<network::mojom::URLLoader> loader_receiver,
-    int32_t routing_id,
     int32_t request_id,
     uint32_t options,
     const network::ResourceRequest& request,
@@ -678,7 +695,7 @@ void BraveProxyingURLLoaderFactory::CreateLoaderAndStart(
   const uint64_t brave_request_id = request_id_generator_->Generate();
 
   auto result = requests_.emplace(std::make_unique<InProgressRequest>(
-      this, brave_request_id, request_id, routing_id, render_process_id_,
+      this, brave_request_id, request_id, render_process_id_,
       frame_tree_node_id_, options, request, browser_context_,
       traffic_annotation, std::move(loader_receiver), std::move(client)));
   (*result.first)->Restart();

@@ -1,16 +1,16 @@
 diff --git a/chrome/android/BUILD.gn b/chrome/android/BUILD.gn
-index bdc34e6e959ed5d1b5519ccd8d82423c52a7762c..809d70d8656ba8a4eb720be1b6aeb3d94e93fdb8 100644
+index f131e4b93f60674e0dd32c4fc4839e95c122e71d..01960ff86d853a752419b1bd0ee7d9d89e9e7c48 100644
 --- a/chrome/android/BUILD.gn
 +++ b/chrome/android/BUILD.gn
-@@ -235,6 +235,7 @@ android_resources("chrome_app_java_resources") {
-     "//third_party/android_deps:androidx_recyclerview_recyclerview_java",
-     "//third_party/android_deps:material_design_java",
+@@ -239,6 +239,7 @@ android_resources("chrome_app_java_resources") {
+     "//third_party/androidx:androidx_preference_preference_java",
+     "//third_party/androidx:androidx_recyclerview_recyclerview_java",
    ]
 +  deps += brave_chrome_app_java_resources_deps sources += brave_java_resources resource_overlay = true
  }
  
  if (enable_vr) {
-@@ -542,6 +543,7 @@ android_library("chrome_java") {
+@@ -566,6 +567,7 @@ android_library("chrome_java") {
    ]
  
    deps += feed_deps
@@ -18,23 +18,31 @@ index bdc34e6e959ed5d1b5519ccd8d82423c52a7762c..809d70d8656ba8a4eb720be1b6aeb3d9
  
    srcjar_deps = [
      ":chrome_android_java_enums_srcjar",
-@@ -571,6 +573,7 @@ android_library("chrome_java") {
-     "//components/ui_metrics:ui_metrics_enums_java",
+@@ -596,6 +598,7 @@ android_library("chrome_java") {
+     "//components/offline_pages/core:offline_page_model_enums_java",
      "//net:effective_connection_type_java",
    ]
 +  srcjar_deps += brave_chrome_java_srcjar_deps
  
    # From java_sources.gni.
    sources = chrome_java_sources + [ app_hooks_impl ]
-@@ -692,6 +695,7 @@ group("jni_headers") {
-     "//chrome/browser/webauthn/android:jni_headers",
-     "//components/media_router/browser/android:jni_headers",
+@@ -696,6 +699,7 @@ java_group("chrome_all_java") {
+       "//chrome/android/features/tab_ui:module_desc_java",
+     ]
+   }
++  deps += brave_chrome_all_java_deps
+ }
+ 
+ # This is a list of all base module jni headers. New features should add their
+@@ -732,6 +736,7 @@ group("jni_headers") {
+     "//components/ukm/android:jni_headers",
+     "//components/webauthn/android:jni_headers",
    ]
 +  public_deps += ["//brave/build/android:jni_headers"]
  }
  
  # TODO(crbug.com/1112471): Get this to run cleanly under Python 3.
-@@ -1857,6 +1861,7 @@ if (current_toolchain == default_toolchain) {
+@@ -1969,6 +1974,7 @@ if (current_toolchain == default_toolchain) {
          ":${_variant}_locale_pak_assets",
          ":${_variant}_paks",
        ]
@@ -42,3 +50,11 @@ index bdc34e6e959ed5d1b5519ccd8d82423c52a7762c..809d70d8656ba8a4eb720be1b6aeb3d9
        if (_is_monochrome) {
          deps += [ "//android_webview:locale_pak_assets" ]
          if (webview_includes_weblayer && !_is_bundle_module) {
+@@ -2359,6 +2365,7 @@ android_library("base_module_java") {
+     "//components/payments/content/android:service_java",
+     "//third_party/androidx:androidx_browser_browser_java",
+   ]
++  sources += brave_java_base_module_sources deps += brave_java_base_module_deps
+ 
+   # More deps for DFMs.
+   if (dfmify_dev_ui) {

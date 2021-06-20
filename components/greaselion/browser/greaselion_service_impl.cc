@@ -27,10 +27,10 @@
 #include "base/task_runner_util.h"
 #include "base/values.h"
 #include "base/version.h"
-#include "brave/browser/version_info.h"
 #include "brave/components/brave_component_updater/browser/features.h"
 #include "brave/components/brave_component_updater/browser/switches.h"
 #include "brave/components/greaselion/browser/greaselion_download_service.h"
+#include "brave/components/version_info//version_info.h"
 #include "chrome/browser/extensions/extension_service.h"
 #include "components/version_info/version_info.h"
 #include "crypto/sha2.h"
@@ -41,10 +41,11 @@
 #include "extensions/common/extension.h"
 #include "extensions/common/file_util.h"
 #include "extensions/common/manifest_constants.h"
+#include "extensions/common/mojom/manifest.mojom.h"
 #include "url/gurl.h"
 
 using extensions::Extension;
-using extensions::Manifest;
+using extensions::mojom::ManifestLocation;
 
 namespace {
 
@@ -175,7 +176,8 @@ ConvertGreaselionRuleToExtensionOnTaskRunner(
 
   std::string error;
   scoped_refptr<Extension> extension = extensions::file_util::LoadExtension(
-      temp_dir.GetPath(), Manifest::COMPONENT, Extension::NO_FLAGS, &error);
+      temp_dir.GetPath(), ManifestLocation::kComponent, Extension::NO_FLAGS,
+      &error);
   if (!extension.get()) {
     LOG(ERROR) << "Could not load Greaselion extension";
     LOG(ERROR) << error;
@@ -301,10 +303,9 @@ void GreaselionServiceImpl::PostConvert(
     greaselion_extensions_.push_back(converted_extension->first->id());
     extension_dirs_.push_back(std::move(converted_extension->second));
     extension_system_->ready().Post(
-        FROM_HERE,
-        base::BindOnce(&GreaselionServiceImpl::Install,
-                       weak_factory_.GetWeakPtr(),
-                       base::Passed(&converted_extension->first)));
+        FROM_HERE, base::BindOnce(&GreaselionServiceImpl::Install,
+                                  weak_factory_.GetWeakPtr(),
+                                  std::move(converted_extension->first)));
   }
 }
 

@@ -5,6 +5,7 @@
 
 #include "bat/ads/internal/ad_server/ad_server.h"
 
+#include <cstdint>
 #include <functional>
 #include <string>
 #include <utility>
@@ -17,6 +18,7 @@
 #include "bat/ads/internal/bundle/bundle.h"
 #include "bat/ads/internal/catalog/catalog.h"
 #include "bat/ads/internal/catalog/catalog_issuers_info.h"
+#include "bat/ads/internal/catalog/catalog_version.h"
 #include "bat/ads/internal/logging.h"
 #include "bat/ads/internal/server/ads_server_util.h"
 #include "bat/ads/internal/time_formatting_util.h"
@@ -60,7 +62,7 @@ void AdServer::Fetch() {
   DCHECK(!is_processing_);
 
   BLOG(1, "Get catalog");
-  BLOG(2, "GET /v6/catalog");
+  BLOG(2, "GET /v" << kCurrentCatalogVersion << "/catalog");
 
   is_processing_ = true;
 
@@ -166,13 +168,13 @@ void AdServer::FetchAfterDelay() {
   BLOG(1, "Fetch catalog " << FriendlyDateAndTime(time));
 }
 
-void AdServer::NotifyCatalogUpdated(const Catalog& catalog) {
+void AdServer::NotifyCatalogUpdated(const Catalog& catalog) const {
   for (AdServerObserver& observer : observers_) {
     observer.OnCatalogUpdated(catalog);
   }
 }
 
-void AdServer::NotifyCatalogFailed() {
+void AdServer::NotifyCatalogFailed() const {
   for (AdServerObserver& observer : observers_) {
     observer.OnCatalogFailed();
   }

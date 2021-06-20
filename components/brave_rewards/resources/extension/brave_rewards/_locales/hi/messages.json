@@ -235,6 +235,18 @@
     "message": "कृपया अपने Brave बटुए को बैकअप करें।",
     "description": "Description for backup wallet notification"
   },
+  "deviceLimitReachedLearnMore": {
+    "message": "अधिक जानकारी प्राप्त करें",
+    "description": "Notification button text to learn more about device limit"
+  },
+  "deviceLimitReachedTitle": {
+    "message": "डिवाइस की सीमा तक पहुँच गये",
+    "description": "Title for device limit reached notification"
+  },
+  "deviceLimitReachedNotification": {
+    "message": "आपके वॉलेट को सत्यापित नहीं किया जा सकता है क्योंकि आप अधिकतम सत्यापित डिवाइस सीमा पर पहुँच गए हैं।\n",
+    "description": "Description for device limit reached notification"
+  },
   "insufficientFundsNotification": {
     "message": "आपका Brave Rewards खाता धनराशि की प्रतीक्षा कर रहा है।",
     "description": "Description for new insufficient funds notification"
@@ -515,9 +527,15 @@
     "message": "वॉलेट सत्यापन पूरा हुआ",
     "description": "Displayed in wallet that tells users that he is verified"
   },
-  "walletGoToUphold":  {
-    "message": "मेरे मान्य खाते पर जाएँ",
-    "description": "CTA to open uphold account"
+  "walletGoToProvider":  {
+    "message": "मेरे $provider$ अकाउंट पर जाएँ",
+    "description": "CTA to open an external wallet account",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Uphold"
+      }
+    }
   },
   "walletDisconnect":  {
     "message": "Brave Rewards से डिसकनेक्ट करें",
@@ -612,8 +630,14 @@
     "description": "Text for login button"
   },
   "loginMessageText":  {
-    "message": "अपफोल्ड अकाउंट बनाने के लिए आपको न्यूनतम 25 BAT की ज़रूरत है। बाद में दोबारा कोशिश करें।\nयदि आपके पास वेरीफ़ाई अपफोल्ड अकाउंट पहले से है तो लॉग इन करना जारी रखें।",
-    "description": "Text for login button"
+    "message": "Upfold अकाउंट बनाने के लिए आपको न्यूनतम$amount$ BAT की ज़रूरत है. अगर  आपके पास पहले से ही वेरीफ़ाई किया हुआ Upfold अकाउंट है, तो लॉगिन करें.",
+    "description": "Text for login button",
+    "placeholders": {
+      "amount": {
+        "content": "$1",
+        "example": "15"
+      }
+    }
   },
   "walletConnected":  {
     "message": "कनेक्टेड",
@@ -624,8 +648,14 @@
     "description": "Status button that tells user that he is currently pending"
   },
   "walletVerificationNote3":  {
-    "message": "ध्यान दें: आपके द्वारा एकबार अधिकृत किए जाने पर अपहोल्ड के लिए आपका लेनदेन दिखाई देगा; उदाहरण के लिए, वे आपकी टिप्स की रसीद और राशि को देखने में सक्षम होंगे।",
-    "description": "Displayed in login modal for uphold"
+    "message": "नोट: आपके अधिकृत करने के बाद $provider$ को आपके लेनदेन दिखाई देगें; उदाहरण के लिए, वे आपकी टिप्स के प्राप्तकर्ता और राशि देख पाएंगे।\n",
+    "description": "Displayed in login modal for external wallet providers",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Uphold"
+      }
+    }
   },
   "onboardingEarnHeader": {
     "message": "टोकन कमाएँ और वापस दें",
@@ -764,6 +794,42 @@
   "onboardingPanelCompleteText": {
     "message": "Brave पुरस्कारों का उपयोग करके आप वेब को सभी के लिए बेहतर जगह बनाने में मदद कर रहे हैं। और वह बहुत बढ़िया है!",
     "description": ""
+  },
+  "onboardingPanelVerifyHeader": {
+    "message": "अपना वॉलेट सत्यापित करें",
+    "description": ""
+  },
+  "onboardingPanelVerifySubtext": {
+    "message": "विज्ञापन देखने के लिए आपके द्वारा अर्जित टोकन को वापस लेने के लिए, आपको अपने वॉलेट को सत्यापित करना होगा।",
+    "description": ""
+  },
+  "onboardingPanelVerifyLater": {
+    "message": "बाद में करें",
+    "description": ""
+  },
+  "onboardingPanelVerifyNow": {
+    "message": "मेरा वॉलेट सत्यापित करें",
+    "description": ""
+  },
+  "onboardingPanelBitflyerNote": {
+    "message": "The bitFlyer वॉलेट bitFlyer, Inc द्वारा प्रबंधित सेवा है।",
+    "description": ""
+  },
+  "onboardingPanelBitflyerText": {
+    "message": "अपने वॉलेट की पुष्टि करके और इसे एक बिटफ़ायर खाते से लिंक करके, आप Brave  पुरस्कार के माध्यम से अर्जित टोकन को स्टोर और प्रबंधित कर पाएंगे।",
+    "description": ""
+  },
+  "onboardingPanelBitflyerLearnMore": {
+    "message": "अपने Brave ब्राउज़र को अपने bitFlyer अकाउंट से कैसे लिंक करें इसके बारे में $link_begin$और जानें$link_end$.",
+    "description": "",
+    "placeholders": {
+      "link_begin": {
+        "content": "$1"
+      },
+      "link_end": {
+        "content": "$2"
+      }
+    }
   },
   "bapDeprecationHeader": {
     "message": "जापान में ब्रेव रिवार्ड्स नए सिस्टम में पलायन कर रहे हैं!",

@@ -1,11 +1,11 @@
 diff --git a/extensions/common/api/_api_features.json b/extensions/common/api/_api_features.json
-index e82d6fdd6f3a477a80a32abf7f382a10a89e5681..241f4e9c27b8dbc6a2b2090f8002d1b41e22f875 100644
+index 9db0bbe8e75b00b632ebe73fddf5a3066bf596cc..2d4ed75263518a2142dd24f0b2e53a8a2bba9ad0 100644
 --- a/extensions/common/api/_api_features.json
 +++ b/extensions/common/api/_api_features.json
-@@ -515,6 +515,7 @@
-     "contexts": ["webui"],
+@@ -525,6 +525,7 @@
      "matches": [
-       "chrome://password-change/*"
+       "chrome://password-change/*",
+       "chrome://file-manager/*"
 +      ,"chrome://newtab/*"
      ]
    }],

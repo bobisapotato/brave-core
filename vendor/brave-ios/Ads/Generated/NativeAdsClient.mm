@@ -23,6 +23,10 @@ bool NativeAdsClient::IsForeground() const {
   return [bridge_ isForeground];
 }
 
+bool NativeAdsClient::IsFullScreen() const {
+  return [bridge_ isFullScreen];
+}
+
 bool NativeAdsClient::CanShowBackgroundNotifications() const {
     return [bridge_ canShowBackgroundNotifications];
 }
@@ -39,6 +43,20 @@ void NativeAdsClient::CloseNotification(const std::string & uuid) {
   [bridge_ closeNotification:uuid];
 }
 
+void NativeAdsClient::RecordAdEvent(const std::string& ad_type,
+                                    const std::string& confirmation_type,
+                                    const uint64_t timestamp) const {
+  [bridge_ recordAdEvent:ad_type
+        confirmationType:confirmation_type
+               timestamp:timestamp];
+}
+
+std::vector<uint64_t> NativeAdsClient::GetAdEvents(
+    const std::string& ad_type,
+    const std::string& confirmation_type) const {
+  return [bridge_ getAdEvents:ad_type confirmationType:confirmation_type];
+}
+
 void NativeAdsClient::UrlRequest(ads::UrlRequestPtr url_request, ads::UrlRequestCallback callback) {
   [bridge_ UrlRequest:std::move(url_request) callback:callback];
 }
@@ -47,8 +65,17 @@ void NativeAdsClient::Save(const std::string & name, const std::string & value, 
   [bridge_ save:name value:value callback:callback];
 }
 
-void NativeAdsClient::LoadUserModelForId(const std::string & id, ads::LoadCallback callback) {
-  [bridge_ loadUserModelForId:id callback:callback];
+void NativeAdsClient::LoadAdsResource(const std::string& id,
+                                      const int version,
+                                      ads::LoadCallback callback) {
+  [bridge_ loadAdsResource:id version:version callback:callback];
+}
+
+void NativeAdsClient::GetBrowsingHistory(
+    const int max_count,
+    const int days_ago,
+    ads::GetBrowsingHistoryCallback callback) {
+  [bridge_ getBrowsingHistory:max_count forDays:days_ago callback:callback];
 }
 
 void NativeAdsClient::Load(const std::string & name, ads::LoadCallback callback) {

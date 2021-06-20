@@ -235,6 +235,18 @@
     "message": "Please backup your Brave wallet.",
     "description": "Description for backup wallet notification"
   },
+  "deviceLimitReachedLearnMore": {
+    "message": "अधिक जाणून घ्या",
+    "description": "Notification button text to learn more about device limit"
+  },
+  "deviceLimitReachedTitle": {
+    "message": "Device Limit Reached",
+    "description": "Title for device limit reached notification"
+  },
+  "deviceLimitReachedNotification": {
+    "message": "Your wallet cannot be verified because you've reached the maximum verified device limit.",
+    "description": "Description for device limit reached notification"
+  },
   "insufficientFundsNotification": {
     "message": "Your Brave Rewards account is waiting for a deposit.",
     "description": "Description for new insufficient funds notification"
@@ -515,9 +527,15 @@
     "message": "Wallet Verified",
     "description": "Displayed in wallet that tells users that he is verified"
   },
-  "walletGoToUphold":  {
-    "message": "Go to my Uphold account",
-    "description": "CTA to open uphold account"
+  "walletGoToProvider":  {
+    "message": "Go to my $provider$ account",
+    "description": "CTA to open an external wallet account",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Uphold"
+      }
+    }
   },
   "walletDisconnect":  {
     "message": "Disconnect from Brave Rewards",
@@ -612,8 +630,14 @@
     "description": "Text for login button"
   },
   "loginMessageText":  {
-    "message": "You need to have minimum 25 BAT to create an Uphold account. Please try again later. \n If you already have a verified Uphold account, continue to login.",
-    "description": "Text for login button"
+    "message": "You need to have minimum $amount$ BAT to create an Uphold account. If you already have a verified Uphold account, continue to login.",
+    "description": "Text for login button",
+    "placeholders": {
+      "amount": {
+        "content": "$1",
+        "example": "15"
+      }
+    }
   },
   "walletConnected":  {
     "message": "कनेक्ट केले",
@@ -624,8 +648,14 @@
     "description": "Status button that tells user that he is currently pending"
   },
   "walletVerificationNote3":  {
-    "message": "Note: Your transactions will be visible to Uphold once you authorize; for instance, they will be able to see the recipient and amount of your tips.",
-    "description": "Displayed in login modal for uphold"
+    "message": "Note: Your transactions will be visible to $provider$ once you authorize; for instance, they will be able to see the recipient and amount of your tips.",
+    "description": "Displayed in login modal for external wallet providers",
+    "placeholders": {
+      "provider": {
+        "content": "$1",
+        "example": "Uphold"
+      }
+    }
   },
   "onboardingEarnHeader": {
     "message": "Earn Tokens & Give Back",
@@ -718,7 +748,7 @@
     "description": ""
   },
   "onboardingPanelScheduleHeader": {
-    "message": "When do you receive rewards",
+    "message": "When do you receive rewards?",
     "description": ""
   },
   "onboardingPanelScheduleText": {
@@ -764,6 +794,42 @@
   "onboardingPanelCompleteText": {
     "message": "By using Brave Rewards you are helping make the web a better place for everyone. And that’s awesome!",
     "description": ""
+  },
+  "onboardingPanelVerifyHeader": {
+    "message": "Verify your wallet",
+    "description": ""
+  },
+  "onboardingPanelVerifySubtext": {
+    "message": "In order to withdraw the tokens you earn for viewing ads, you’ll need to verify your wallet.",
+    "description": ""
+  },
+  "onboardingPanelVerifyLater": {
+    "message": "Do it later",
+    "description": ""
+  },
+  "onboardingPanelVerifyNow": {
+    "message": "Verify my wallet",
+    "description": ""
+  },
+  "onboardingPanelBitflyerNote": {
+    "message": "The bitFlyer wallet is a service managed by bitFlyer, Inc.",
+    "description": ""
+  },
+  "onboardingPanelBitflyerText": {
+    "message": "By verifying your wallet and linking it to a bitFlyer account, you will be able to store and manage the tokens you have earned through Brave Rewards more easily",
+    "description": ""
+  },
+  "onboardingPanelBitflyerLearnMore": {
+    "message": "$link_begin$Learn more$link_end$ about how to link your Brave browser with your bitFlyer account.",
+    "description": "",
+    "placeholders": {
+      "link_begin": {
+        "content": "$1"
+      },
+      "link_end": {
+        "content": "$2"
+      }
+    }
   },
   "bapDeprecationHeader": {
     "message": "Brave Rewards in Japan is switching to a new system!",

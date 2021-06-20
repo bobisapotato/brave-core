@@ -6,6 +6,7 @@
 #include <utility>
 
 #include "base/task/post_task.h"
+#include "base/task/thread_pool.h"
 #include "base/task/thread_pool/thread_pool_instance.h"
 #include "bat/ledger/global_constants.h"
 #include "bat/ledger/internal/common/security_util.h"
@@ -36,6 +37,7 @@ LedgerImpl::LedgerImpl(ledger::LedgerClient* client)
       state_(std::make_unique<state::State>(this)),
       api_(std::make_unique<api::API>(this)),
       recovery_(std::make_unique<recovery::Recovery>(this)),
+      bitflyer_(std::make_unique<bitflyer::Bitflyer>(this)),
       uphold_(std::make_unique<uphold::Uphold>(this)),
       initialized_task_scheduler_(false),
       initializing_(false),
@@ -52,8 +54,8 @@ LedgerImpl::LedgerImpl(ledger::LedgerClient* client)
     initialized_task_scheduler_ = true;
   }
 
-  task_runner_ = base::CreateSequencedTaskRunner(
-      {base::ThreadPool(), base::MayBlock(), base::TaskPriority::BEST_EFFORT,
+  task_runner_ = base::ThreadPool::CreateSequencedTaskRunner(
+      {base::MayBlock(), base::TaskPriority::BEST_EFFORT,
        base::TaskShutdownBehavior::BLOCK_SHUTDOWN});
 
   sku_ = sku::SKUFactory::Create(
@@ -115,6 +117,10 @@ api::API* LedgerImpl::api() const {
 
 database::Database* LedgerImpl::database() const {
   return database_.get();
+}
+
+bitflyer::Bitflyer* LedgerImpl::bitflyer() const {
+  return bitflyer_.get();
 }
 
 uphold::Uphold* LedgerImpl::uphold() const {
@@ -717,6 +723,20 @@ void LedgerImpl::GetExternalWallet(const std::string& wallet_type,
     return;
   }
 
+  if (wallet_type == constant::kWalletBitflyer) {
+    bitflyer()->GenerateWallet([this, callback](const type::Result result) {
+      if (result != type::Result::LEDGER_OK &&
+          result != type::Result::CONTINUE) {
+        callback(result, nullptr);
+        return;
+      }
+
+      auto wallet = bitflyer()->GetWallet();
+      callback(type::Result::LEDGER_OK, std::move(wallet));
+    });
+    return;
+  }
+
   NOTREACHED();
   callback(type::Result::LEDGER_OK, nullptr);
 }
@@ -835,14 +855,18 @@ std::string LedgerImpl::GetWalletPassphrase() const {
   return wallet()->GetWalletPassphrase(brave_wallet->Clone());
 }
 
-void LedgerImpl::LinkBraveWallet(
-    const std::string& destination_payment_id,
-    ResultCallback callback) {
+void LedgerImpl::LinkBraveWallet(const std::string& destination_payment_id,
+                                 PostSuggestionsClaimCallback callback) {
   wallet()->LinkBraveWallet(destination_payment_id, callback);
 }
 
 void LedgerImpl::GetTransferableAmount(GetTransferableAmountCallback callback) {
   promotion()->GetTransferableAmount(callback);
+}
+
+void LedgerImpl::GetDrainStatus(const std::string& drain_id,
+                                ledger::GetDrainCallback callback) {
+  promotion()->GetDrainStatus(drain_id, callback);
 }
 
 }  // namespace ledger
